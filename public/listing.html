@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="page-title">लिस्टिंग — अपनागंगोह.in</title>
+  <meta name="description" id="page-desc" content="गंगोह प्रॉपर्टी लिस्टिंग — अपनागंगोह.in">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main class="container section" id="main-content">
+    <div class="spinner"></div>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { mountUI, toast, formatPrice, waURL } from './assets/js/ui.js';
+    import { initListings, fetchListing } from './assets/js/listings.js';
+    import { ALL_LOCATIONS } from './data/villages.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.getElementById('main-content').innerHTML =
+        `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const db = firebase.firestore();
+    mountUI();
+    initListings(db, null, null);
+
+    const id = new URLSearchParams(location.search).get('id');
+    const main = document.getElementById('main-content');
+
+    if (!id) {
+      main.innerHTML = `<div class="empty-state"><span class="empty-icon">❓</span><p>लिस्टिंग नहीं मिली।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
+    } else {
+      loadListing(id);
+    }
+
+    async function loadListing(listingId) {
+      try {
+        const listing = await fetchListing(listingId);
+        if (!listing || listing.status !== 'live') {
+          main.innerHTML = `<div class="empty-state"><span class="empty-icon">🚫</span><p>यह listing उपलब्ध नहीं है।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
+          return;
+        }
+        renderListing(listing);
+      } catch (err) {
+        main.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function renderListing(l) {
+      // Update page title/meta
+      document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | अपनागंगोह.in`;
+      document.getElementById('page-desc').content = `${l.title} — ${l.purpose === 'sale' ? 'बिक्री' : 'किराये'} पर। कीमत: ${formatPrice(l.price)}। ${l.village || 'गंगोह'}, Gangoh।`;
+
+      const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[l.type] || l.type;
+      const purposeLabel = l.purpose === 'sale' ? 'बिक्री' : 'किराया';
+
+      // Gallery
+      const photos = l.photos && l.photos.length ? l.photos : [];
+      const galleryHTML = photos.length
+        ? `<div class="gallery">
+            <img class="gallery-main" id="gallery-main" src="${photos[0]}" alt="${l.title}">
+            ${photos.length > 1 ? `<div class="gallery-thumbs">${photos.map((p, i) =>
+              `<img class="gallery-thumb${i===0?' active':''}" data-full="${p}" src="${p}" alt="photo ${i+1}">`
+            ).join('')}</div>` : ''}
+           </div>`
+        : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:4rem;">🏘️</div>`;
+
+      // WhatsApp message
+      const waMsg = `नमस्ते, मुझे ${l.title} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। अपनागंगोह.in पर देखा।`;
+      const waLink = l.contactWhatsApp ? waURL(l.contactWhatsApp, waMsg) : '#';
+
+      // Share message
+      const shareMsg = `${l.title} — ${formatPrice(l.price)} | ${l.village || 'गंगोह'}\nदेखें: ${location.href}`;
+
+      main.innerHTML = `
+<div style="margin-bottom:1rem;">
+  <a href="browse.html" style="color:#888;font-size:0.9rem;">← वापस जाएं</a>
+</div>
+
+<div class="detail-grid">
+  <!-- Left: Gallery + Description -->
+  <div>
+    ${galleryHTML}
+
+    <div style="background:white;border-radius:0.75rem;padding:1.5rem;margin-top:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">
+        <span class="badge ${l.purpose==='sale'?'badge-sale':'badge-rent'}">${purposeLabel}</span>
+        ${l.isVerified ? `<span class="badge badge-verified">✓ Verified</span>` : ''}
+        ${l.isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : ''}
+      </div>
+      <h1 style="font-size:1.5rem;margin-bottom:0.5rem;">${l.title}</h1>
+      <div class="detail-meta-row">
+        <div class="detail-meta-item">📍 <strong>${l.village || 'गंगोह'}</strong></div>
+        ${l.locality ? `<div class="detail-meta-item">🏘️ <strong>${l.locality}</strong></div>` : ''}
+        ${l.landmark ? `<div class="detail-meta-item">🚩 ${l.landmark}</div>` : ''}
+        <div class="detail-meta-item">🏷️ <strong>${typeLabel}</strong></div>
+        ${l.areaSize ? `<div class="detail-meta-item">📐 <strong>${l.areaSize} ${l.areaUnit || ''}</strong></div>` : ''}
+      </div>
+
+      ${l.description ? `
+      <div style="margin-top:1rem;">
+        <h3 style="font-size:1rem;margin-bottom:0.5rem;">विवरण</h3>
+        <p style="color:#555;line-height:1.7;white-space:pre-wrap;">${escapeHtml(l.description)}</p>
+      </div>` : ''}
+    </div>
+  </div>
+
+  <!-- Right: Price + Contact -->
+  <div>
+    <div class="detail-info-card" style="position:sticky;top:80px;">
+      <div class="price">${formatPrice(l.price)}</div>
+      ${l.areaSize ? `<p style="color:#888;font-size:0.9rem;margin:0.25rem 0 0;">${l.areaSize} ${l.areaUnit || ''}</p>` : ''}
+      <hr style="margin:1rem 0;border:none;border-top:1.5px solid #F0EDE8;">
+
+      ${l.contactWhatsApp
+        ? `<a href="${waLink}" class="whatsapp-btn" target="_blank" rel="noopener">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp पर संपर्क करें
+           </a>`
+        : `<p style="color:#888;text-align:center;padding:1rem;">Contact नंबर उपलब्ध नहीं</p>`
+      }
+
+      <button class="btn btn-outline btn-full" style="margin-top:0.75rem;" id="share-btn">
+        📤 Share करें
+      </button>
+
+      <div style="margin-top:1.25rem;padding-top:1rem;border-top:1.5px solid #F0EDE8;">
+        <p style="font-size:0.8rem;color:#888;margin:0 0 0.3rem;">पोस्ट की तारीख</p>
+        <p style="font-size:0.85rem;color:#555;" id="posted-date">—</p>
+      </div>
+      <div style="margin-top:0.75rem;">
+        <a href="about.html#report" style="font-size:0.8rem;color:#DC2626;">🚩 फर्ज़ी लिस्टिंग रिपोर्ट करें</a>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+      // Set posted date
+      if (l.createdAt?.toDate) {
+        document.getElementById('posted-date').textContent =
+          l.createdAt.toDate().toLocaleDateString('hi-IN', { year:'numeric', month:'long', day:'numeric' });
+      }
+
+      // Gallery thumb clicks
+      document.querySelectorAll('.gallery-thumb').forEach(thumb => {
+        thumb.addEventListener('click', () => {
+          document.getElementById('gallery-main').src = thumb.dataset.full;
+          document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+          thumb.classList.add('active');
+        });
+      });
+
+      // Share
+      document.getElementById('share-btn')?.addEventListener('click', async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: l.title, text: shareMsg, url: location.href });
+          } catch {}
+        } else {
+          await navigator.clipboard.writeText(location.href);
+          toast('Link copy हो गया!', 'success');
+        }
+      });
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+  </script>
+</body>
+</html>

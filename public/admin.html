@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — अपनागंगोह.in</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <div class="page-header">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h1>⚙️ Admin Panel</h1>
+        <p style="color:#888;margin:0;font-size:0.85rem;">Listings moderate करें — approve, reject, verify, feature</p>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" id="refresh-btn">🔄 Refresh</button>
+        <button class="btn btn-danger btn-sm" id="logout-btn">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;" id="stats-row">
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#FF6B00;" id="stat-pending">—</div>
+        <div style="font-size:0.85rem;color:#888;">Pending</div>
+      </div>
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#138808;" id="stat-live">—</div>
+        <div style="font-size:0.85rem;color:#888;">Live</div>
+      </div>
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#1E40AF;" id="stat-rejected">—</div>
+        <div style="font-size:0.85rem;color:#888;">Rejected</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid #E2DDD8;">
+      <button class="tab-btn active" data-tab="pending" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#FF6B00;border-bottom:2px solid #FF6B00;margin-bottom:-2px;">
+        Pending <span id="pending-count" style="background:#FF6B00;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
+      </button>
+      <button class="tab-btn" data-tab="live" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
+        Live
+      </button>
+      <button class="tab-btn" data-tab="rejected" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
+        Rejected
+      </button>
+    </div>
+
+    <div id="admin-content">
+      <div class="spinner"></div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script type="module">
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js';
+    import { initAuth, requireAdmin, logout } from './assets/js/auth.js';
+    import { initListings, fetchPending, approveListing, rejectListing, toggleVerified, toggleFeatured } from './assets/js/listings.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const auth    = firebase.auth();
+    const db      = firebase.firestore();
+    const storage = firebase.storage();
+
+    mountUI('admin.html');
+    initAuth(auth, db);
+    initListings(db, storage, auth);
+
+    await requireAdmin();
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('refresh-btn').addEventListener('click', () => loadTab(currentTab));
+
+    // ── Stats ─────────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const [pSnap, lSnap, rSnap] = await Promise.all([
+          db.collection('listings').where('status','==','pending').get(),
+          db.collection('listings').where('status','==','live').get(),
+          db.collection('listings').where('status','==','rejected').get(),
+        ]);
+        document.getElementById('stat-pending').textContent = pSnap.size;
+        document.getElementById('stat-live').textContent    = lSnap.size;
+        document.getElementById('stat-rejected').textContent= rSnap.size;
+        document.getElementById('pending-count').textContent = pSnap.size;
+      } catch {}
+    }
+    loadStats();
+
+    // ── Tabs ──────────────────────────────────────────────
+    let currentTab = 'pending';
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.style.color = '#888'; b.style.borderBottom = 'none';
+        });
+        btn.style.color = '#FF6B00';
+        btn.style.borderBottom = '2px solid #FF6B00';
+        btn.style.marginBottom = '-2px';
+        currentTab = btn.dataset.tab;
+        loadTab(currentTab);
+      });
+    });
+
+    async function loadTab(status) {
+      const content = document.getElementById('admin-content');
+      content.innerHTML = '<div class="spinner"></div>';
+      try {
+        let snap;
+        if (status === 'pending') {
+          snap = await db.collection('listings').where('status','==','pending').orderBy('createdAt','asc').limit(50).get();
+        } else if (status === 'live') {
+          snap = await db.collection('listings').where('status','==','live').orderBy('createdAt','desc').limit(50).get();
+        } else {
+          snap = await db.collection('listings').where('status','==','rejected').orderBy('createdAt','desc').limit(50).get();
+        }
+        const listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderTable(listings, status, content);
+      } catch (err) {
+        content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function renderTable(listings, status, container) {
+      if (!listings.length) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>कोई ${status} listing नहीं।</p></div>`;
+        return;
+      }
+      const table = document.createElement('table');
+      table.className = 'admin-table';
+      table.innerHTML = `
+<thead><tr>
+  <th>फ़ोटो</th><th>टाइटल / लोकेशन</th><th>कीमत</th><th>प्रकार</th><th>तारीख</th><th>Actions</th>
+</tr></thead><tbody id="tbl-body"></tbody>`;
+      container.innerHTML = '';
+      container.appendChild(table);
+      const tbody = table.querySelector('#tbl-body');
+      listings.forEach(l => tbody.appendChild(buildRow(l, status)));
+    }
+
+    function buildRow(l, status) {
+      const tr = document.createElement('tr');
+      tr.id = `row-${l.id}`;
+      const thumb = l.photos?.length
+        ? `<img src="${l.photos[0]}" style="width:64px;height:48px;object-fit:cover;border-radius:0.35rem;" loading="lazy">`
+        : `<span style="font-size:2rem;">🏘️</span>`;
+      const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
+      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि'}[l.type] || l.type;
+
+      const actionBtns = status === 'pending'
+        ? `<button class="btn btn-green btn-sm" data-action="approve" data-id="${l.id}">✅ Approve</button>
+           <button class="btn btn-danger btn-sm" data-action="reject" data-id="${l.id}">❌ Reject</button>`
+        : status === 'live'
+        ? `<button class="btn btn-danger btn-sm" data-action="reject" data-id="${l.id}">❌ Reject</button>`
+        : `<button class="btn btn-green btn-sm" data-action="approve" data-id="${l.id}">✅ Re-approve</button>`;
+
+      tr.innerHTML = `
+<td data-label="फ़ोटो">${thumb}</td>
+<td data-label="टाइटल"><strong>${l.title||'—'}</strong><br><span style="font-size:0.8rem;color:#888;">📍 ${l.village||'गंगोह'} | ${l.ownerId?.slice(0,8)||''}...</span></td>
+<td data-label="कीमत">${formatPrice(l.price)}</td>
+<td data-label="प्रकार">${typeLabel}/${l.purpose==='sale'?'बिक्री':'किराया'}</td>
+<td data-label="तारीख">${date}</td>
+<td data-label="Actions" style="display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;">
+  ${actionBtns}
+  <a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁</a>
+  <button class="btn btn-outline btn-sm" data-action="verify" data-id="${l.id}" data-current="${l.isVerified}"
+    style="${l.isVerified?'background:#DBEAFE;':''}">
+    ${l.isVerified?'☑ Verified':'Verify'}
+  </button>
+  <button class="btn btn-outline btn-sm" data-action="feature" data-id="${l.id}" data-current="${l.isFeatured}"
+    style="${l.isFeatured?'background:#FDE68A;':''}">
+    ${l.isFeatured?'⭐ Featured':'Feature'}
+  </button>
+</td>`;
+
+      tr.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => handleAction(btn, l));
+      });
+      return tr;
+    }
+
+    async function handleAction(btn, l) {
+      btn.disabled = true;
+      try {
+        const action = btn.dataset.action;
+        if (action === 'approve') {
+          await approveListing(l.id);
+          document.getElementById(`row-${l.id}`)?.remove();
+          toast('Approved!', 'success');
+          loadStats();
+        } else if (action === 'reject') {
+          if (!confirm('Reject करना चाहते हैं?')) { btn.disabled=false; return; }
+          await rejectListing(l.id);
+          document.getElementById(`row-${l.id}`)?.remove();
+          toast('Rejected।', 'error');
+          loadStats();
+        } else if (action === 'verify') {
+          const cur = btn.dataset.current === 'true';
+          await toggleVerified(l.id, cur);
+          btn.dataset.current = String(!cur);
+          btn.textContent = !cur ? '☑ Verified' : 'Verify';
+          btn.style.background = !cur ? '#DBEAFE' : '';
+          toast(!cur ? 'Verified!' : 'Unverified।', 'success');
+        } else if (action === 'feature') {
+          const cur = btn.dataset.current === 'true';
+          await toggleFeatured(l.id, cur);
+          btn.dataset.current = String(!cur);
+          btn.textContent = !cur ? '⭐ Featured' : 'Feature';
+          btn.style.background = !cur ? '#FDE68A' : '';
+          toast(!cur ? 'Featured!' : 'Unfeatured।', 'success');
+        }
+      } catch (err) {
+        toast(`Error: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Initial load
+    loadTab('pending');
+  </script>
+</body>
+</html>

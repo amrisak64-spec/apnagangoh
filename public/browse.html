@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>प्रॉपर्टी देखें — गंगोह | अपनागंगोह.in</title>
+  <meta name="description" content="गंगोह और आस-पास के गाँवों में प्लॉट, मकान, दुकान और खेती की ज़मीन — बिक्री और किराये पर। Saharanpur, UP।">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <div class="page-header">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <h1>🏘️ प्रॉपर्टी देखें</h1>
+      <a href="post.html" class="btn btn-primary btn-sm">+ लिस्ट करें</a>
+    </div>
+  </div>
+
+  <main class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+
+    <!-- Filters -->
+    <div class="filter-bar" id="filter-bar">
+      <div style="flex:1 1 140px;">
+        <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.25rem;color:#888;">प्रकार</label>
+        <select class="form-control" id="filter-type">
+          <option value="">सभी प्रकार</option>
+          <option value="plot">🏞️ प्लॉट</option>
+          <option value="house">🏠 मकान</option>
+          <option value="shop">🏪 दुकान</option>
+          <option value="agri">🌾 कृषि भूमि</option>
+        </select>
+      </div>
+      <div style="flex:1 1 130px;">
+        <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.25rem;color:#888;">उद्देश्य</label>
+        <select class="form-control" id="filter-purpose">
+          <option value="">बिक्री + किराया</option>
+          <option value="sale">बिक्री</option>
+          <option value="rent">किराया</option>
+        </select>
+      </div>
+      <div style="flex:1 1 140px;">
+        <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.25rem;color:#888;">इलाका</label>
+        <select class="form-control" id="filter-area">
+          <option value="">सभी इलाके</option>
+          <option value="town">गंगोह शहर</option>
+          <option value="village">गाँव</option>
+        </select>
+      </div>
+      <div style="flex:1 1 160px;" id="village-filter-wrap" style="display:none;">
+        <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.25rem;color:#888;">गाँव</label>
+        <select class="form-control" id="filter-village">
+          <option value="">सभी गाँव</option>
+        </select>
+      </div>
+      <div style="flex:1 1 180px;">
+        <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.25rem;color:#888;">अधिकतम कीमत</label>
+        <select class="form-control" id="filter-price">
+          <option value="">कोई सीमा नहीं</option>
+          <option value="500000">₹5 लाख तक</option>
+          <option value="1000000">₹10 लाख तक</option>
+          <option value="2500000">₹25 लाख तक</option>
+          <option value="5000000">₹50 लाख तक</option>
+          <option value="10000000">₹1 करोड़ तक</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-sm" id="apply-filters">खोजें</button>
+      <button class="btn btn-outline btn-sm" id="clear-filters">साफ करें</button>
+    </div>
+
+    <!-- Active filter pills -->
+    <div id="active-filters" style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1rem;"></div>
+
+    <!-- Results count -->
+    <p id="results-count" style="color:#888;font-size:0.9rem;margin-bottom:1rem;"></p>
+
+    <!-- Listings grid -->
+    <div id="listings-container">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- Load more -->
+    <div style="text-align:center;margin-top:2rem;">
+      <button id="load-more-btn" class="btn btn-outline" style="display:none;">और देखें</button>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { mountUI, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { initListings, fetchListings } from './assets/js/listings.js';
+    import { VILLAGES } from './data/villages.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const db = firebase.firestore();
+    mountUI('browse.html');
+    initListings(db, null, null);
+
+    // Populate village dropdown
+    const villageFilter = document.getElementById('filter-village');
+    VILLAGES.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v.value; opt.textContent = v.label;
+      villageFilter.appendChild(opt);
+    });
+
+    // Show/hide village filter
+    document.getElementById('filter-area').addEventListener('change', function() {
+      const wrap = document.getElementById('village-filter-wrap');
+      wrap.style.display = this.value === 'village' ? 'block' : 'none';
+    });
+
+    // Read URL params
+    const params = new URLSearchParams(location.search);
+    if (params.get('type'))    document.getElementById('filter-type').value    = params.get('type');
+    if (params.get('purpose')) document.getElementById('filter-purpose').value = params.get('purpose');
+    if (params.get('village')) {
+      document.getElementById('filter-area').value = 'village';
+      document.getElementById('village-filter-wrap').style.display = 'block';
+      document.getElementById('filter-village').value = params.get('village');
+    }
+    if (params.get('area'))    document.getElementById('filter-area').value    = params.get('area');
+
+    const PAGE_SIZE = 12;
+    let lastDoc = null;
+    let currentFilters = {};
+
+    function getFilters() {
+      const type         = document.getElementById('filter-type').value;
+      const purpose      = document.getElementById('filter-purpose').value;
+      const townOrVillage= document.getElementById('filter-area').value;
+      const village      = document.getElementById('filter-village').value;
+      const priceMax     = document.getElementById('filter-price').value;
+      return { type, purpose, townOrVillage, village: townOrVillage === 'village' ? village : undefined, priceMax };
+    }
+
+    async function loadListings(append = false) {
+      const container = document.getElementById('listings-container');
+      if (!append) {
+        container.innerHTML = '<div class="spinner"></div>';
+        lastDoc = null;
+      }
+
+      try {
+        const filters = { ...currentFilters, limit: PAGE_SIZE, after: lastDoc || undefined };
+        const listings = await fetchListings(filters);
+
+        if (!append) container.innerHTML = '';
+        if (!listings.length && !append) {
+          showEmpty('listings-container', 'इस filter में कोई लिस्टिंग नहीं मिली। फ़िल्टर बदलकर देखें।');
+          document.getElementById('load-more-btn').style.display = 'none';
+          document.getElementById('results-count').textContent = '';
+          return;
+        }
+
+        const grid = append
+          ? container.querySelector('.listings-grid')
+          : (() => { const g = document.createElement('div'); g.className = 'listings-grid'; container.appendChild(g); return g; })();
+
+        listings.forEach(l => {
+          grid.insertAdjacentHTML('beforeend', listingCardHTML(l));
+        });
+        lazyLoad();
+
+        // Keep last doc for pagination
+        if (listings.length === PAGE_SIZE) {
+          // Firestore cursor: re-fetch with startAfter — store last id
+          lastDoc = listings[listings.length - 1].createdAt;
+          document.getElementById('load-more-btn').style.display = 'inline-flex';
+        } else {
+          document.getElementById('load-more-btn').style.display = 'none';
+        }
+
+        if (!append) {
+          const count = listings.length;
+          document.getElementById('results-count').textContent =
+            count < PAGE_SIZE ? `${count} लिस्टिंग मिली` : `${count}+ लिस्टिंग`;
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        console.error(err);
+      }
+    }
+
+    function renderActiveFilters() {
+      const bar = document.getElementById('active-filters');
+      bar.innerHTML = '';
+      const labels = {
+        type:         { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' },
+        purpose:      { sale:'बिक्री', rent:'किराया' },
+        townOrVillage:{ town:'गंगोह शहर', village:'गाँव' },
+        priceMax:     { '500000':'≤₹5L', '1000000':'≤₹10L', '2500000':'≤₹25L', '5000000':'≤₹50L', '10000000':'≤₹1Cr' },
+      };
+      Object.entries(currentFilters).forEach(([k, v]) => {
+        if (!v) return;
+        const lbl = (labels[k] && labels[k][v]) || v;
+        bar.insertAdjacentHTML('beforeend',
+          `<span class="pill" style="background:#FEF3C7;color:#92400E;">${lbl}</span>`);
+      });
+    }
+
+    document.getElementById('apply-filters').addEventListener('click', () => {
+      currentFilters = getFilters();
+      renderActiveFilters();
+      loadListings(false);
+    });
+
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      ['filter-type','filter-purpose','filter-area','filter-price','filter-village'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('village-filter-wrap').style.display = 'none';
+      currentFilters = {};
+      renderActiveFilters();
+      loadListings(false);
+    });
+
+    document.getElementById('load-more-btn').addEventListener('click', () => loadListings(true));
+
+    // Initial load from URL params
+    currentFilters = getFilters();
+    renderActiveFilters();
+    loadListings(false);
+  </script>
+</body>
+</html>
