@@ -2,13 +2,6 @@
   publish = "public"
   # No build command — static files only
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Role = ["admin"]}
-  force = false
-
 # SPA fallback — let client-side routing handle ?id= params
 [[headers]]
   for = "/*"
