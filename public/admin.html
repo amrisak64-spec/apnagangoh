@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel — अपनागंगोह.in</title>
+  <title>Admin Panel — गंगोह.in</title>
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -30,7 +30,7 @@
     <!-- Stats row -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem;" id="stats-row">
       <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
-        <div style="font-size:2rem;font-weight:800;color:#FF6B00;" id="stat-pending">—</div>
+        <div style="font-size:2rem;font-weight:800;color:#1D4ED8;" id="stat-pending">—</div>
         <div style="font-size:0.85rem;color:#888;">Pending</div>
       </div>
       <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
@@ -45,8 +45,8 @@
 
     <!-- Tabs -->
     <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid #E2DDD8;">
-      <button class="tab-btn active" data-tab="pending" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#FF6B00;border-bottom:2px solid #FF6B00;margin-bottom:-2px;">
-        Pending <span id="pending-count" style="background:#FF6B00;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
+      <button class="tab-btn active" data-tab="pending" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#1D4ED8;border-bottom:2px solid #1D4ED8;margin-bottom:-2px;">
+        Pending <span id="pending-count" style="background:#1D4ED8;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
       </button>
       <button class="tab-btn" data-tab="live" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
         Live
@@ -125,8 +125,8 @@
         document.querySelectorAll('.tab-btn').forEach(b => {
           b.style.color = '#888'; b.style.borderBottom = 'none';
         });
-        btn.style.color = '#FF6B00';
-        btn.style.borderBottom = '2px solid #FF6B00';
+        btn.style.color = '#1D4ED8';
+        btn.style.borderBottom = '2px solid #1D4ED8';
         btn.style.marginBottom = '-2px';
         currentTab = btn.dataset.tab;
         loadTab(currentTab);
@@ -273,3 +273,4 @@
   </script>
 </body>
 </html>
+

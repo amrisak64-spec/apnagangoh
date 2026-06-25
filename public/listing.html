@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="page-title">लिस्टिंग — अपनागंगोह.in</title>
-  <meta name="description" id="page-desc" content="गंगोह प्रॉपर्टी लिस्टिंग — अपनागंगोह.in">
+  <title id="page-title">लिस्टिंग — गंगोह.in</title>
+  <meta name="description" id="page-desc" content="गंगोह प्रॉपर्टी लिस्टिंग — गंगोह.in">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -66,7 +66,7 @@
 
     function renderListing(l) {
       // Update page title/meta
-      document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | अपनागंगोह.in`;
+      document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | गंगोह.in`;
       document.getElementById('page-desc').content = `${l.title} — ${l.purpose === 'sale' ? 'बिक्री' : 'किराये'} पर। कीमत: ${formatPrice(l.price)}। ${l.village || 'गंगोह'}, Gangoh।`;
 
       const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[l.type] || l.type;
@@ -84,7 +84,7 @@
         : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:4rem;">🏘️</div>`;
 
       // WhatsApp message
-      const waMsg = `नमस्ते, मुझे ${l.title} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। अपनागंगोह.in पर देखा।`;
+      const waMsg = `नमस्ते, मुझे ${l.title} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। गंगोह.in पर देखा।`;
       const waLink = l.contactWhatsApp ? waURL(l.contactWhatsApp, waMsg) : '#';
 
       // Share message
@@ -187,3 +187,4 @@
   </script>
 </body>
 </html>
+

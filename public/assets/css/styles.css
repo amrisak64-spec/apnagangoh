@@ -1,9 +1,9 @@
-/* ApnaGangoh.in — base styles */
+/* Gangoh.in — base styles */
 /* Tailwind CDN handles utilities; this file handles theming + components */
 
 :root {
-  --color-saffron:   #FF6B00;
-  --color-saffron-lt:#FF8C3A;
+  --color-saffron:   #1D4ED8;
+  --color-saffron-lt:#2563EB;
   --color-green:     #138808;
   --color-green-lt:  #1aaa0a;
   --color-white:     #FFFFFF;
@@ -64,14 +64,14 @@ a:hover { text-decoration: underline; }
   color: white;
   letter-spacing: -0.02em;
 }
-#site-header .logo span { color: #FFE0C0; }
+#site-header .logo span { color: #BFDBFE; }
 #site-header nav a {
   color: white;
   margin-left: 1.25rem;
   font-size: 0.95rem;
   font-weight: 500;
 }
-#site-header nav a:hover { color: #FFE0C0; text-decoration: none; }
+#site-header nav a:hover { color: #BFDBFE; text-decoration: none; }
 .btn-post-header {
   background: white;
   color: var(--color-saffron);
@@ -81,7 +81,7 @@ a:hover { text-decoration: underline; }
   font-size: 0.9rem;
   white-space: nowrap;
 }
-.btn-post-header:hover { background: #FFE0C0; text-decoration: none; }
+.btn-post-header:hover { background: #BFDBFE; text-decoration: none; }
 .hamburger {
   display: none;
   background: none;
@@ -246,7 +246,7 @@ a:hover { text-decoration: underline; }
   transition: border-color 0.15s;
   min-height: 48px;
 }
-.form-control:focus { outline: none; border-color: var(--color-saffron); box-shadow: 0 0 0 3px rgba(255,107,0,0.15); }
+.form-control:focus { outline: none; border-color: var(--color-saffron); box-shadow: 0 0 0 3px rgba(29,78,216,0.15); }
 select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; }
 textarea.form-control { resize: vertical; min-height: 100px; }
 .form-hint { font-size: 0.8rem; color: var(--color-muted); margin-top: 0.25rem; }
@@ -268,7 +268,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 /* ── Hero ────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, var(--color-saffron) 0%, #FF8C3A 50%, #FFA040 100%);
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
   color: white;
   padding: 3rem 1rem 2.5rem;
   text-align: center;
@@ -420,7 +420,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   transition: border-color 0.2s, background 0.2s;
   background: #FAFAF8;
 }
-.upload-area:hover, .upload-area.drag-over { border-color: var(--color-saffron); background: #FFF7F2; }
+.upload-area:hover, .upload-area.drag-over { border-color: var(--color-saffron); background: #EFF6FF; }
 .upload-area .upload-icon { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
 .img-preview-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
 .img-preview-item { position: relative; width: 80px; height: 80px; }

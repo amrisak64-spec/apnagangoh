@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>प्रॉपर्टी चाहिए — अपनागंगोह.in</title>
+  <title>प्रॉपर्टी चाहिए — गंगोह.in</title>
   <meta name="description" content="गंगोह में प्रॉपर्टी खरीदना या किराये पर लेना है? अपनी ज़रूरत यहाँ post करें — sellers खुद connect करेंगे।">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -72,7 +72,7 @@
           </div>
           <p id="req-error" class="form-error" style="display:none;"></p>
           <div id="req-login-notice" style="display:none;background:#FEF3C7;border-radius:0.5rem;padding:0.75rem;font-size:0.9rem;margin-bottom:0.75rem;">
-            ⚠️ Post करने के लिए <a href="login.html?next=requirement.html" style="color:#FF6B00;font-weight:700;">Login करें</a>
+            ⚠️ Post करने के लिए <a href="login.html?next=requirement.html" style="color:#1D4ED8;font-weight:700;">Login करें</a>
           </div>
           <button id="req-submit-btn" class="btn btn-primary btn-full">📤 ज़रूरत Post करें</button>
         </div>
@@ -208,7 +208,7 @@
         : '';
       const villageLine  = r.village ? `📍 ${r.village}` : '📍 गंगोह / आस-पास';
       const date         = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('hi-IN') : '';
-      const waURL        = `https://wa.me/91${r.phone}?text=${encodeURIComponent(`नमस्ते! आपने अपनागंगोह.in पर ${typeLabel} (${purposeLabel}) की ज़रूरत post की थी — मेरे पास उपलब्ध है।`)}`;
+      const waURL        = `https://wa.me/91${r.phone}?text=${encodeURIComponent(`नमस्ते! आपने गंगोह.in पर ${typeLabel} (${purposeLabel}) की ज़रूरत post की थी — मेरे पास उपलब्ध है।`)}`;
 
       const isMine = currentUser && r.ownerId === currentUser.uid;
 
@@ -262,3 +262,5 @@
   </style>
 </body>
 </html>
+
+

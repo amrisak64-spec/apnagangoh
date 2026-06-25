@@ -33,7 +33,7 @@ export async function createListing(formData, compressedFiles, onProgress) {
     ...formData,
     photos:     photoURLs,
     ownerId:    user.uid,
-    status:     'pending',
+    status:     'live',
     isVerified: false,
     isFeatured: false,
     createdAt:  firebase.firestore.FieldValue.serverTimestamp(),

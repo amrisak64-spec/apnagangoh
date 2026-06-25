@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>मेरी Listings — अपनागंगोह.in</title>
+  <title>मेरी Listings — गंगोह.in</title>
   <meta name="robots" content="noindex">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -27,7 +27,7 @@
     <!-- Stats -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:2rem;" id="my-stats">
       <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
-        <div style="font-size:2rem;font-weight:800;color:#FF6B00;" id="stat-pending">—</div>
+        <div style="font-size:2rem;font-weight:800;color:#1D4ED8;" id="stat-pending">—</div>
         <div style="font-size:0.85rem;color:#888;">Pending</div>
       </div>
       <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
@@ -42,7 +42,7 @@
 
     <!-- Tabs -->
     <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid #E2DDD8;">
-      <button class="my-tab active" data-tab="all"      style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#FF6B00;border-bottom:2px solid #FF6B00;margin-bottom:-2px;">सभी</button>
+      <button class="my-tab active" data-tab="all"      style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#1D4ED8;border-bottom:2px solid #1D4ED8;margin-bottom:-2px;">सभी</button>
       <button class="my-tab"        data-tab="pending"  style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Pending</button>
       <button class="my-tab"        data-tab="live"     style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Live</button>
       <button class="my-tab"        data-tab="rejected" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Rejected</button>
@@ -126,7 +126,7 @@
       div.id = `card-${l.id}`;
       div.style.cssText = 'background:white;border-radius:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;display:flex;gap:0;';
 
-      const statusColor = { pending:'#FF6B00', live:'#138808', rejected:'#DC2626' }[l.status] || '#888';
+      const statusColor = { pending:'#1D4ED8', live:'#138808', rejected:'#DC2626' }[l.status] || '#888';
       const statusLabel = { pending:'⏳ Review में', live:'✅ Live', rejected:'❌ Rejected' }[l.status] || l.status;
       const thumb = l.photos?.length
         ? `<img src="${l.photos[0]}" style="width:110px;min-width:110px;height:90px;object-fit:cover;" loading="lazy">`
@@ -144,7 +144,7 @@
             <div style="font-size:0.75rem;color:#aaa;">${date}</div>
           </div>
           <div style="font-weight:700;font-size:1rem;margin:0.35rem 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.title || '—'}</div>
-          <div style="font-size:0.85rem;color:#FF6B00;font-weight:700;">${formatPrice(l.price)}</div>
+          <div style="font-size:0.85rem;color:#1D4ED8;font-weight:700;">${formatPrice(l.price)}</div>
           <div style="font-size:0.8rem;color:#888;margin-top:0.15rem;">📍 ${l.village||'गंगोह'} · ${typeLabel} · ${l.purpose==='sale'?'बिक्री':'किराया'}</div>
           ${l.status === 'rejected' ? `<div style="font-size:0.78rem;color:#DC2626;margin-top:0.25rem;">❗ Admin ने reject किया। नई listing डालें।</div>` : ''}
           <div style="display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;">
@@ -176,8 +176,8 @@
     document.querySelectorAll('.my-tab').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.my-tab').forEach(b => { b.style.color='#888'; b.style.borderBottom='none'; });
-        btn.style.color = '#FF6B00';
-        btn.style.borderBottom = '2px solid #FF6B00';
+        btn.style.color = '#1D4ED8';
+        btn.style.borderBottom = '2px solid #1D4ED8';
         btn.style.marginBottom = '-2px';
         currentTab = btn.dataset.tab;
         renderTab(currentTab);
@@ -188,3 +188,5 @@
   </script>
 </body>
 </html>
+
+

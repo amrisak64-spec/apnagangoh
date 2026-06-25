@@ -20,10 +20,10 @@ service cloud.firestore {
                   || isOwner(resource.data.ownerId)
                   || isAdmin();
 
-      // Authenticated user can create, but status must be 'pending' and ownerId must match
+      // Authenticated user can create with status 'live' (no admin review)
       allow create: if request.auth != null
                    && request.resource.data.ownerId == request.auth.uid
-                   && request.resource.data.status == 'pending';
+                   && request.resource.data.status == 'live';
 
       // Only admin can update (approve/reject/verify/feature)
       allow update: if isAdmin();

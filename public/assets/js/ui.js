@@ -14,7 +14,7 @@ function getHeaderHTML(activePage = '') {
   ).join('');
   return `
 <div class="inner">
-  <a href="index.html" class="logo">अपना<span>गंगोह</span>.in</a>
+  <a href="index.html" class="logo">गंगोह<span>.in</span></a>
   <nav class="nav-desktop">
     ${links}
     <a href="post.html" class="btn-post-header">+ लिस्ट करें</a>
@@ -35,7 +35,7 @@ function getFooterHTML() {
   return `
 <div class="footer-grid">
   <div>
-    <h4>अपनागंगोह.in</h4>
+    <h4>गंगोह.in</h4>
     <p style="font-size:0.85rem;color:#999;margin:0 0 0.75rem;">गंगोह और आस-पास के गाँव का अपना ऑनलाइन बाज़ार।</p>
     <a href="about.html" style="font-size:0.85rem;">हमारे बारे में</a><br>
     <a href="about.html#contact" style="font-size:0.85rem;">संपर्क करें</a>
@@ -55,7 +55,7 @@ function getFooterHTML() {
   </div>
 </div>
 <div class="footer-bottom">
-  <p>© ${new Date().getFullYear()} अपनागंगोह.in — Gangoh, Saharanpur, UP | Made with ❤️ for rural UP</p>
+  <p>© ${new Date().getFullYear()} गंगोह.in — Gangoh, Saharanpur, UP | Made with ❤️ for rural UP</p>
   <p style="margin-top:0.25rem;"><a href="about.html#report">फर्ज़ी लिस्टिंग रिपोर्ट करें</a></p>
 </div>`;
 }
@@ -144,7 +144,7 @@ export function listingCardHTML(listing) {
   const featuredBadge = isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : '';
   const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[type] || type;
   const area = areaSize ? `${areaSize} ${areaUnit || ''}` : '';
-  const shareText = encodeURIComponent(`🏘️ ${title} — ${formatPrice(price)} (${village || 'गंगोह'})\nअपनागंगोह.in पर देखें: https://apnagangoh.in/listing.html?id=${id}`);
+  const shareText = encodeURIComponent(`🏘️ ${title} — ${formatPrice(price)} (${village || 'गंगोह'})\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
   return `
 <div class="listing-card" style="display:flex;flex-direction:column;">
   <a href="listing.html?id=${id}" style="text-decoration:none;color:inherit;flex:1;">
