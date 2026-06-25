@@ -59,12 +59,12 @@ a:hover { text-decoration: underline; }
   margin: 0 auto;
 }
 #site-header .logo {
-  font-size: 1.35rem;
+  font-size: 1.65rem;
   font-weight: 800;
   color: white;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
-#site-header .logo span { color: #BFDBFE; }
+#site-header .logo span { color: #BFDBFE; font-weight: 400; font-size: 1.2rem; }
 #site-header nav a {
   color: white;
   margin-left: 1.25rem;
