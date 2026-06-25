@@ -51,42 +51,21 @@ export async function ensureUserDoc(user) {
   if (!snap.exists) {
     await ref.set({
       uid: user.uid,
-      phone: user.phoneNumber,
-      name: '',
+      name: user.displayName || '',
+      email: user.email || '',
+      phone: user.phoneNumber || '',
+      photoURL: user.photoURL || '',
       role: 'user',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   }
 }
 
-// ── Phone OTP flow ────────────────────────────────────────
-let _confirmationResult = null;
-let _recaptchaVerifier  = null;
-
-export function setupRecaptcha(buttonId) {
-  if (_recaptchaVerifier) {
-    _recaptchaVerifier.clear();
-    _recaptchaVerifier = null;
-  }
-  _recaptchaVerifier = new firebase.auth.RecaptchaVerifier(buttonId, {
-    size: 'invisible',
-    callback: () => {},
-    'expired-callback': () => {
-      toast('reCAPTCHA expire हो गया। दोबारा try करें।', 'error');
-    },
-  });
-  return _recaptchaVerifier;
-}
-
-export async function sendOTP(phoneNumber, recaptchaVerifier) {
-  const fullPhone = phoneNumber.startsWith('+') ? phoneNumber : `+91${phoneNumber}`;
-  _confirmationResult = await _auth.signInWithPhoneNumber(fullPhone, recaptchaVerifier);
-  return _confirmationResult;
-}
-
-export async function verifyOTP(otp) {
-  if (!_confirmationResult) throw new Error('OTP नहीं भेजा गया। पहले नंबर दर्ज करें।');
-  const result = await _confirmationResult.confirm(otp);
+// ── Google Sign-In ────────────────────────────────────────
+export async function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  const result = await _auth.signInWithPopup(provider);
   await ensureUserDoc(result.user);
   return result.user;
 }

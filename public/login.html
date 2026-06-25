@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login — अपनागंगोह.in | गंगोह का Online बाज़ार</title>
-  <meta name="description" content="अपने मोबाइल नंबर से Login करें — गंगोह और आस-पास के गाँव का सबसे भरोसेमंद प्रॉपर्टी पोर्टल।">
+  <meta name="description" content="Google से Login करें — गंगोह और आस-पास के गाँव का सबसे भरोसेमंद प्रॉपर्टी पोर्टल।">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -15,61 +15,27 @@
 
   <main style="background:linear-gradient(135deg,#FF6B00 0%,#FF8C3A 50%,#FFA040 100%);min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:1rem;">
     <div class="auth-card" style="width:100%;">
-      <div style="text-align:center;margin-bottom:1.5rem;">
-        <div style="font-size:2.5rem;">📱</div>
-        <h2>OTP से Login करें</h2>
-        <p class="sub">अपना मोबाइल नंबर दर्ज करें — OTP आएगा</p>
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-size:2.5rem;">🏘️</div>
+        <h2>अपनागंगोह.in</h2>
+        <p class="sub">Login करें और शुरू करें</p>
       </div>
 
-      <!-- Step 1: Phone number -->
-      <div id="step-phone">
-        <div class="form-group">
-          <label>मोबाइल नंबर</label>
-          <div class="phone-input-wrap">
-            <div class="country-code">🇮🇳 +91</div>
-            <input type="tel" id="phone-input" class="form-control" placeholder="10 अंकों का नंबर"
-              maxlength="10" pattern="[6-9][0-9]{9}" inputmode="numeric" autocomplete="tel-national">
-          </div>
-          <p class="form-hint">SMS OTP भेजा जाएगा।</p>
-        </div>
-        <button id="send-otp-btn" class="btn btn-primary btn-full">
-          OTP भेजें
-        </button>
-        <div id="recaptcha-container" style="margin-top:0.75rem;"></div>
-        <p id="phone-error" class="form-error" style="display:none;"></p>
-      </div>
+      <button id="google-signin-btn" class="btn btn-primary btn-full" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;font-size:1rem;padding:0.85rem;">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:22px;height:22px;background:#fff;border-radius:50%;padding:2px;">
+        Google से Login करें
+      </button>
 
-      <!-- Step 2: OTP verification -->
-      <div id="step-otp" style="display:none;">
-        <p style="text-align:center;color:#666;margin-bottom:1rem;font-size:0.95rem;">
-          <span id="otp-sent-to"></span> पर OTP भेजा गया
-        </p>
-        <div class="form-group">
-          <label>6-अंक का OTP दर्ज करें</label>
-          <div class="otp-inputs" id="otp-inputs">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
-          </div>
-          <p id="otp-error" class="form-error" style="display:none;"></p>
-        </div>
-        <button id="verify-otp-btn" class="btn btn-primary btn-full">Verify & Login</button>
-        <button id="resend-btn" class="btn btn-outline btn-full" style="margin-top:0.75rem;" disabled>
-          OTP दोबारा भेजें (<span id="countdown">30</span>s)
-        </button>
-        <button id="change-phone-btn" class="btn btn-outline btn-sm" style="margin-top:0.5rem;width:100%;">
-          नंबर बदलें
-        </button>
-      </div>
-
-      <!-- Loading overlay -->
       <div id="auth-loading" style="display:none;text-align:center;padding:1rem;">
         <div class="spinner" style="margin:0 auto 0.75rem;"></div>
         <p style="color:#888;">कृपया प्रतीक्षा करें...</p>
       </div>
+
+      <p id="login-error" class="form-error" style="display:none;margin-top:1rem;"></p>
+
+      <p style="text-align:center;font-size:0.8rem;color:#888;margin-top:1.5rem;">
+        Login करके आप हमारी <a href="#" style="color:#FF6B00;">शर्तें</a> मानते हैं।
+      </p>
     </div>
   </main>
 
@@ -80,18 +46,16 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-  <!-- Image compression (not needed on login page but keep CDN consistent) -->
   <script type="module">
     import { mountUI, toast } from './assets/js/ui.js';
-    import { initAuth, sendOTP, verifyOTP, setupRecaptcha, onAuthReady } from './assets/js/auth.js';
+    import { initAuth, signInWithGoogle, onAuthReady } from './assets/js/auth.js';
 
-    // Load firebase config
     let fbConfig;
     try {
       const m = await import('./assets/js/firebase-config.js');
       fbConfig = m.firebaseConfig;
     } catch {
-      document.body.innerHTML = `<div style="text-align:center;padding:4rem;font-size:1.1rem;">⚠️ Firebase config नहीं मिला।<br>firebase-config.js बनाएं (example देखें)।</div>`;
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;font-size:1.1rem;">⚠️ Firebase config नहीं मिला।</div>`;
       throw new Error('firebase-config.js missing');
     }
 
@@ -102,156 +66,30 @@
     mountUI('login.html');
     initAuth(auth, db);
 
-    // Redirect if already logged in
     const nextURL = new URLSearchParams(location.search).get('next') || 'index.html';
+
     onAuthReady((user) => {
       if (user) window.location.href = nextURL;
     });
 
-    // ── DOM refs ──────────────────────────────────────────
-    const phoneInput    = document.getElementById('phone-input');
-    const sendOTPBtn    = document.getElementById('send-otp-btn');
-    const stepPhone     = document.getElementById('step-phone');
-    const stepOTP       = document.getElementById('step-otp');
-    const otpInputs     = document.querySelectorAll('#otp-inputs input');
-    const verifyBtn     = document.getElementById('verify-otp-btn');
-    const resendBtn     = document.getElementById('resend-btn');
-    const changePhoBtn  = document.getElementById('change-phone-btn');
-    const otpSentTo     = document.getElementById('otp-sent-to');
-    const phoneError    = document.getElementById('phone-error');
-    const otpError      = document.getElementById('otp-error');
-    const loading       = document.getElementById('auth-loading');
+    const btn      = document.getElementById('google-signin-btn');
+    const loading  = document.getElementById('auth-loading');
+    const errEl    = document.getElementById('login-error');
 
-    function showLoading(show) {
-      loading.style.display = show ? 'block' : 'none';
-      stepPhone.style.display = show ? 'none' : (currentStep === 'phone' ? 'block' : 'none');
-      stepOTP.style.display = show ? 'none' : (currentStep === 'otp' ? 'block' : 'none');
-    }
-
-    let currentStep = 'phone';
-    let recaptchaVerifier;
-
-    // Setup reCAPTCHA on page load
-    recaptchaVerifier = setupRecaptcha('send-otp-btn');
-
-    // ── Send OTP ─────────────────────────────────────────
-    sendOTPBtn.addEventListener('click', async () => {
-      const phone = phoneInput.value.trim();
-      phoneError.style.display = 'none';
-
-      if (!/^[6-9][0-9]{9}$/.test(phone)) {
-        phoneError.textContent = '10 अंकों का सही मोबाइल नंबर दर्ज करें।';
-        phoneError.style.display = 'block';
-        return;
-      }
-
-      showLoading(true);
+    btn.addEventListener('click', async () => {
+      btn.style.display = 'none';
+      loading.style.display = 'block';
+      errEl.style.display = 'none';
       try {
-        await sendOTP(phone, recaptchaVerifier);
-        currentStep = 'otp';
-        otpSentTo.textContent = `+91 ${phone}`;
-        showLoading(false);
-        stepPhone.style.display = 'none';
-        stepOTP.style.display = 'block';
-        otpInputs[0].focus();
-        startCountdown();
-        toast('OTP भेजा गया!', 'success');
-      } catch (err) {
-        showLoading(false);
-        currentStep = 'phone';
-        phoneError.textContent = err.message || 'OTP भेजने में error। दोबारा try करें।';
-        phoneError.style.display = 'block';
-        // Reset recaptcha on error
-        recaptchaVerifier = setupRecaptcha('send-otp-btn');
-      }
-    });
-
-    // ── OTP input auto-advance ────────────────────────────
-    otpInputs.forEach((input, i) => {
-      input.addEventListener('input', () => {
-        if (input.value && i < otpInputs.length - 1) otpInputs[i + 1].focus();
-      });
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !input.value && i > 0) otpInputs[i - 1].focus();
-      });
-      input.addEventListener('paste', (e) => {
-        const data = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-        if (data.length === 6) {
-          otpInputs.forEach((inp, idx) => inp.value = data[idx] || '');
-          otpInputs[5].focus();
-          e.preventDefault();
-        }
-      });
-    });
-
-    // ── Verify OTP ────────────────────────────────────────
-    verifyBtn.addEventListener('click', async () => {
-      const otp = Array.from(otpInputs).map(i => i.value).join('');
-      otpError.style.display = 'none';
-
-      if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-        otpError.textContent = '6-अंकों का OTP दर्ज करें।';
-        otpError.style.display = 'block';
-        return;
-      }
-
-      showLoading(true);
-      try {
-        await verifyOTP(otp);
+        await signInWithGoogle();
         toast('Login सफल!', 'success');
         setTimeout(() => window.location.href = nextURL, 800);
       } catch (err) {
-        showLoading(false);
-        currentStep = 'otp';
-        otpError.textContent = 'OTP गलत है या expire हो गया। दोबारा try करें।';
-        otpError.style.display = 'block';
-        otpInputs.forEach(i => i.value = '');
-        otpInputs[0].focus();
+        loading.style.display = 'none';
+        btn.style.display = 'flex';
+        errEl.textContent = 'Login में error। दोबारा try करें।';
+        errEl.style.display = 'block';
       }
-    });
-
-    // ── Resend countdown ─────────────────────────────────
-    let countInterval;
-    function startCountdown(seconds = 30) {
-      resendBtn.disabled = true;
-      let s = seconds;
-      document.getElementById('countdown').textContent = s;
-      countInterval = setInterval(() => {
-        s--;
-        document.getElementById('countdown').textContent = s;
-        if (s <= 0) {
-          clearInterval(countInterval);
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'OTP दोबारा भेजें';
-        }
-      }, 1000);
-    }
-
-    resendBtn.addEventListener('click', async () => {
-      clearInterval(countInterval);
-      const phone = phoneInput.value.trim();
-      recaptchaVerifier = setupRecaptcha('send-otp-btn');
-      showLoading(true);
-      try {
-        await sendOTP(phone, recaptchaVerifier);
-        showLoading(false);
-        currentStep = 'otp';
-        startCountdown();
-        toast('नया OTP भेजा गया!', 'success');
-      } catch (err) {
-        showLoading(false);
-        toast(err.message, 'error');
-      }
-    });
-
-    changePhoBtn.addEventListener('click', () => {
-      currentStep = 'phone';
-      stepOTP.style.display = 'none';
-      stepPhone.style.display = 'block';
-      phoneInput.value = '';
-      otpInputs.forEach(i => i.value = '');
-      clearInterval(countInterval);
-      recaptchaVerifier = setupRecaptcha('send-otp-btn');
     });
   </script>
 </body>
