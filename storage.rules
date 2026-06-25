@@ -3,21 +3,26 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // ── listing images ────────────────────────────────────────────
-    // Path: listings/{uid}/{listingId}/{fileName}
-    match /listings/{uid}/{listingId}/{fileName} {
-      // Anyone can read (listing images are public)
+    // Admin check via Firestore
+    function isAdmin() {
+      return request.auth != null
+          && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ── Listing images: listings/{uid}/{fileName}  ────────────────
+    // Path created by: `listings/${user.uid}/${Date.now()}_${i}.jpg`
+    match /listings/{uid}/{fileName} {
+      // Public read (CDN-served listing photos)
       allow read: if true;
 
-      // Only the authenticated owner can upload to their own path
+      // Owner can upload to their own folder (images only, max 2 MB)
       allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   // Images only
-                   && request.resource.contentType.matches('image/.*')
-                   // Max 2 MB per image (compressed before upload)
-                   && request.resource.size <= 2 * 1024 * 1024;
+                  && request.auth.uid == uid
+                  && request.resource.contentType.matches('image/.*')
+                  && request.resource.size <= 2 * 1024 * 1024;
 
-      allow delete: if request.auth != null && request.auth.uid == uid;
+      // Owner OR admin can delete
+      allow delete: if (request.auth != null && request.auth.uid == uid) || isAdmin();
     }
 
     // Block everything else

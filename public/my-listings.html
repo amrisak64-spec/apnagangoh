@@ -11,20 +11,180 @@
 </head>
 <body>
   <header id="site-header"></header>
-  <div class="page-header"><div class="container"><h1>📋 मेरी Listings (Dashboard)</h1></div></div>
-  <main class="container section">
-    <div class="empty-state" style="max-width:500px;margin:0 auto;">
-      <span class="empty-icon">🚧</span>
-      <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">जल्द आ रहा है!</h2>
-      <p>My Listings dashboard Phase 2 में launch होगा।</p>
-      <a href="post.html" class="btn btn-primary" style="margin-top:1.5rem;">+ नई Listing डालें</a>
+
+  <div class="page-header">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+      <div>
+        <h1>📋 मेरी Listings</h1>
+        <p id="user-name-line" style="color:#888;margin:0;font-size:0.85rem;"></p>
+      </div>
+      <a href="post.html" class="btn btn-primary btn-sm">+ नई Listing डालें</a>
     </div>
+  </div>
+
+  <main class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1rem;margin-bottom:2rem;" id="my-stats">
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#FF6B00;" id="stat-pending">—</div>
+        <div style="font-size:0.85rem;color:#888;">Pending</div>
+      </div>
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#138808;" id="stat-live">—</div>
+        <div style="font-size:0.85rem;color:#888;">Live</div>
+      </div>
+      <div style="background:white;border-radius:0.75rem;padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);text-align:center;">
+        <div style="font-size:2rem;font-weight:800;color:#DC2626;" id="stat-rejected">—</div>
+        <div style="font-size:0.85rem;color:#888;">Rejected</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:2px solid #E2DDD8;">
+      <button class="my-tab active" data-tab="all"      style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#FF6B00;border-bottom:2px solid #FF6B00;margin-bottom:-2px;">सभी</button>
+      <button class="my-tab"        data-tab="pending"  style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Pending</button>
+      <button class="my-tab"        data-tab="live"     style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Live</button>
+      <button class="my-tab"        data-tab="rejected" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">Rejected</button>
+    </div>
+
+    <div id="my-content"><div class="spinner"></div></div>
   </main>
+
   <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI } from './assets/js/ui.js';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js';
+    import { initAuth, requireAuth } from './assets/js/auth.js';
+    import { initListings, fetchUserListings, deleteListing } from './assets/js/listings.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const auth    = firebase.auth();
+    const db      = firebase.firestore();
+    const storage = firebase.storage();
+
     mountUI('my-listings.html');
+    initAuth(auth, db);
+    initListings(db, storage, auth);
+
+    const { user } = await requireAuth('login.html');
+    document.getElementById('user-name-line').textContent = user.displayName || user.email || '';
+
+    let allListings = [];
+    let currentTab  = 'all';
+
+    async function loadMyListings() {
+      document.getElementById('my-content').innerHTML = '<div class="spinner"></div>';
+      try {
+        allListings = await fetchUserListings(user.uid);
+        updateStats();
+        renderTab(currentTab);
+      } catch (err) {
+        document.getElementById('my-content').innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function updateStats() {
+      const p = allListings.filter(l => l.status === 'pending').length;
+      const lv = allListings.filter(l => l.status === 'live').length;
+      const r = allListings.filter(l => l.status === 'rejected').length;
+      document.getElementById('stat-pending').textContent  = p;
+      document.getElementById('stat-live').textContent     = lv;
+      document.getElementById('stat-rejected').textContent = r;
+    }
+
+    function renderTab(tab) {
+      const filtered = tab === 'all' ? allListings : allListings.filter(l => l.status === tab);
+      const content  = document.getElementById('my-content');
+      if (!filtered.length) {
+        content.innerHTML = `<div class="empty-state"><span class="empty-icon">🏘️</span><p>${tab === 'all' ? 'अभी कोई listing नहीं।' : `कोई ${tab} listing नहीं।`}</p><a href="post.html" class="btn btn-primary" style="margin-top:1rem;">+ पहली Listing डालें</a></div>`;
+        return;
+      }
+      content.innerHTML = '';
+      const list = document.createElement('div');
+      list.style.cssText = 'display:flex;flex-direction:column;gap:1rem;';
+      filtered.forEach(l => list.appendChild(buildCard(l)));
+      content.appendChild(list);
+    }
+
+    function buildCard(l) {
+      const div = document.createElement('div');
+      div.id = `card-${l.id}`;
+      div.style.cssText = 'background:white;border-radius:0.75rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);overflow:hidden;display:flex;gap:0;';
+
+      const statusColor = { pending:'#FF6B00', live:'#138808', rejected:'#DC2626' }[l.status] || '#888';
+      const statusLabel = { pending:'⏳ Review में', live:'✅ Live', rejected:'❌ Rejected' }[l.status] || l.status;
+      const thumb = l.photos?.length
+        ? `<img src="${l.photos[0]}" style="width:110px;min-width:110px;height:90px;object-fit:cover;" loading="lazy">`
+        : `<div style="width:110px;min-width:110px;height:90px;background:#F3EEE8;display:flex;align-items:center;justify-content:center;font-size:2rem;">🏘️</div>`;
+      const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
+      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि भूमि'}[l.type] || '';
+
+      div.innerHTML = `
+        ${thumb}
+        <div style="flex:1;padding:0.75rem;min-width:0;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+            <div>
+              <span style="font-size:0.75rem;font-weight:700;color:${statusColor};background:${statusColor}18;padding:0.15rem 0.5rem;border-radius:1rem;">${statusLabel}</span>
+            </div>
+            <div style="font-size:0.75rem;color:#aaa;">${date}</div>
+          </div>
+          <div style="font-weight:700;font-size:1rem;margin:0.35rem 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.title || '—'}</div>
+          <div style="font-size:0.85rem;color:#FF6B00;font-weight:700;">${formatPrice(l.price)}</div>
+          <div style="font-size:0.8rem;color:#888;margin-top:0.15rem;">📍 ${l.village||'गंगोह'} · ${typeLabel} · ${l.purpose==='sale'?'बिक्री':'किराया'}</div>
+          ${l.status === 'rejected' ? `<div style="font-size:0.78rem;color:#DC2626;margin-top:0.25rem;">❗ Admin ने reject किया। नई listing डालें।</div>` : ''}
+          <div style="display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;">
+            ${l.status === 'live' ? `<a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁 देखें</a>` : ''}
+            <button class="btn btn-danger btn-sm" data-del="${l.id}">🗑️ Delete</button>
+          </div>
+        </div>`;
+
+      div.querySelector(`[data-del]`).addEventListener('click', async () => {
+        if (!confirm('इस listing को delete करना चाहते हैं?')) return;
+        try {
+          await deleteListing(l.id);
+          document.getElementById(`card-${l.id}`)?.remove();
+          allListings = allListings.filter(x => x.id !== l.id);
+          updateStats();
+          toast('Listing delete हो गई।', 'success');
+          if (!document.getElementById('my-content').querySelector(`[id^="card-"]`)) {
+            renderTab(currentTab);
+          }
+        } catch (err) {
+          toast(`Error: ${err.message}`, 'error');
+        }
+      });
+
+      return div;
+    }
+
+    // Tab switching
+    document.querySelectorAll('.my-tab').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.my-tab').forEach(b => { b.style.color='#888'; b.style.borderBottom='none'; });
+        btn.style.color = '#FF6B00';
+        btn.style.borderBottom = '2px solid #FF6B00';
+        btn.style.marginBottom = '-2px';
+        currentTab = btn.dataset.tab;
+        renderTab(currentTab);
+      });
+    });
+
+    loadMyListings();
   </script>
 </body>
 </html>

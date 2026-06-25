@@ -120,6 +120,54 @@ export async function deleteListing(id) {
   await _db.collection('listings').doc(id).delete();
 }
 
+// ── Admin: delete listing + all Storage photos ────────────
+export async function deleteListingWithPhotos(id) {
+  const snap = await _db.collection('listings').doc(id).get();
+  if (snap.exists) {
+    const photos = snap.data().photos || [];
+    for (const url of photos) {
+      try { await _storage.refFromURL(url).delete(); } catch {}
+    }
+  }
+  await _db.collection('listings').doc(id).delete();
+}
+
+// ── Fetch listings by current user ───────────────────────
+export async function fetchUserListings(uid) {
+  const snap = await _db.collection('listings')
+    .where('ownerId', '==', uid)
+    .orderBy('createdAt', 'desc')
+    .limit(50)
+    .get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// ── Requirements (property wanted) ───────────────────────
+export async function createRequirement(data) {
+  const user = _auth.currentUser;
+  if (!user) throw new Error('Login ज़रूरी है।');
+  return _db.collection('requirements').add({
+    ...data,
+    ownerId:   user.uid,
+    ownerName: user.displayName || '',
+    status:    'active',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+export async function fetchRequirements(lim = 40) {
+  const snap = await _db.collection('requirements')
+    .where('status', '==', 'active')
+    .orderBy('createdAt', 'desc')
+    .limit(lim)
+    .get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function deleteRequirement(id) {
+  await _db.collection('requirements').doc(id).delete();
+}
+
 // ── Search by title (simple client-side prefix search) ───
 export async function searchListings(query, lim = 20) {
   if (!query) return [];

@@ -3,28 +3,262 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>प्रॉपर्टी चाहिए (माँग) — अपनागंगोह.in</title>
-  <meta name="description" content="गंगोह में प्रॉपर्टी खरीदना है? अपनी ज़रूरत post करें — sellers खुद connect करेंगे।">
+  <title>प्रॉपर्टी चाहिए — अपनागंगोह.in</title>
+  <meta name="description" content="गंगोह में प्रॉपर्टी खरीदना या किराये पर लेना है? अपनी ज़रूरत यहाँ post करें — sellers खुद connect करेंगे।">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
   <header id="site-header"></header>
-  <div class="page-header"><div class="container"><h1>📋 प्रॉपर्टी चाहिए (माँग Board)</h1></div></div>
-  <main class="container section">
-    <div class="empty-state" style="max-width:500px;margin:0 auto;">
-      <span class="empty-icon">🚧</span>
-      <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">जल्द आ रहा है!</h2>
-      <p>Property Requirement Board Phase 2 में launch होगा।</p>
-      <a href="browse.html" class="btn btn-primary" style="margin-top:1.5rem;">🏘️ Listings देखें</a>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>🔍 प्रॉपर्टी चाहिए</h1>
+      <p style="color:#888;margin:0.25rem 0 0;font-size:0.9rem;">खरीदार अपनी ज़रूरत post करें — sellers खुद आपसे मिलेंगे</p>
+    </div>
+  </div>
+
+  <main class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start;">
+
+      <!-- Post requirement form -->
+      <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);position:sticky;top:1rem;">
+        <h2 style="font-size:1.1rem;margin:0 0 1.25rem;">✍️ अपनी ज़रूरत बताएं</h2>
+
+        <div id="req-form-wrap">
+          <div class="form-group">
+            <label class="form-label">प्रकार *</label>
+            <select class="form-control" id="req-type">
+              <option value="">चुनें</option>
+              <option value="plot">🏞️ प्लॉट</option>
+              <option value="house">🏠 मकान</option>
+              <option value="shop">🏪 दुकान</option>
+              <option value="agri">🌾 कृषि भूमि</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">उद्देश्य *</label>
+            <select class="form-control" id="req-purpose">
+              <option value="">चुनें</option>
+              <option value="sale">खरीदना है</option>
+              <option value="rent">किराये पर चाहिए</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">इलाका / गाँव</label>
+            <select class="form-control" id="req-village">
+              <option value="">कहीं भी (गंगोह आस-पास)</option>
+              <option value="gangoh">गंगोह शहर</option>
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <label class="form-label">न्यूनतम बजट</label>
+              <input type="number" class="form-control" id="req-budget-min" placeholder="₹" min="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">अधिकतम बजट</label>
+              <input type="number" class="form-control" id="req-budget-max" placeholder="₹" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">विवरण</label>
+            <textarea class="form-control" id="req-desc" rows="3" placeholder="जैसे: 2 कमरे चाहिए, जमीन की तरफ हो, सड़क के पास..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp नंबर *</label>
+            <input type="tel" class="form-control" id="req-phone" placeholder="10 अंक का नंबर" maxlength="10">
+          </div>
+          <p id="req-error" class="form-error" style="display:none;"></p>
+          <div id="req-login-notice" style="display:none;background:#FEF3C7;border-radius:0.5rem;padding:0.75rem;font-size:0.9rem;margin-bottom:0.75rem;">
+            ⚠️ Post करने के लिए <a href="login.html?next=requirement.html" style="color:#FF6B00;font-weight:700;">Login करें</a>
+          </div>
+          <button id="req-submit-btn" class="btn btn-primary btn-full">📤 ज़रूरत Post करें</button>
+        </div>
+
+        <div id="req-success" style="display:none;text-align:center;padding:1rem 0;">
+          <div style="font-size:2.5rem;">✅</div>
+          <h3 style="margin:0.5rem 0 0.25rem;">Post हो गया!</h3>
+          <p style="color:#888;font-size:0.9rem;">Sellers अब आपसे WhatsApp पर contact करेंगे।</p>
+          <button id="req-post-another" class="btn btn-outline btn-sm" style="margin-top:1rem;">+ और Post करें</button>
+        </div>
+      </div>
+
+      <!-- Requirements board -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <h2 style="font-size:1.1rem;margin:0;">📋 ज़रूरतें (Board)</h2>
+          <button id="refresh-req-btn" class="btn btn-outline btn-sm">🔄 Refresh</button>
+        </div>
+        <div id="req-board"><div class="spinner"></div></div>
+      </div>
     </div>
   </main>
+
   <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI } from './assets/js/ui.js';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js';
+    import { initAuth, onAuthReady } from './assets/js/auth.js';
+    import { initListings, createRequirement, fetchRequirements, deleteRequirement } from './assets/js/listings.js';
+    import { VILLAGES } from './data/villages.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
     mountUI('requirement.html');
+    initAuth(auth, db);
+    initListings(db, null, auth);
+
+    // Populate village dropdown
+    const villSel = document.getElementById('req-village');
+    VILLAGES.filter(v => v.value !== 'other').forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.value; o.textContent = v.label;
+      villSel.appendChild(o);
+    });
+
+    // Auth state — show/hide form vs login notice
+    let currentUser = null;
+    onAuthReady(user => {
+      currentUser = user;
+      document.getElementById('req-login-notice').style.display = user ? 'none' : 'block';
+      document.getElementById('req-submit-btn').style.display   = user ? 'block' : 'none';
+    });
+
+    // ── Submit requirement ─────────────────────────────────
+    document.getElementById('req-submit-btn').addEventListener('click', async () => {
+      const type    = document.getElementById('req-type').value;
+      const purpose = document.getElementById('req-purpose').value;
+      const village = document.getElementById('req-village').value;
+      const budMin  = document.getElementById('req-budget-min').value;
+      const budMax  = document.getElementById('req-budget-max').value;
+      const desc    = document.getElementById('req-desc').value.trim();
+      const phone   = document.getElementById('req-phone').value.trim();
+      const errEl   = document.getElementById('req-error');
+
+      if (!type || !purpose) { errEl.textContent = 'प्रकार और उद्देश्य ज़रूरी है।'; errEl.style.display='block'; return; }
+      if (!phone || phone.length !== 10) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+      errEl.style.display = 'none';
+
+      const btn = document.getElementById('req-submit-btn');
+      btn.disabled = true; btn.textContent = 'Post हो रहा है...';
+
+      try {
+        await createRequirement({ type, purpose, village, budgetMin: budMin ? Number(budMin) : null, budgetMax: budMax ? Number(budMax) : null, description: desc, phone });
+        document.getElementById('req-form-wrap').style.display = 'none';
+        document.getElementById('req-success').style.display   = 'block';
+        toast('ज़रूरत post हो गई!', 'success');
+        loadBoard();
+      } catch (err) {
+        errEl.textContent = `Error: ${err.message}`; errEl.style.display='block';
+      } finally {
+        btn.disabled = false; btn.textContent = '📤 ज़रूरत Post करें';
+      }
+    });
+
+    document.getElementById('req-post-another').addEventListener('click', () => {
+      ['req-type','req-purpose','req-village','req-budget-min','req-budget-max','req-desc','req-phone']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('req-form-wrap').style.display = 'block';
+      document.getElementById('req-success').style.display   = 'none';
+    });
+
+    // ── Load board ─────────────────────────────────────────
+    async function loadBoard() {
+      const board = document.getElementById('req-board');
+      board.innerHTML = '<div class="spinner"></div>';
+      try {
+        const reqs = await fetchRequirements();
+        if (!reqs.length) {
+          board.innerHTML = `<div class="empty-state"><span class="empty-icon">🔍</span><p>अभी कोई ज़रूरत post नहीं है।<br>पहले आप post करें!</p></div>`;
+          return;
+        }
+        board.innerHTML = '';
+        reqs.forEach(r => board.appendChild(buildReqCard(r)));
+      } catch (err) {
+        board.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function buildReqCard(r) {
+      const div = document.createElement('div');
+      div.id = `req-${r.id}`;
+      div.style.cssText = 'background:white;border-radius:0.75rem;padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:0.85rem;';
+
+      const typeLabel    = {plot:'🏞️ प्लॉट',house:'🏠 मकान',shop:'🏪 दुकान',agri:'🌾 कृषि भूमि'}[r.type] || r.type;
+      const purposeLabel = r.purpose === 'sale' ? 'खरीदना है' : 'किराये पर चाहिए';
+      const budgetLine   = r.budgetMin || r.budgetMax
+        ? `बजट: ${r.budgetMin ? formatPrice(r.budgetMin) : '—'} से ${r.budgetMax ? formatPrice(r.budgetMax) : 'ऊपर'}`
+        : '';
+      const villageLine  = r.village ? `📍 ${r.village}` : '📍 गंगोह / आस-पास';
+      const date         = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('hi-IN') : '';
+      const waURL        = `https://wa.me/91${r.phone}?text=${encodeURIComponent(`नमस्ते! आपने अपनागंगोह.in पर ${typeLabel} (${purposeLabel}) की ज़रूरत post की थी — मेरे पास उपलब्ध है।`)}`;
+
+      const isMine = currentUser && r.ownerId === currentUser.uid;
+
+      div.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+          <div>
+            <span style="font-size:0.8rem;background:#FEF3C7;color:#92400E;padding:0.2rem 0.6rem;border-radius:1rem;font-weight:700;">${typeLabel} · ${purposeLabel}</span>
+          </div>
+          <div style="font-size:0.78rem;color:#bbb;">${date}</div>
+        </div>
+        <div style="margin:0.6rem 0 0.25rem;font-size:0.9rem;color:#555;">
+          ${villageLine}
+          ${budgetLine ? `<span style="margin-left:1rem;">💰 ${budgetLine}</span>` : ''}
+        </div>
+        ${r.description ? `<p style="font-size:0.9rem;color:#333;margin:0.35rem 0 0.5rem;">${r.description}</p>` : ''}
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center;">
+          <a href="${waURL}" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:0.4rem;background:#25D366;color:white;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp करें
+          </a>
+          ${isMine ? `<button class="btn btn-danger btn-sm" data-del-req="${r.id}">🗑️ Delete</button>` : ''}
+          ${isMine ? `<span style="font-size:0.75rem;color:#888;">(आपकी post)</span>` : ''}
+        </div>`;
+
+      if (isMine) {
+        div.querySelector(`[data-del-req]`).addEventListener('click', async () => {
+          if (!confirm('इस ज़रूरत को delete करें?')) return;
+          try {
+            await deleteRequirement(r.id);
+            document.getElementById(`req-${r.id}`)?.remove();
+            toast('Delete हो गया।', 'success');
+          } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+          }
+        });
+      }
+
+      return div;
+    }
+
+    document.getElementById('refresh-req-btn').addEventListener('click', loadBoard);
+    loadBoard();
   </script>
+
+  <style>
+    @media (max-width: 700px) {
+      main .container > div { grid-template-columns: 1fr !important; }
+      main .container > div > div:first-child { position: static !important; }
+    }
+  </style>
 </body>
 </html>

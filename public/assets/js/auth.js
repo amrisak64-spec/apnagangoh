@@ -65,9 +65,34 @@ export async function ensureUserDoc(user) {
 export async function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  const result = await _auth.signInWithPopup(provider);
-  await ensureUserDoc(result.user);
-  return result.user;
+  try {
+    const result = await _auth.signInWithPopup(provider);
+    await ensureUserDoc(result.user);
+    return result.user;
+  } catch (err) {
+    // Popup blocked → fall back to redirect (page will reload after Google auth)
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user') {
+      sessionStorage.setItem('pendingRedirectLogin', '1');
+      await _auth.signInWithRedirect(provider);
+    } else {
+      throw err;
+    }
+  }
+}
+
+// Call this once on page load to capture the redirect result
+export async function handleRedirectResult() {
+  try {
+    const result = await _auth.getRedirectResult();
+    if (result && result.user) {
+      await ensureUserDoc(result.user);
+      sessionStorage.removeItem('pendingRedirectLogin');
+      return result.user;
+    }
+  } catch {
+    // no redirect in progress
+  }
+  return null;
 }
 
 export function logout() {

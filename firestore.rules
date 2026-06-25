@@ -2,6 +2,74 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Admin check — reads user's role from users collection
+    function isAdmin() {
+      return request.auth != null
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isOwner(ownerId) {
+      return request.auth != null && request.auth.uid == ownerId;
+    }
+
+    // ── listings ──────────────────────────────────────────────────
+    match /listings/{listingId} {
+      // Public can read live listings; owner can read their own; admin can read all
+      allow read: if resource.data.status == 'live'
+                  || isOwner(resource.data.ownerId)
+                  || isAdmin();
+
+      // Authenticated user can create, but status must be 'pending' and ownerId must match
+      allow create: if request.auth != null
+                   && request.resource.data.ownerId == request.auth.uid
+                   && request.resource.data.status == 'pending';
+
+      // Only admin can update (approve/reject/verify/feature)
+      allow update: if isAdmin();
+
+      // Owner can delete their own; admin can delete any
+      allow delete: if isOwner(resource.data.ownerId) || isAdmin();
+    }
+
+    // ── users ─────────────────────────────────────────────────────
+    match /users/{uid} {
+      // User can read/write their own profile
+      allow read, create: if request.auth != null && request.auth.uid == uid;
+
+      // User can update their own profile but NOT change their role
+      allow update: if request.auth != null
+                   && request.auth.uid == uid
+                   && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+
+      // Admin can read any user profile
+      allow read: if isAdmin();
+    }
+
+    // ── admins collection (role gate check) ───────────────────────
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow read, write: if isAdmin();
+    }
+
+    // ── requirements (property wanted board) ──────────────────────
+    match /requirements/{reqId} {
+      // Anyone can read active requirements
+      allow read: if resource.data.status == 'active';
+
+      // Authenticated user can post their own requirement
+      allow create: if request.auth != null
+                   && request.resource.data.ownerId == request.auth.uid
+                   && request.resource.data.status == 'active';
+
+      // Owner or admin can delete
+      allow delete: if isOwner(resource.data.ownerId) || isAdmin();
+
+      // Admin can update (change status etc.)
+      allow update: if isAdmin();
+    }
+
+    // ── Block everything else ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }

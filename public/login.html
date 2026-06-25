@@ -48,7 +48,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
     import { mountUI, toast } from './assets/js/ui.js';
-    import { initAuth, signInWithGoogle, onAuthReady } from './assets/js/auth.js';
+    import { initAuth, signInWithGoogle, handleRedirectResult, onAuthReady } from './assets/js/auth.js';
 
     let fbConfig;
     try {
@@ -67,6 +67,13 @@
     initAuth(auth, db);
 
     const nextURL = new URLSearchParams(location.search).get('next') || 'index.html';
+
+    // Handle redirect-based login result (popup was blocked, user came back via redirect)
+    const redirectUser = await handleRedirectResult();
+    if (redirectUser) {
+      toast('Login सफल!', 'success');
+      setTimeout(() => window.location.href = nextURL, 800);
+    }
 
     onAuthReady((user) => {
       if (user) window.location.href = nextURL;

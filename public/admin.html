@@ -71,7 +71,7 @@
   <script type="module">
     import { mountUI, toast, formatPrice } from './assets/js/ui.js';
     import { initAuth, requireAdmin, logout } from './assets/js/auth.js';
-    import { initListings, fetchPending, approveListing, rejectListing, toggleVerified, toggleFeatured } from './assets/js/listings.js';
+    import { initListings, approveListing, rejectListing, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js';
 
     let fbConfig;
     try {
@@ -118,6 +118,8 @@
 
     // ── Tabs ──────────────────────────────────────────────
     let currentTab = 'pending';
+    let pendingUnsubscribe = null;
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.tab-btn').forEach(b => {
@@ -131,22 +133,33 @@
       });
     });
 
-    async function loadTab(status) {
+    function loadTab(status) {
+      // Unsubscribe old real-time listener if switching away from pending
+      if (pendingUnsubscribe) { pendingUnsubscribe(); pendingUnsubscribe = null; }
+
       const content = document.getElementById('admin-content');
       content.innerHTML = '<div class="spinner"></div>';
-      try {
-        let snap;
-        if (status === 'pending') {
-          snap = await db.collection('listings').where('status','==','pending').orderBy('createdAt','asc').limit(50).get();
-        } else if (status === 'live') {
-          snap = await db.collection('listings').where('status','==','live').orderBy('createdAt','desc').limit(50).get();
-        } else {
-          snap = await db.collection('listings').where('status','==','rejected').orderBy('createdAt','desc').limit(50).get();
-        }
-        const listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTable(listings, status, content);
-      } catch (err) {
-        content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+
+      if (status === 'pending') {
+        // Real-time listener — auto-updates when new posts arrive
+        const q = db.collection('listings').where('status','==','pending').orderBy('createdAt','asc').limit(50);
+        pendingUnsubscribe = q.onSnapshot(snap => {
+          const listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          renderTable(listings, 'pending', content);
+          document.getElementById('stat-pending').textContent = listings.length;
+          document.getElementById('pending-count').textContent = listings.length;
+        }, err => {
+          content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        });
+      } else {
+        const q = status === 'live'
+          ? db.collection('listings').where('status','==','live').orderBy('createdAt','desc').limit(50)
+          : db.collection('listings').where('status','==','rejected').orderBy('createdAt','desc').limit(50);
+        q.get().then(snap => {
+          renderTable(snap.docs.map(d => ({ id: d.id, ...d.data() })), status, content);
+        }).catch(err => {
+          content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        });
       }
     }
 
@@ -155,15 +168,19 @@
         container.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>कोई ${status} listing नहीं।</p></div>`;
         return;
       }
-      const table = document.createElement('table');
-      table.className = 'admin-table';
-      table.innerHTML = `
-<thead><tr>
+      // Preserve existing tbody if real-time update, else rebuild
+      let tbody = container.querySelector('#tbl-body');
+      if (!tbody) {
+        const table = document.createElement('table');
+        table.className = 'admin-table';
+        table.innerHTML = `<thead><tr>
   <th>फ़ोटो</th><th>टाइटल / लोकेशन</th><th>कीमत</th><th>प्रकार</th><th>तारीख</th><th>Actions</th>
 </tr></thead><tbody id="tbl-body"></tbody>`;
-      container.innerHTML = '';
-      container.appendChild(table);
-      const tbody = table.querySelector('#tbl-body');
+        container.innerHTML = '';
+        container.appendChild(table);
+        tbody = table.querySelector('#tbl-body');
+      }
+      tbody.innerHTML = '';
       listings.forEach(l => tbody.appendChild(buildRow(l, status)));
     }
 
@@ -200,6 +217,7 @@
     style="${l.isFeatured?'background:#FDE68A;':''}">
     ${l.isFeatured?'⭐ Featured':'Feature'}
   </button>
+  <button class="btn btn-danger btn-sm" data-action="delete" data-id="${l.id}" title="हमेशा के लिए Delete करें">🗑️</button>
 </td>`;
 
       tr.querySelectorAll('[data-action]').forEach(btn => {
@@ -218,10 +236,15 @@
           toast('Approved!', 'success');
           loadStats();
         } else if (action === 'reject') {
-          if (!confirm('Reject करना चाहते हैं?')) { btn.disabled=false; return; }
           await rejectListing(l.id);
           document.getElementById(`row-${l.id}`)?.remove();
           toast('Rejected।', 'error');
+          loadStats();
+        } else if (action === 'delete') {
+          if (!confirm('इस listing को हमेशा के लिए Delete करें? Photos भी हटेंगी।')) { btn.disabled=false; return; }
+          await deleteListingWithPhotos(l.id);
+          document.getElementById(`row-${l.id}`)?.remove();
+          toast('Deleted!', 'error');
           loadStats();
         } else if (action === 'verify') {
           const cur = btn.dataset.current === 'true';
@@ -245,7 +268,7 @@
       }
     }
 
-    // Initial load
+    // Initial load — pending tab with real-time listener
     loadTab('pending');
   </script>
 </body>
