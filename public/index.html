@@ -167,7 +167,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { initAuth, onAuthReady } from './assets/js/auth.js';
     import { initListings, fetchFeatured, fetchListings } from './assets/js/listings.js';
     import { ALL_LOCATIONS, VILLAGES, TOWN } from './data/villages.js';
 
@@ -186,9 +187,12 @@
     }
 
     if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
     mountUI('index.html');
+    initAuth(auth, db);
     initListings(db, null, null);
+    onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
 
     // Trust counter
     try {

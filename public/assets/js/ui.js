@@ -18,12 +18,18 @@ function getHeaderHTML(activePage = '') {
   <nav class="nav-desktop">
     ${links}
     <a href="post.html" class="btn-post-header">+ लिस्ट करें</a>
+    <a href="my-listings.html" id="nav-user-btn" style="display:none;background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;font-weight:600;text-decoration:none;">👤 मेरी Listings</a>
+    <a href="login.html" id="nav-login-btn" style="display:none;background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;font-weight:600;text-decoration:none;">Login</a>
+    <a href="admin.html" id="nav-admin-btn" style="display:none;background:#FDE68A;color:#92400E;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;font-weight:700;text-decoration:none;">⚙️ Admin</a>
   </nav>
   <button class="hamburger" id="hamburger-btn" aria-label="Menu">☰</button>
 </div>
 <nav class="nav-mobile" id="nav-mobile">
   ${links}
   <a href="post.html" class="btn-post-header" style="display:inline-block;margin-top:0.5rem;text-align:center;">+ लिस्ट करें</a>
+  <a href="my-listings.html" id="nav-user-btn-m" style="display:none;color:white;padding:0.4rem 0;font-size:1.05rem;">👤 मेरी Listings</a>
+  <a href="login.html" id="nav-login-btn-m" style="display:none;color:white;padding:0.4rem 0;font-size:1.05rem;">Login</a>
+  <a href="admin.html" id="nav-admin-btn-m" style="display:none;color:#FDE68A;padding:0.4rem 0;font-size:1.05rem;font-weight:700;">⚙️ Admin Panel</a>
 </nav>`;
 }
 
@@ -72,6 +78,20 @@ export function mountUI(activePage = '') {
   }
   const footer = document.getElementById('site-footer');
   if (footer) footer.innerHTML = getFooterHTML();
+}
+
+// ── Update nav after auth resolves ────────────────────────
+export function updateNavUser(user, isAdmin = false) {
+  const show = (id, visible) => { const el = document.getElementById(id); if (el) el.style.display = visible ? '' : 'none'; };
+  if (user) {
+    show('nav-user-btn', true);   show('nav-user-btn-m', true);
+    show('nav-login-btn', false); show('nav-login-btn-m', false);
+    show('nav-admin-btn', isAdmin);   show('nav-admin-btn-m', isAdmin);
+  } else {
+    show('nav-user-btn', false);  show('nav-user-btn-m', false);
+    show('nav-login-btn', true);  show('nav-login-btn-m', true);
+    show('nav-admin-btn', false); show('nav-admin-btn-m', false);
+  }
 }
 
 // ── Toast notifications ────────────────────────────────────

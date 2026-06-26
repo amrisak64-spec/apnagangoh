@@ -94,7 +94,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { initAuth, onAuthReady } from './assets/js/auth.js';
     import { initListings, fetchListings } from './assets/js/listings.js';
     import { VILLAGES } from './data/villages.js';
 
@@ -108,9 +109,12 @@
     }
 
     if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
     mountUI('browse.html');
+    initAuth(auth, db);
     initListings(db, null, null);
+    onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
 
     // Populate village dropdown
     const villageFilter = document.getElementById('filter-village');
@@ -240,4 +244,5 @@
   </script>
 </body>
 </html>
+
 
