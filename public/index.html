@@ -232,18 +232,25 @@
 
     function renderAreaGrid() {
       const grid = document.getElementById('area-grid');
-      // Town first
-      const townCard = `<a href="browse.html?area=town" style="background:white;border:1.5px solid #F0EDE8;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:#1A1A1A;display:block;transition:box-shadow 0.2s;">
-        <div style="font-size:1.4rem;margin-bottom:0.3rem;">🏙️</div>
-        <div style="font-weight:600;font-size:0.9rem;">गंगोह शहर</div>
-      </a>`;
-      const villagCards = VILLAGES.slice(0, 11).map(v =>
-        `<a href="browse.html?village=${v.value}" style="background:white;border:1.5px solid #F0EDE8;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:#1A1A1A;display:block;transition:box-shadow 0.2s;">
-          <div style="font-size:1.4rem;margin-bottom:0.3rem;">🏘️</div>
-          <div style="font-weight:600;font-size:0.85rem;">${v.label}</div>
+      const areas = [
+        { label: 'गंगोह शहर',           href: 'browse.html?area=town',              icon: '🏙️' },
+        { label: 'रामपुर मानिहारन',      href: 'browse.html?village=rampurmaniharan',icon: '🏘️' },
+        { label: 'नकुड़',                href: 'browse.html?village=nakud',           icon: '🏘️' },
+        { label: 'अंबेहटा',             href: 'browse.html?village=ambehata',        icon: '🏘️' },
+        { label: 'नानौता',              href: 'browse.html?village=nanota',           icon: '🏘️' },
+        { label: 'लखनौती',             href: 'browse.html?village=lakhnoti',          icon: '🏘️' },
+        { label: 'सहारनपुर',            href: 'browse.html?village=saharanpur',       icon: '🏙️' },
+        { label: 'गंगोह नानौता रोड',    href: 'browse.html?area=town',               icon: '🛣️' },
+        { label: 'गंगोह जंदहेड़ा रोड',  href: 'browse.html?area=town',               icon: '🛣️' },
+        { label: 'गंगोह लखनौती रोड',   href: 'browse.html?area=town',               icon: '🛣️' },
+      ];
+      const cards = areas.map(a =>
+        `<a href="${a.href}" style="background:white;border:1.5px solid #E2E8F0;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:#1A1A1A;display:block;transition:box-shadow 0.2s;">
+          <div style="font-size:1.4rem;margin-bottom:0.3rem;">${a.icon}</div>
+          <div style="font-weight:600;font-size:0.82rem;line-height:1.3;">${a.label}</div>
         </a>`
       ).join('');
-      grid.innerHTML = townCard + villagCards +
+      grid.innerHTML = cards +
         `<a href="browse.html" style="background:#1D4ED8;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:white;display:block;">
           <div style="font-size:1.4rem;margin-bottom:0.3rem;">🔍</div>
           <div style="font-weight:600;font-size:0.85rem;">सभी इलाके</div>
