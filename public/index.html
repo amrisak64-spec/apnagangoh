@@ -176,20 +176,19 @@
     try {
       const m = await import('./assets/js/firebase-config.js');
       fbConfig = m.firebaseConfig;
-    } catch {
-      // Show site without listings if config missing
-      mountUI('index.html');
+    } catch { /* config missing */ }
+
+    mountUI('index.html');
+
+    if (!fbConfig) {
       document.getElementById('featured-container').innerHTML =
-        `<div class="empty-state"><p>⚠️ Firebase config नहीं मिला — <code>firebase-config.js</code> बनाएं।</p></div>`;
+        `<div class="empty-state"><p>⚠️ Firebase config नहीं मिला।</p></div>`;
       document.getElementById('recent-container').innerHTML = '';
       renderAreaGrid();
-      return;
-    }
-
+    } else {
     if (!firebase.apps.length) firebase.initializeApp(fbConfig);
     const auth = firebase.auth();
     const db   = firebase.firestore();
-    mountUI('index.html');
     initAuth(auth, db);
     initListings(db, null, null);
     onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
@@ -260,6 +259,7 @@
     document.getElementById('hero-search-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('hero-search-btn').click();
     });
+    } // end else (fbConfig exists)
   </script>
 </body>
 </html>
