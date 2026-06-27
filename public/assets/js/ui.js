@@ -35,7 +35,7 @@ function getHeaderHTML(activePage = '') {
 
 // ── Footer HTML ───────────────────────────────────────────
 function getFooterHTML() {
-  const villageTags = VILLAGES.map(v =>
+  const villageTags = VILLAGES.slice(0, 50).map(v =>
     `<a href="browse.html?village=${v.value}" class="village-tag">${v.label}</a>`
   ).join('');
   return `
@@ -159,25 +159,28 @@ export function listingCardHTML(listing) {
   const purposeBadge = purpose === 'sale'
     ? `<span class="badge badge-sale">बिक्री</span>`
     : `<span class="badge badge-rent">किराया</span>`;
-  const verifiedBadge = isVerified ? `<span class="badge badge-verified">✓ Verified</span>` : '';
   const featuredBadge = isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : '';
   const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[type] || type;
   const area = areaSize ? `${areaSize} ${areaUnit || ''}` : '';
+  // Feature chips: area size + verified
+  const chip1 = area ? `<span style="background:#EFF6FF;color:#1D4ED8;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">📐 ${area}</span>` : '';
+  const chip2 = isVerified ? `<span style="background:#F0FDF4;color:#15803D;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">✓ Verified</span>` : `<span style="background:#F9F7F4;color:#666;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">📞 Direct Owner</span>`;
   const shareText = encodeURIComponent(`🏘️ ${title} — ${formatPrice(price)} (${village || 'गंगोह'})\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
   return `
 <div class="listing-card" style="display:flex;flex-direction:column;">
   <a href="listing.html?id=${id}" style="text-decoration:none;color:inherit;flex:1;">
     ${img}
     <div class="card-body">
-      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.4rem;">
-        ${purposeBadge}${verifiedBadge}${featuredBadge}
+      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem;">
+        ${purposeBadge}${featuredBadge}
       </div>
-      <div class="card-price">${formatPrice(price)}</div>
-      <div class="card-title">${title}</div>
-      <div class="card-meta">📍 ${village || 'गंगोह'} &nbsp;|&nbsp; ${typeLabel}${area ? ' &nbsp;|&nbsp; ' + area : ''}</div>
+      <div class="card-title" style="font-size:1.05rem;font-weight:700;line-height:1.35;margin-bottom:0.3rem;">${title}</div>
+      <div style="font-size:0.85rem;color:#555;margin-bottom:0.5rem;">📍 ${village || 'गंगोह'} &nbsp;·&nbsp; ${typeLabel}</div>
+      <div class="card-price" style="font-size:1.2rem;font-weight:800;color:#1D4ED8;margin-bottom:0.5rem;">${formatPrice(price)}</div>
+      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">${chip1}${chip2}</div>
     </div>
   </a>
-  <div style="padding:0 0.75rem 0.75rem;">
+  <div style="padding:0 0.75rem 0.75rem;border-top:1px solid #F0EDE8;margin-top:0.5rem;padding-top:0.5rem;">
     <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener"
        onclick="event.stopPropagation()"
        style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:#25D366;font-weight:600;text-decoration:none;">
