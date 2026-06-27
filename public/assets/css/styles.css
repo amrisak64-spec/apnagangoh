@@ -2,8 +2,8 @@
 /* Tailwind CDN handles utilities; this file handles theming + components */
 
 :root {
-  --color-saffron:   #1D4ED8;
-  --color-saffron-lt:#2563EB;
+  --color-saffron:   #5B35D5;
+  --color-saffron-lt:#6D28D9;
   --color-green:     #138808;
   --color-green-lt:  #1aaa0a;
   --color-white:     #FFFFFF;
@@ -59,12 +59,13 @@ a:hover { text-decoration: underline; }
   margin: 0 auto;
 }
 #site-header .logo {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: white;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: #FCD34D;
   letter-spacing: -0.03em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-#site-header .logo span { color: #BFDBFE; font-weight: 400; font-size: 1.2rem; }
+#site-header .logo span { color: white; font-weight: 500; font-size: 1.35rem; }
 #site-header nav a {
   color: white;
   margin-left: 1.25rem;
@@ -269,7 +270,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 /* ── Hero ────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 50%, #3B82F6 100%);
+  background: linear-gradient(135deg, #3B0F9E 0%, #5B35D5 50%, #7C3AED 100%);
   color: white;
   padding: 3rem 1rem 2.5rem;
   text-align: center;
