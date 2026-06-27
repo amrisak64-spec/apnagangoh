@@ -65,30 +65,54 @@
     }
 
     function renderListing(l) {
-      // Update page title/meta
       document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | गंगोह.in`;
       document.getElementById('page-desc').content = `${l.title} — ${l.purpose === 'sale' ? 'बिक्री' : 'किराये'} पर। कीमत: ${formatPrice(l.price)}। ${l.village || 'गंगोह'}, Gangoh।`;
 
-      const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[l.type] || l.type;
+      const typeLabel    = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'खेती की ज़मीन' }[l.type] || l.type;
       const purposeLabel = l.purpose === 'sale' ? 'बिक्री' : 'किराया';
+
+      // Smart headline: "200 गज का प्लॉट", "6 बीघा खेती की ज़मीन" etc.
+      const headlineMap = {
+        plot:  l.areaSize ? `${l.areaSize} ${l.areaUnit || 'गज'} का प्लॉट`        : 'प्लॉट',
+        house: l.areaSize ? `${l.areaSize} ${l.areaUnit || 'गज'} का मकान`         : 'मकान',
+        shop:  l.areaSize ? `${l.areaSize} ${l.areaUnit || 'गज़'} की दुकान`        : 'दुकान',
+        agri:  l.areaSize ? `${l.areaSize} ${l.areaUnit || 'बीघा'} खेती की ज़मीन` : 'खेती की ज़मीन',
+      };
+      const headline = headlineMap[l.type] || l.title;
+
+      // Price breakup rows
+      const breakupRows = [];
+      if (l.ratePerGaj)    breakupRows.push(['रेट', `₹${Number(l.ratePerGaj).toLocaleString('hi-IN')} / गज`]);
+      if (l.ratePerBigha)  breakupRows.push(['रेट', `₹${Number(l.ratePerBigha).toLocaleString('hi-IN')} / बीघा`]);
+      if (l.areaSize)      breakupRows.push(['साइज़', `${l.areaSize} ${l.areaUnit || ''}`]);
+      if (l.roadSizeFeet)  breakupRows.push(['सड़क चौड़ाई', `${l.roadSizeFeet} फ़ुट`]);
+      if (l.storey)        breakupRows.push(['मंज़िल', l.storey === 'single' ? 'Single Storey' : l.storey === 'double' ? 'Double Storey' : 'Triple Storey']);
+      if (l.rooms)         breakupRows.push(['कमरे', l.rooms]);
+      if (l.securityDeposit) breakupRows.push(['Security Deposit', formatPrice(l.securityDeposit)]);
+      if (l.pagdi)         breakupRows.push(['पगड़ी', formatPrice(l.pagdi)]);
+
+      const breakupHTML = breakupRows.length ? `
+        <div style="border:1.5px solid #EDE9FE;border-radius:0.75rem;overflow:hidden;margin-top:1rem;">
+          ${breakupRows.map(([k,v], i) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;${i<breakupRows.length-1?'border-bottom:1px solid #F5F3FF;':''}background:${i%2===0?'#FAFAFA':'white'};">
+            <span style="font-size:0.88rem;color:#6B6B6B;">${k}</span>
+            <span style="font-size:0.95rem;font-weight:700;color:#1A1A1A;">${v}</span>
+          </div>`).join('')}
+        </div>` : '';
 
       // Gallery
       const photos = l.photos && l.photos.length ? l.photos : [];
       const galleryHTML = photos.length
         ? `<div class="gallery">
             <img class="gallery-main" id="gallery-main" src="${photos[0]}" alt="${l.title}">
-            ${photos.length > 1 ? `<div class="gallery-thumbs">${photos.map((p, i) =>
+            ${photos.length > 1 ? `<div class="gallery-thumbs">${photos.map((p,i) =>
               `<img class="gallery-thumb${i===0?' active':''}" data-full="${p}" src="${p}" alt="photo ${i+1}">`
             ).join('')}</div>` : ''}
            </div>`
         : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:4rem;">🏘️</div>`;
 
-      // WhatsApp message
-      const waMsg = `नमस्ते, मुझे ${l.title} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। गंगोह.in पर देखा।`;
+      const waMsg  = `नमस्ते, मुझे ${headline} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। गंगोह.in पर देखा।`;
       const waLink = l.contactWhatsApp ? waURL(l.contactWhatsApp, waMsg) : '#';
-
-      // Share message
-      const shareMsg = `${l.title} — ${formatPrice(l.price)} | ${l.village || 'गंगोह'}\nदेखें: ${location.href}`;
 
       main.innerHTML = `
 <div style="margin-bottom:1rem;">
@@ -96,39 +120,64 @@
 </div>
 
 <div class="detail-grid">
-  <!-- Left: Gallery + Description -->
+  <!-- Left: Headline + Gallery + Details -->
   <div>
-    ${galleryHTML}
 
-    <div style="background:white;border-radius:0.75rem;padding:1.5rem;margin-top:1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+    <!-- BIG HEADLINE -->
+    <div style="background:white;border-radius:0.75rem;padding:1.25rem 1.5rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+
+      <!-- Badges -->
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">
         <span class="badge ${l.purpose==='sale'?'badge-sale':'badge-rent'}">${purposeLabel}</span>
         ${l.isVerified ? `<span class="badge badge-verified">✓ Verified</span>` : ''}
         ${l.isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : ''}
       </div>
-      <h1 style="font-size:1.5rem;margin-bottom:0.5rem;">${l.title}</h1>
-      <div class="detail-meta-row">
-        <div class="detail-meta-item">📍 <strong>${l.village || 'गंगोह'}</strong></div>
-        ${l.locality ? `<div class="detail-meta-item">🏘️ <strong>${l.locality}</strong></div>` : ''}
-        ${l.landmark ? `<div class="detail-meta-item">🚩 ${l.landmark}</div>` : ''}
-        <div class="detail-meta-item">🏷️ <strong>${typeLabel}</strong></div>
-        ${l.areaSize ? `<div class="detail-meta-item">📐 <strong>${l.areaSize} ${l.areaUnit || ''}</strong></div>` : ''}
+
+      <!-- Size + Type — BIG RED -->
+      <h1 style="font-size:clamp(1.8rem,6vw,2.6rem);font-weight:900;color:#DC2626;line-height:1.15;margin-bottom:0.35rem;letter-spacing:-0.02em;">${headline}</h1>
+
+      <!-- User title as subtitle -->
+      <p style="font-size:1rem;color:#555;margin:0 0 0.85rem;line-height:1.5;">${escapeHtml(l.title)}</p>
+
+      <!-- Location -->
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem 1.25rem;font-size:0.95rem;color:#444;">
+        <span>📍 <strong>${l.village || 'गंगोह'}</strong></span>
+        ${l.locality ? `<span>🏘️ ${l.locality}</span>` : ''}
+        ${l.landmark ? `<span>🚩 ${l.landmark}</span>` : ''}
       </div>
 
-      ${l.description ? `
-      <div style="margin-top:1rem;">
-        <h3 style="font-size:1rem;margin-bottom:0.5rem;">विवरण</h3>
-        <p style="color:#555;line-height:1.7;white-space:pre-wrap;">${escapeHtml(l.description)}</p>
-      </div>` : ''}
+      <hr style="margin:1rem 0;border:none;border-top:1.5px solid #F5F3FF;">
+
+      <!-- Full Price -->
+      <div style="margin-bottom:0.2rem;font-size:0.8rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.08em;">
+        ${l.purpose === 'rent' ? 'मासिक किराया' : 'कुल कीमत'}
+      </div>
+      <div style="font-size:clamp(1.6rem,5vw,2.2rem);font-weight:900;color:#5B35D5;line-height:1.1;">
+        ${formatPrice(l.price)}${l.purpose === 'rent' ? '<span style="font-size:1rem;font-weight:600;color:#888;"> / माह</span>' : ''}
+      </div>
+
+      <!-- Price Breakup -->
+      ${breakupHTML}
     </div>
+
+    <!-- Gallery -->
+    ${galleryHTML}
+
+    <!-- Description -->
+    ${l.description ? `
+    <div style="background:white;border-radius:0.75rem;padding:1.25rem 1.5rem;margin-top:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+      <h3 style="font-size:1rem;font-weight:800;margin-bottom:0.5rem;">विवरण</h3>
+      <p style="color:#555;line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">${escapeHtml(l.description)}</p>
+    </div>` : ''}
   </div>
 
-  <!-- Right: Price + Contact -->
+  <!-- Right: Contact -->
   <div>
     <div class="detail-info-card" style="position:sticky;top:80px;">
-      <div class="price">${formatPrice(l.price)}</div>
-      ${l.areaSize ? `<p style="color:#888;font-size:0.9rem;margin:0.25rem 0 0;">${l.areaSize} ${l.areaUnit || ''}</p>` : ''}
-      <hr style="margin:1rem 0;border:none;border-top:1.5px solid #F0EDE8;">
+      <!-- Mini price repeat for sticky sidebar -->
+      <div style="font-size:1.4rem;font-weight:900;color:#DC2626;margin-bottom:0.15rem;">${headline}</div>
+      <div style="font-size:1.1rem;font-weight:800;color:#5B35D5;margin-bottom:1rem;">${formatPrice(l.price)}${l.purpose==='rent'?' / माह':''}</div>
+      <hr style="margin:0 0 1rem;border:none;border-top:1.5px solid #F0EDE8;">
 
       ${l.contactWhatsApp
         ? `<a href="${waLink}" class="whatsapp-btn" target="_blank" rel="noopener">
