@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -8,16 +8,65 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Image compression library -->
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <style>
+    .field-section { display: none; }
+    .field-section.active { display: block; }
+    .calc-box {
+      background: linear-gradient(135deg, #EDE9FE, #F5F3FF);
+      border: 1.5px solid #C4B5FD;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .calc-box .calc-result {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #5B35D5;
+    }
+    .calc-box .calc-label { font-size: 0.82rem; color: #6B6B6B; margin-bottom: 0.25rem; }
+    .type-selector { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+    @media(min-width:480px){ .type-selector { grid-template-columns: repeat(4,1fr); } }
+    .type-btn {
+      border: 2px solid #E2E8F0;
+      border-radius: 0.75rem;
+      padding: 1rem 0.5rem;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .type-btn:hover { border-color: #5B35D5; }
+    .type-btn.selected { border-color: #5B35D5; background: #EDE9FE; }
+    .type-btn .t-icon { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+    .type-btn .t-label { font-size: 0.82rem; font-weight: 700; color: #1A1A1A; }
+    .purpose-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .purpose-tab {
+      flex: 1; padding: 0.65rem; text-align: center; border-radius: 0.5rem;
+      border: 2px solid #E2E8F0; background: white; cursor: pointer;
+      font-weight: 700; font-size: 0.9rem; font-family: inherit;
+      transition: all 0.15s;
+    }
+    .purpose-tab.selected { border-color: #5B35D5; background: #5B35D5; color: white; }
+    .section-divider {
+      font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #5B35D5; margin: 1.5rem 0 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-divider::after { content:''; flex:1; height:1.5px; background:#EDE9FE; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media(max-width:480px){ .three-col { grid-template-columns: 1fr 1fr; } }
+  </style>
 </head>
 <body>
   <header id="site-header"></header>
 
   <div class="page-header">
     <div class="container">
-      <h1>🏠 प्रॉपर्टी लिस्ट करें</h1>
-      <p style="color:#888;margin:0;font-size:0.9rem;">Listing post करें — तुरंत live होगी।</p>
+      <h1>प्रॉपर्टी लिस्ट करें</h1>
+      <p style="color:#888;margin:0;font-size:0.9rem;">मुफ़्त में — तुरंत live होगी।</p>
     </div>
   </div>
 
@@ -25,135 +74,328 @@
     <div style="max-width:680px;margin:0 auto;">
       <form id="post-form" novalidate>
 
-        <!-- Type & Purpose -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div class="form-group">
-            <label>प्रकार *</label>
-            <select class="form-control" id="f-type" required>
-              <option value="">— चुनें —</option>
-              <option value="plot">🏞️ प्लॉट</option>
-              <option value="house">🏠 मकान</option>
-              <option value="shop">🏪 दुकान/ऑफिस</option>
-              <option value="agri">🌾 खेती की ज़मीन</option>
+        <!-- STEP 1: Type -->
+        <div class="section-divider">Step 1 — प्रकार चुनें</div>
+        <div class="type-selector">
+          <button type="button" class="type-btn" data-type="plot">
+            <span class="t-icon">🏞️</span>
+            <span class="t-label">प्लॉट</span>
+          </button>
+          <button type="button" class="type-btn" data-type="house">
+            <span class="t-icon">🏠</span>
+            <span class="t-label">मकान / फ्लैट</span>
+          </button>
+          <button type="button" class="type-btn" data-type="shop">
+            <span class="t-icon">🏪</span>
+            <span class="t-label">दुकान / ऑफिस</span>
+          </button>
+          <button type="button" class="type-btn" data-type="agri">
+            <span class="t-icon">🌾</span>
+            <span class="t-label">खेती की ज़मीन</span>
+          </button>
+        </div>
+        <input type="hidden" id="f-type">
+
+        <!-- STEP 2: Purpose -->
+        <div class="section-divider">Step 2 — उद्देश्य</div>
+        <div class="purpose-tabs">
+          <button type="button" class="purpose-tab" data-purpose="sale">बिक्री (Sale)</button>
+          <button type="button" class="purpose-tab" data-purpose="rent">किराया / लीज़</button>
+        </div>
+        <input type="hidden" id="f-purpose">
+
+        <!-- Dynamic fields wrapper (shown after type+purpose selected) -->
+        <div id="dynamic-fields" style="display:none;">
+
+          <!-- STEP 3: Location -->
+          <div class="section-divider">Step 3 — लोकैशन</div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>शहर / गाँव *</label>
+              <select class="form-control" id="f-townOrVillage" required>
+                <option value="">— चुनें —</option>
+                <option value="town">गंगोह नगर</option>
+                <option value="village">गाँव</option>
+              </select>
+            </div>
+            <div class="form-group" id="village-group" style="display:none;">
+              <label>गाँव का नाम *</label>
+              <select class="form-control" id="f-village">
+                <option value="">— गाँव चुनें —</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group" id="town-road-group" style="display:none;">
+            <label>गंगोह नगर — इलाका / रोड</label>
+            <select class="form-control" id="f-town-road">
+              <option value="">— इलाका चुनें (वैकल्पिक) —</option>
+              <option>गंगोह, मैन रोड</option>
+              <option>गंगोह सर्राफा बाजार</option>
+              <option>गंगोह, नानौता रोड</option>
+              <option>गंगोह, जंधहेड़ा रोड</option>
+              <option>गंगोह, लखनौती रोड</option>
+              <option>गंगोह, गुरछप्पर रोड</option>
+              <option>गंगोह, सहारनपुर रोड</option>
+              <option>गंगोह, बाइ-पास रोड</option>
+              <option>गंगोह, रामबाग रोड</option>
+              <option>गंगोह, सलारपुर रोड</option>
+              <option>गंगोह, तीतरों रोड</option>
             </select>
           </div>
+          <div class="two-col">
+            <div class="form-group">
+              <label>मोहल्ला / इलाका</label>
+              <input type="text" class="form-control" id="f-locality" maxlength="80" placeholder="जैसे: सदर बाज़ार">
+            </div>
+            <div class="form-group">
+              <label>लैंडमार्क</label>
+              <input type="text" class="form-control" id="f-landmark" maxlength="100" placeholder="जैसे: स्कूल के सामने">
+            </div>
+          </div>
+
+          <!-- ═══════ PLOT fields ═══════ -->
+          <div class="field-section" id="fields-plot">
+            <div class="section-divider">Step 4 — प्लॉट की जानकारी</div>
+            <div class="three-col">
+              <div class="form-group">
+                <label>साइज़ (गज) *</label>
+                <input type="number" class="form-control" id="plot-gaj" min="1" placeholder="जैसे: 200" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>रेट / गज (₹)</label>
+                <input type="number" class="form-control" id="plot-rate" min="1" placeholder="जैसे: 3500" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>सड़क चौड़ाई (फ़ुट)</label>
+                <input type="number" class="form-control" id="plot-road" min="1" placeholder="जैसे: 20" inputmode="numeric">
+              </div>
+            </div>
+            <div class="calc-box" id="plot-calc" style="display:none;">
+              <div class="calc-label">कुल अनुमानित कीमत</div>
+              <div class="calc-result" id="plot-calc-val">—</div>
+            </div>
+            <div class="form-group">
+              <label>कुल कीमत (₹) *</label>
+              <input type="number" class="form-control" id="plot-price" min="1000" placeholder="कुल रकम" inputmode="numeric" required>
+              <p class="form-hint" id="plot-price-preview"></p>
+            </div>
+          </div>
+
+          <!-- ═══════ KHETI fields ═══════ -->
+          <div class="field-section" id="fields-agri">
+            <div class="section-divider">Step 4 — खेती की ज़मीन की जानकारी</div>
+            <div class="three-col">
+              <div class="form-group">
+                <label>साइज़ (बीघा) *</label>
+                <input type="number" class="form-control" id="agri-bigha" min="0.1" step="0.1" placeholder="जैसे: 3.5" inputmode="decimal">
+              </div>
+              <div class="form-group">
+                <label>रेट / बीघा (₹)</label>
+                <input type="number" class="form-control" id="agri-rate" min="1" placeholder="जैसे: 500000" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>सड़क चौड़ाई (फ़ुट)</label>
+                <input type="number" class="form-control" id="agri-road" min="1" placeholder="जैसे: 15" inputmode="numeric">
+              </div>
+            </div>
+            <div class="calc-box" id="agri-calc" style="display:none;">
+              <div class="calc-label">कुल अनुमानित कीमत</div>
+              <div class="calc-result" id="agri-calc-val">—</div>
+            </div>
+            <div class="form-group">
+              <label>कुल कीमत (₹) *</label>
+              <input type="number" class="form-control" id="agri-price" min="1000" placeholder="कुल रकम" inputmode="numeric" required>
+              <p class="form-hint" id="agri-price-preview"></p>
+            </div>
+          </div>
+
+          <!-- ═══════ HOUSE SALE fields ═══════ -->
+          <div class="field-section" id="fields-house-sale">
+            <div class="section-divider">Step 4 — मकान की जानकारी</div>
+            <div class="three-col">
+              <div class="form-group">
+                <label>साइज़ (गज) *</label>
+                <input type="number" class="form-control" id="house-gaj" min="1" placeholder="जैसे: 100" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>मंज़िल</label>
+                <select class="form-control" id="house-storey">
+                  <option value="">— चुनें —</option>
+                  <option value="single">Single Storey</option>
+                  <option value="double">Double Storey</option>
+                  <option value="triple">Triple Storey</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>कमरे</label>
+                <select class="form-control" id="house-rooms">
+                  <option value="">— चुनें —</option>
+                  <option value="1BHK">1 BHK</option>
+                  <option value="2BHK">2 BHK</option>
+                  <option value="3BHK">3 BHK</option>
+                  <option value="4BHK">4 BHK+</option>
+                  <option value="other">अन्य</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>कुल कीमत (₹) *</label>
+              <input type="number" class="form-control" id="house-price" min="1000" placeholder="जैसे: 3500000" inputmode="numeric" required>
+              <p class="form-hint" id="house-price-preview"></p>
+            </div>
+          </div>
+
+          <!-- ═══════ HOUSE RENT fields ═══════ -->
+          <div class="field-section" id="fields-house-rent">
+            <div class="section-divider">Step 4 — मकान किराये की जानकारी</div>
+            <div class="three-col">
+              <div class="form-group">
+                <label>साइज़ (गज)</label>
+                <input type="number" class="form-control" id="house-rent-gaj" min="1" placeholder="जैसे: 60" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>मंज़िल</label>
+                <select class="form-control" id="house-rent-storey">
+                  <option value="">— चुनें —</option>
+                  <option value="single">Single Storey</option>
+                  <option value="double">Double Storey</option>
+                  <option value="triple">Triple Storey</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>कमरे</label>
+                <select class="form-control" id="house-rent-rooms">
+                  <option value="">— चुनें —</option>
+                  <option value="1BHK">1 BHK</option>
+                  <option value="2BHK">2 BHK</option>
+                  <option value="3BHK">3 BHK</option>
+                  <option value="4BHK">4 BHK+</option>
+                  <option value="other">अन्य</option>
+                </select>
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="form-group">
+                <label>मासिक किराया (₹/माह) *</label>
+                <input type="number" class="form-control" id="house-rent-monthly" min="500" placeholder="जैसे: 5000" inputmode="numeric" required>
+                <p class="form-hint" id="house-rent-preview"></p>
+              </div>
+              <div class="form-group">
+                <label>Security Deposit (₹)</label>
+                <input type="number" class="form-control" id="house-rent-deposit" min="0" placeholder="जैसे: 10000" inputmode="numeric">
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══════ SHOP SALE fields ═══════ -->
+          <div class="field-section" id="fields-shop-sale">
+            <div class="section-divider">Step 4 — दुकान / ऑफिस की जानकारी</div>
+            <div class="two-col">
+              <div class="form-group">
+                <label>साइज़ *</label>
+                <input type="number" class="form-control" id="shop-size" min="1" placeholder="जैसे: 20" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>इकाई</label>
+                <select class="form-control" id="shop-unit">
+                  <option value="guz">गज़ (Guz)</option>
+                  <option value="sqft">वर्ग फ़ुट</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>कुल कीमत (₹) *</label>
+              <input type="number" class="form-control" id="shop-price" min="1000" placeholder="जैसे: 1500000" inputmode="numeric" required>
+              <p class="form-hint" id="shop-price-preview"></p>
+            </div>
+          </div>
+
+          <!-- ═══════ SHOP RENT fields ═══════ -->
+          <div class="field-section" id="fields-shop-rent">
+            <div class="section-divider">Step 4 — दुकान किराये की जानकारी</div>
+            <div class="three-col">
+              <div class="form-group">
+                <label>साइज़</label>
+                <input type="number" class="form-control" id="shop-rent-size" min="1" placeholder="जैसे: 15" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label>इकाई</label>
+                <select class="form-control" id="shop-rent-unit">
+                  <option value="guz">गज़ (Guz)</option>
+                  <option value="sqft">वर्ग फ़ुट</option>
+                  <option value="feet">फ़ुट</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>मासिक किराया (₹/माह) *</label>
+                <input type="number" class="form-control" id="shop-rent-monthly" min="500" placeholder="जैसे: 8000" inputmode="numeric" required>
+                <p class="form-hint" id="shop-rent-preview"></p>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>पगड़ी (₹) <span style="font-weight:400;color:#888;font-size:0.85rem;">— अगर लागू हो</span></label>
+              <input type="number" class="form-control" id="shop-pagdi" min="0" placeholder="जैसे: 200000" inputmode="numeric">
+              <p class="form-hint">एकमुश्त रकम जो दुकान लेते समय दी जाती है।</p>
+            </div>
+          </div>
+
+          <!-- ═══════ TITLE ═══════ -->
+          <div class="section-divider">Step 5 — शीर्षक व विवरण</div>
           <div class="form-group">
-            <label>उद्देश्य *</label>
-            <select class="form-control" id="f-purpose" required>
-              <option value="">— चुनें —</option>
-              <option value="sale">बिक्री</option>
-              <option value="rent">किराया / लीज़</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Title -->
-        <div class="form-group">
-          <label>शीर्षक (Title) *</label>
-          <input type="text" class="form-control" id="f-title" maxlength="120"
-            placeholder="जैसे: 2 BHK मकान, सदर बाज़ार के पास, गंगोह" required>
-          <p class="form-hint">स्पष्ट और जानकारीपूर्ण लिखें।</p>
-        </div>
-
-        <!-- Location -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div class="form-group">
-            <label>शहर/गाँव *</label>
-            <select class="form-control" id="f-townOrVillage" required>
-              <option value="">— चुनें —</option>
-              <option value="town">गंगोह शहर</option>
-              <option value="village">गाँव</option>
-            </select>
-          </div>
-          <div class="form-group" id="village-group" style="display:none;">
-            <label>गाँव का नाम *</label>
-            <select class="form-control" id="f-village">
-              <option value="">— गाँव चुनें —</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>मोहल्ला / इलाका</label>
-          <input type="text" class="form-control" id="f-locality" maxlength="80"
-            placeholder="जैसे: सदर बाज़ार, रेलवे रोड">
-        </div>
-
-        <div class="form-group">
-          <label>लैंडमार्क</label>
-          <input type="text" class="form-control" id="f-landmark" maxlength="100"
-            placeholder="जैसे: पानी की टंकी के पास, स्कूल के सामने">
-        </div>
-
-        <!-- Price & Area -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-          <div class="form-group" style="grid-column:1/3;">
-            <label>कीमत (₹) *</label>
-            <input type="number" class="form-control" id="f-price" min="1000" max="999999999"
-              placeholder="जैसे: 2500000" inputmode="numeric" required>
-            <p class="form-hint" id="price-preview"></p>
+            <label>शीर्षक (Title) *</label>
+            <input type="text" class="form-control" id="f-title" maxlength="120"
+              placeholder="जैसे: 200 गज प्लॉट, मैन रोड के पास, गंगोह" required>
+            <p class="form-hint" id="title-hint">स्पष्ट और जानकारीपूर्ण लिखें।</p>
           </div>
           <div class="form-group">
-            <label>क्षेत्रफल</label>
-            <input type="number" class="form-control" id="f-areaSize" min="1" placeholder="जैसे: 200">
+            <label>विवरण</label>
+            <textarea class="form-control" id="f-description" rows="4" maxlength="1000"
+              placeholder="अतिरिक्त जानकारी — पानी, बिजली, सड़क, आस-पास की सुविधाएँ..."></textarea>
+            <p class="form-hint"><span id="desc-count">0</span>/1000 अक्षर</p>
           </div>
-        </div>
-        <div class="form-group">
-          <label>इकाई</label>
-          <select class="form-control" id="f-areaUnit" style="max-width:180px;">
-            <option value="gaj">गज</option>
-            <option value="sqft">वर्ग फ़ुट</option>
-            <option value="bigha">बीघा</option>
-          </select>
-        </div>
 
-        <!-- Description -->
-        <div class="form-group">
-          <label>विवरण</label>
-          <textarea class="form-control" id="f-description" maxlength="1000"
-            placeholder="प्रॉपर्टी की ख़ासियत, मंज़िल, कमरे, पानी, बिजली, सड़क, आदि..."></textarea>
-          <p class="form-hint"><span id="desc-count">0</span>/1000 अक्षर</p>
-        </div>
-
-        <!-- Photos -->
-        <div class="form-group">
-          <label>फ़ोटो (अधिकतम 5)</label>
-          <div class="upload-area" id="upload-area" role="button" tabindex="0" aria-label="फ़ोटो अपलोड करें">
-            <span class="upload-icon">📷</span>
-            <p style="margin:0;font-weight:600;">फ़ोटो जोड़ने के लिए tap करें</p>
-            <p class="form-hint" style="margin:0.25rem 0 0;">JPG/PNG • अपने आप compress होगी • अधिकतम 5 फ़ोटो</p>
+          <!-- ═══════ PHOTOS ═══════ -->
+          <div class="section-divider">Step 6 — फ़ोटो</div>
+          <div class="form-group">
+            <div class="upload-area" id="upload-area" role="button" tabindex="0">
+              <span class="upload-icon">📷</span>
+              <p style="margin:0;font-weight:600;">फ़ोटो जोड़ने के लिए tap करें</p>
+              <p class="form-hint" style="margin:0.25rem 0 0;">JPG/PNG • अपने आप compress होगी • अधिकतम 5 फ़ोटो</p>
+            </div>
+            <input type="file" id="photo-input" accept="image/*" multiple style="display:none;">
+            <div class="img-preview-grid" id="img-previews"></div>
+            <p id="photo-status" style="font-size:0.82rem;color:#888;margin-top:0.4rem;"></p>
           </div>
-          <input type="file" id="photo-input" accept="image/*" multiple style="display:none;">
-          <div class="img-preview-grid" id="img-previews"></div>
-          <p id="photo-status" style="font-size:0.82rem;color:#888;margin-top:0.4rem;"></p>
-        </div>
 
-        <!-- Contact WhatsApp -->
-        <div class="form-group">
-          <label>WhatsApp नंबर (खरीदार से संपर्क के लिए) *</label>
-          <div class="phone-input-wrap">
-            <div class="country-code">🇮🇳 +91</div>
-            <input type="tel" class="form-control" id="f-whatsapp" maxlength="10"
-              placeholder="10 अंकों का नंबर" inputmode="numeric" required>
+          <!-- ═══════ CONTACT ═══════ -->
+          <div class="section-divider">Step 7 — संपर्क</div>
+          <div class="form-group">
+            <label>WhatsApp नंबर *</label>
+            <div class="phone-input-wrap">
+              <div class="country-code">🇮🇳 +91</div>
+              <input type="tel" class="form-control" id="f-whatsapp" maxlength="10"
+                placeholder="10 अंकों का नंबर" inputmode="numeric" required>
+            </div>
+            <p class="form-hint">खरीदार / किरायेदार सीधे यहाँ संपर्क करेंगे।</p>
           </div>
-          <p class="form-hint">Login नंबर ही रहेगा — बदलना हो तो यहाँ बदलें।</p>
-        </div>
 
-        <p id="form-error" class="form-error" style="display:none;"></p>
+          <p id="form-error" class="form-error" style="display:none;"></p>
 
-        <button type="submit" class="btn btn-primary btn-full" id="submit-btn">
-          📤 लिस्टिंग Submit करें
-        </button>
-        <p style="text-align:center;color:#888;font-size:0.85rem;margin-top:0.75rem;">
-          Submit करने पर listing तुरंत live हो जाएगी!
-        </p>
+          <button type="submit" class="btn btn-primary btn-full" id="submit-btn" style="font-size:1.1rem;padding:1rem;">
+            📤 लिस्टिंग Submit करें
+          </button>
+          <p style="text-align:center;color:#888;font-size:0.85rem;margin-top:0.75rem;">
+            Submit करने पर listing तुरंत live हो जाएगी!
+          </p>
+
+        </div><!-- /dynamic-fields -->
       </form>
 
-      <!-- Success state -->
+      <!-- Success -->
       <div id="post-success" style="display:none;text-align:center;padding:2rem;">
         <div style="font-size:3.5rem;margin-bottom:1rem;">🎉</div>
         <h2>लिस्टिंग Submit हो गई!</h2>
-        <p style="color:#666;">आपकी प्रॉपर्टी तुरंत live हो गई! Browse पर जाकर देखें।</p>
+        <p style="color:#666;">आपकी प्रॉपर्टी तुरंत live हो गई!</p>
         <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
           <a href="index.html" class="btn btn-outline">🏠 Home</a>
           <button class="btn btn-primary" id="post-another-btn">+ एक और लिस्ट करें</button>
@@ -196,7 +438,6 @@
 
     const { user } = await requireAuth('login.html');
 
-    // Pre-fill WhatsApp from user phone
     if (user.phoneNumber) {
       document.getElementById('f-whatsapp').value = user.phoneNumber.replace('+91', '');
     }
@@ -205,24 +446,125 @@
     const villageSelect = document.getElementById('f-village');
     VILLAGES.forEach(v => {
       const opt = document.createElement('option');
-      opt.value = v.value;
-      opt.textContent = v.label;
+      opt.value = v.value; opt.textContent = v.label;
       villageSelect.appendChild(opt);
     });
 
-    // Show/hide village dropdown based on townOrVillage
+    // ── Type selector ─────────────────────────────────────
+    let selectedType = '', selectedPurpose = '';
+
+    document.querySelectorAll('.type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedType = btn.dataset.type;
+        document.getElementById('f-type').value = selectedType;
+        updateDynamicFields();
+      });
+    });
+
+    document.querySelectorAll('.purpose-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.purpose-tab').forEach(t => t.classList.remove('selected'));
+        tab.classList.add('selected');
+        selectedPurpose = tab.dataset.purpose;
+        document.getElementById('f-purpose').value = selectedPurpose;
+        updateDynamicFields();
+      });
+    });
+
+    function updateDynamicFields() {
+      if (!selectedType || !selectedPurpose) return;
+      document.getElementById('dynamic-fields').style.display = 'block';
+
+      // Hide all field sections
+      document.querySelectorAll('.field-section').forEach(s => s.classList.remove('active'));
+
+      const key = `${selectedType}-${selectedPurpose}`;
+      const sectionMap = {
+        'plot-sale':  'fields-plot',
+        'plot-rent':  'fields-plot',
+        'agri-sale':  'fields-agri',
+        'agri-rent':  'fields-agri',
+        'house-sale': 'fields-house-sale',
+        'house-rent': 'fields-house-rent',
+        'shop-sale':  'fields-shop-sale',
+        'shop-rent':  'fields-shop-rent',
+      };
+      const sectionId = sectionMap[key];
+      if (sectionId) document.getElementById(sectionId)?.classList.add('active');
+
+      // Update title placeholder
+      const hints = {
+        'plot-sale':  'जैसे: 200 गज प्लॉट, मैन रोड के पास, गंगोह',
+        'plot-rent':  'जैसे: 100 गज प्लॉट लीज़ पर, गंगोह',
+        'agri-sale':  'जैसे: 3 बीघा खेत, नकुड़ रोड के पास',
+        'agri-rent':  'जैसे: 5 बीघा खेत ठेके पर',
+        'house-sale': 'जैसे: 2 BHK मकान, सदर बाज़ार, गंगोह',
+        'house-rent': 'जैसे: 2 कमरे किराये पर, रामबाग रोड, गंगोह',
+        'shop-sale':  'जैसे: 20 गज़ दुकान, मैन बाज़ार, गंगोह',
+        'shop-rent':  'जैसे: 15 गज़ दुकान किराये पर, सर्राफा बाज़ार',
+      };
+      document.getElementById('f-title').placeholder = hints[key] || 'शीर्षक लिखें';
+
+      window.scrollTo({ top: document.getElementById('dynamic-fields').offsetTop - 80, behavior: 'smooth' });
+    }
+
+    // ── Location toggles ─────────────────────────────────
     document.getElementById('f-townOrVillage').addEventListener('change', function() {
-      const vg = document.getElementById('village-group');
-      vg.style.display = this.value === 'village' ? 'block' : 'none';
+      document.getElementById('village-group').style.display   = this.value === 'village' ? 'block' : 'none';
+      document.getElementById('town-road-group').style.display = this.value === 'town'    ? 'block' : 'none';
     });
 
-    // Price preview
-    document.getElementById('f-price').addEventListener('input', function() {
-      const preview = document.getElementById('price-preview');
-      preview.textContent = this.value ? formatPrice(Number(this.value)) : '';
+    // ── Auto-calculate: Plot ──────────────────────────────
+    function calcPlot() {
+      const gaj  = Number(document.getElementById('plot-gaj').value);
+      const rate = Number(document.getElementById('plot-rate').value);
+      const calcBox = document.getElementById('plot-calc');
+      const priceInput = document.getElementById('plot-price');
+      if (gaj && rate) {
+        const total = gaj * rate;
+        document.getElementById('plot-calc-val').textContent = formatPrice(total);
+        calcBox.style.display = 'block';
+        priceInput.value = total;
+        document.getElementById('plot-price-preview').textContent = formatPrice(total);
+      } else { calcBox.style.display = 'none'; }
+    }
+    document.getElementById('plot-gaj').addEventListener('input', calcPlot);
+    document.getElementById('plot-rate').addEventListener('input', calcPlot);
+    document.getElementById('plot-price').addEventListener('input', function(){
+      document.getElementById('plot-price-preview').textContent = this.value ? formatPrice(Number(this.value)) : '';
     });
 
-    // Description char count
+    // ── Auto-calculate: Kheti ─────────────────────────────
+    function calcAgri() {
+      const bigha = Number(document.getElementById('agri-bigha').value);
+      const rate  = Number(document.getElementById('agri-rate').value);
+      const calcBox = document.getElementById('agri-calc');
+      const priceInput = document.getElementById('agri-price');
+      if (bigha && rate) {
+        const total = bigha * rate;
+        document.getElementById('agri-calc-val').textContent = formatPrice(total);
+        calcBox.style.display = 'block';
+        priceInput.value = total;
+        document.getElementById('agri-price-preview').textContent = formatPrice(total);
+      } else { calcBox.style.display = 'none'; }
+    }
+    document.getElementById('agri-bigha').addEventListener('input', calcAgri);
+    document.getElementById('agri-rate').addEventListener('input', calcAgri);
+    document.getElementById('agri-price').addEventListener('input', function(){
+      document.getElementById('agri-price-preview').textContent = this.value ? formatPrice(Number(this.value)) : '';
+    });
+
+    // ── Price preview: House / Shop ───────────────────────
+    [['house-price','house-price-preview'],['house-rent-monthly','house-rent-preview'],
+     ['shop-price','shop-price-preview'],['shop-rent-monthly','shop-rent-preview']].forEach(([id, prev]) => {
+      document.getElementById(id)?.addEventListener('input', function(){
+        document.getElementById(prev).textContent = this.value ? formatPrice(Number(this.value)) : '';
+      });
+    });
+
+    // ── Description char count ────────────────────────────
     document.getElementById('f-description').addEventListener('input', function() {
       document.getElementById('desc-count').textContent = this.value.length;
     });
@@ -236,21 +578,19 @@
     const MAX_PHOTOS  = 5;
 
     uploadArea.addEventListener('click', () => photoInput.click());
-    uploadArea.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') photoInput.click(); });
+    uploadArea.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') photoInput.click(); });
     uploadArea.addEventListener('dragover',  e => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
     uploadArea.addEventListener('drop', e => {
-      e.preventDefault();
-      uploadArea.classList.remove('drag-over');
+      e.preventDefault(); uploadArea.classList.remove('drag-over');
       handleFiles(Array.from(e.dataTransfer.files));
     });
-
     photoInput.addEventListener('change', () => handleFiles(Array.from(photoInput.files)));
 
     async function handleFiles(files) {
       const imageFiles = files.filter(f => f.type.startsWith('image/'));
       const remaining = MAX_PHOTOS - compressedFiles.length;
-      if (remaining <= 0) { toast(`अधिकतम ${MAX_PHOTOS} फ़ोटो ही डाल सकते हैं।`, 'error'); return; }
+      if (remaining <= 0) { toast(`अधिकतम ${MAX_PHOTOS} फ़ोटो।`, 'error'); return; }
       const toProcess = imageFiles.slice(0, remaining);
       photoStatus.textContent = 'Compressing...';
       try {
@@ -260,23 +600,17 @@
           addPreview(r.previewUrl, compressedFiles.length - 1);
         });
         photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS} फ़ोटो तैयार`;
-      } catch (err) {
-        photoStatus.textContent = '';
-        toast('फ़ोटो process नहीं हो सकी।', 'error');
-      }
+      } catch { toast('फ़ोटो process नहीं हो सकी।', 'error'); }
       photoInput.value = '';
     }
 
     function addPreview(url, idx) {
       const item = document.createElement('div');
-      item.className = 'img-preview-item';
-      item.dataset.idx = idx;
+      item.className = 'img-preview-item'; item.dataset.idx = idx;
       item.innerHTML = `<img src="${url}" alt="preview"><button class="remove-img" aria-label="हटाएं">✕</button>`;
       item.querySelector('.remove-img').addEventListener('click', () => {
-        compressedFiles.splice(idx, 1);
-        item.remove();
-        // Re-index remaining items
-        document.querySelectorAll('.img-preview-item').forEach((el, i) => el.dataset.idx = i);
+        compressedFiles.splice(idx, 1); item.remove();
+        document.querySelectorAll('.img-preview-item').forEach((el,i) => el.dataset.idx = i);
         photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS} फ़ोटो तैयार`;
       });
       previewGrid.appendChild(item);
@@ -288,45 +622,77 @@
       const errEl = document.getElementById('form-error');
       errEl.style.display = 'none';
 
-      const type         = document.getElementById('f-type').value;
-      const purpose      = document.getElementById('f-purpose').value;
-      const title        = document.getElementById('f-title').value.trim();
-      const townOrVillage= document.getElementById('f-townOrVillage').value;
-      const village      = document.getElementById('f-village').value;
-      const locality     = document.getElementById('f-locality').value.trim();
-      const landmark     = document.getElementById('f-landmark').value.trim();
-      const price        = Number(document.getElementById('f-price').value);
-      const areaSize     = Number(document.getElementById('f-areaSize').value) || null;
-      const areaUnit     = document.getElementById('f-areaUnit').value;
-      const description  = document.getElementById('f-description').value.trim();
-      const whatsapp     = document.getElementById('f-whatsapp').value.trim();
+      const type    = document.getElementById('f-type').value;
+      const purpose = document.getElementById('f-purpose').value;
+      const title   = document.getElementById('f-title').value.trim();
+      const townOrVillage = document.getElementById('f-townOrVillage').value;
+      const village       = document.getElementById('f-village').value;
+      const townRoad      = document.getElementById('f-town-road').value;
+      const locality      = townRoad || document.getElementById('f-locality').value.trim();
+      const landmark      = document.getElementById('f-landmark').value.trim();
+      const description   = document.getElementById('f-description').value.trim();
+      const whatsapp      = document.getElementById('f-whatsapp').value.trim();
 
-      // Validation
-      if (!type || !purpose || !title || !townOrVillage || !price || !whatsapp) {
-        errEl.textContent = 'कृपया सभी ज़रूरी जानकारी भरें (*)।';
-        errEl.style.display = 'block';
-        return;
+      if (!type || !purpose) { showErr('प्रकार और उद्देश्य चुनें।'); return; }
+      if (!title)            { showErr('शीर्षक ज़रूरी है।'); return; }
+      if (!townOrVillage)    { showErr('शहर/गाँव चुनें।'); return; }
+      if (townOrVillage === 'village' && !village) { showErr('गाँव चुनें।'); return; }
+      if (!/^[6-9][0-9]{9}$/.test(whatsapp)) { showErr('सही WhatsApp नंबर दर्ज करें।'); return; }
+
+      // Collect type-specific fields
+      let price = 0, areaSize = null, areaUnit = '', extraFields = {};
+      const key = `${type}-${purpose}`;
+
+      if (key === 'plot-sale' || key === 'plot-rent') {
+        areaSize = Number(document.getElementById('plot-gaj').value) || null;
+        areaUnit = 'गज';
+        price    = Number(document.getElementById('plot-price').value);
+        extraFields.ratePerGaj = Number(document.getElementById('plot-rate').value) || null;
+        extraFields.roadSizeFeet = Number(document.getElementById('plot-road').value) || null;
+      } else if (key === 'agri-sale' || key === 'agri-rent') {
+        areaSize = Number(document.getElementById('agri-bigha').value) || null;
+        areaUnit = 'बीघा';
+        price    = Number(document.getElementById('agri-price').value);
+        extraFields.ratePerBigha = Number(document.getElementById('agri-rate').value) || null;
+        extraFields.roadSizeFeet = Number(document.getElementById('agri-road').value) || null;
+      } else if (key === 'house-sale') {
+        areaSize = Number(document.getElementById('house-gaj').value) || null;
+        areaUnit = 'गज';
+        price    = Number(document.getElementById('house-price').value);
+        extraFields.storey = document.getElementById('house-storey').value;
+        extraFields.rooms  = document.getElementById('house-rooms').value;
+      } else if (key === 'house-rent') {
+        areaSize = Number(document.getElementById('house-rent-gaj').value) || null;
+        areaUnit = 'गज';
+        price    = Number(document.getElementById('house-rent-monthly').value);
+        extraFields.storey          = document.getElementById('house-rent-storey').value;
+        extraFields.rooms           = document.getElementById('house-rent-rooms').value;
+        extraFields.securityDeposit = Number(document.getElementById('house-rent-deposit').value) || null;
+      } else if (key === 'shop-sale') {
+        areaSize = Number(document.getElementById('shop-size').value) || null;
+        areaUnit = document.getElementById('shop-unit').value;
+        price    = Number(document.getElementById('shop-price').value);
+      } else if (key === 'shop-rent') {
+        areaSize = Number(document.getElementById('shop-rent-size').value) || null;
+        areaUnit = document.getElementById('shop-rent-unit').value;
+        price    = Number(document.getElementById('shop-rent-monthly').value);
+        extraFields.pagdi = Number(document.getElementById('shop-pagdi').value) || null;
       }
-      if (townOrVillage === 'village' && !village) {
-        errEl.textContent = 'कृपया गाँव चुनें।';
-        errEl.style.display = 'block';
-        return;
-      }
-      if (!/^[6-9][0-9]{9}$/.test(whatsapp)) {
-        errEl.textContent = 'सही WhatsApp नंबर दर्ज करें।';
-        errEl.style.display = 'block';
-        return;
-      }
+
+      if (!price || price < 100) { showErr('कीमत / किराया सही भरें।'); return; }
 
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Uploading... 0%';
 
       try {
-        const formData = { type, purpose, title, townOrVillage,
+        const formData = {
+          type, purpose, title, townOrVillage,
           village: townOrVillage === 'town' ? 'gangoh' : village,
-          locality, landmark, price, areaSize, areaUnit, description,
-          contactWhatsApp: whatsapp };
+          locality, landmark, price, areaSize, areaUnit,
+          description, contactWhatsApp: whatsapp,
+          ...extraFields
+        };
 
         await createListing(formData, compressedFiles, pct => {
           submitBtn.textContent = `Uploading... ${pct}%`;
@@ -336,18 +702,18 @@
         document.getElementById('post-success').style.display = 'block';
         toast('लिस्टिंग submit हो गई!', 'success');
       } catch (err) {
-        errEl.textContent = `Error: ${err.message}`;
-        errEl.style.display = 'block';
+        showErr(`Error: ${err.message}`);
         submitBtn.disabled = false;
         submitBtn.textContent = '📤 लिस्टिंग Submit करें';
       }
+
+      function showErr(msg) {
+        errEl.textContent = msg; errEl.style.display = 'block';
+        errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     });
 
-    document.getElementById('post-another-btn').addEventListener('click', () => {
-      location.reload();
-    });
+    document.getElementById('post-another-btn').addEventListener('click', () => location.reload());
   </script>
 </body>
 </html>
-
-
