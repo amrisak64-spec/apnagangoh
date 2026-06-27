@@ -323,7 +323,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   display: block;
 }
 .category-tile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-2px); text-decoration: none; color: var(--color-text); }
-.category-tile .tile-icon { font-size: 2.2rem; display: block; margin-bottom: 0.4rem; }
+.category-tile .tile-icon { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 1rem; margin: 0 auto 0.6rem; }
+.category-tile .tile-icon svg { width: 34px; height: 34px; }
 .category-tile .tile-label { font-size: 0.9rem; font-weight: 600; }
 
 /* ── Photo gallery ───────────────────────────────────────── */
