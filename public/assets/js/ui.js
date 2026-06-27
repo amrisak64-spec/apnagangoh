@@ -152,39 +152,55 @@ export function lazyLoad() {
 
 // ── Listing card HTML ─────────────────────────────────────
 export function listingCardHTML(listing) {
-  const { id, title, price, type, purpose, village, photos, isVerified, isFeatured, areaSize, areaUnit } = listing;
+  const { id, title, price, type, purpose, village, locality, photos, isVerified, isFeatured, areaSize, areaUnit } = listing;
   const img = photos && photos.length
     ? `<img class="card-img" data-src="${photos[0]}" src="" alt="${title}" loading="lazy">`
     : `<div class="card-img-placeholder">🏘️</div>`;
   const purposeBadge = purpose === 'sale'
     ? `<span class="badge badge-sale">बिक्री</span>`
     : `<span class="badge badge-rent">किराया</span>`;
-  const featuredBadge = isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : '';
-  const typeLabel = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' }[type] || type;
-  const area = areaSize ? `${areaSize} ${areaUnit || ''}` : '';
-  // Feature chips: area size + verified
-  const chip1 = area ? `<span style="background:#EFF6FF;color:#1D4ED8;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">📐 ${area}</span>` : '';
-  const chip2 = isVerified ? `<span style="background:#F0FDF4;color:#15803D;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">✓ Verified</span>` : `<span style="background:#F9F7F4;color:#666;padding:0.2rem 0.55rem;border-radius:1rem;font-size:0.75rem;font-weight:600;">📞 Direct Owner</span>`;
-  const shareText = encodeURIComponent(`🏘️ ${title} — ${formatPrice(price)} (${village || 'गंगोह'})\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
+  const featuredBadge = isFeatured ? `<span class="badge badge-featured">⭐</span>` : '';
+
+  // Smart headline same as detail page
+  const headlineMap = {
+    plot:  areaSize ? `${areaSize} ${areaUnit || 'गज'} का प्लॉट`        : 'प्लॉट',
+    house: areaSize ? `${areaSize} ${areaUnit || 'गज'} का मकान`         : 'मकान',
+    shop:  areaSize ? `${areaSize} ${areaUnit || 'गज़'} की दुकान`        : 'दुकान',
+    agri:  areaSize ? `${areaSize} ${areaUnit || 'बीघा'} खेती की ज़मीन` : 'खेती की ज़मीन',
+  };
+  const headline = headlineMap[type] || title;
+
+  const locationStr = [village || 'गंगोह', locality].filter(Boolean).join(' · ');
+  const verifiedChip = isVerified
+    ? `<span style="background:#F0FDF4;color:#15803D;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">✓ Verified</span>`
+    : `<span style="background:#F9F7F4;color:#666;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">📞 Direct</span>`;
+  const priceLabel = purpose === 'rent' ? `${formatPrice(price)}<span style="font-size:0.75rem;font-weight:600;color:#888;">/माह</span>` : formatPrice(price);
+  const shareText = encodeURIComponent(`${headline} — ${formatPrice(price)}\n📍 ${locationStr}\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
+
   return `
 <div class="listing-card" style="display:flex;flex-direction:column;">
   <a href="listing.html?id=${id}" style="text-decoration:none;color:inherit;flex:1;">
     ${img}
-    <div class="card-body">
-      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.5rem;">
-        ${purposeBadge}${featuredBadge}
+    <div class="card-body" style="padding:0.8rem;">
+      <!-- Badges -->
+      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.45rem;">
+        ${purposeBadge}${featuredBadge}${verifiedChip}
       </div>
-      <div class="card-title" style="font-size:1.05rem;font-weight:700;line-height:1.35;margin-bottom:0.3rem;">${title}</div>
-      <div style="font-size:0.85rem;color:#555;margin-bottom:0.5rem;">📍 ${village || 'गंगोह'} &nbsp;·&nbsp; ${typeLabel}</div>
-      <div class="card-price" style="font-size:1.2rem;font-weight:800;color:#1D4ED8;margin-bottom:0.5rem;">${formatPrice(price)}</div>
-      <div style="display:flex;gap:0.4rem;flex-wrap:wrap;">${chip1}${chip2}</div>
+      <!-- Smart headline in red -->
+      <div style="font-size:1.05rem;font-weight:900;color:#DC2626;line-height:1.25;margin-bottom:0.2rem;">${headline}</div>
+      <!-- User title as subtitle -->
+      <div style="font-size:0.8rem;color:#777;line-height:1.3;margin-bottom:0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
+      <!-- Location -->
+      <div style="font-size:0.82rem;color:#555;margin-bottom:0.45rem;">📍 ${locationStr}</div>
+      <!-- Price -->
+      <div style="font-size:1.15rem;font-weight:900;color:#5B35D5;">${priceLabel}</div>
     </div>
   </a>
-  <div style="padding:0 0.75rem 0.75rem;border-top:1px solid #F0EDE8;margin-top:0.5rem;padding-top:0.5rem;">
+  <div style="padding:0.5rem 0.8rem 0.7rem;border-top:1px solid #F0EDE8;">
     <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener"
        onclick="event.stopPropagation()"
        style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:#25D366;font-weight:600;text-decoration:none;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
       WhatsApp पर Share करें
     </a>
   </div>
