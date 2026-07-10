@@ -14,7 +14,7 @@ function getHeaderHTML(activePage = '') {
   ).join('');
   return `
 <div class="inner">
-  <a href="index.html" class="logo">गंगोह<span>.in</span></a>
+  <a href="index.html" class="logo">GANGOH<span>.IN</span></a>
   <nav class="nav-desktop">
     ${links}
     <a href="post.html" class="btn-post-header">+ लिस्ट करें</a>
