@@ -5,6 +5,7 @@ import { VILLAGES } from '../../data/villages.js';
 function getHeaderHTML(activePage = '') {
   const nav = [
     { href: 'browse.html',     label: 'प्रॉपर्टी देखें' },
+    { href: 'requirement.html',label: 'प्रॉपर्टी चाहिए' },
     { href: 'jobs.html',       label: 'नौकरी' },
     { href: 'directory.html',  label: 'डायरेक्टरी' },
     { href: 'updates.html',    label: '📰 Premium Articles' },
@@ -55,7 +56,8 @@ function getFooterHTML() {
     <a href="browse.html?type=agri" style="display:block;margin-bottom:0.3rem;">🌾 खेती की ज़मीन</a>
     <a href="browse.html?type=career" style="display:block;margin-bottom:0.3rem;">🎓 करियर & पढ़ाई</a>
     <a href="jobs.html" style="display:block;margin-bottom:0.3rem;">💼 नौकरी</a>
-    <a href="directory.html" style="display:block;">📒 बिज़नेस डायरेक्टरी</a>
+    <a href="directory.html" style="display:block;margin-bottom:0.3rem;">📒 बिज़नेस डायरेक्टरी</a>
+    <a href="requirement.html" style="display:block;">🔍 प्रॉपर्टी चाहिए</a>
   </div>
   <div>
     <h4>गाँव और कस्बे</h4>

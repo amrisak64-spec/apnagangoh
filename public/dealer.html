@@ -1,30 +1,107 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dealer Profile — गंगोह.in</title>
+  <title id="page-title">Dealer Profile — गंगोह.in</title>
+  <meta name="description" id="page-desc" content="गंगोह.in पर वेरिफाइड प्रॉपर्टी डीलर की प्रोफाइल और उनकी लाइव लिस्टिंग्स देखें।">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
 
 </head>
 <body>
   <header id="site-header"></header>
-  <div class="page-header"><div class="container"><h1>🏢 Dealer Profile</h1></div></div>
-  <main class="container section">
-    <div class="empty-state" style="max-width:500px;margin:0 auto;">
-      <span class="empty-icon">🚧</span>
-      <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">जल्द आ रहा है!</h2>
-      <p>Dealer Profiles Phase 2 में launch होंगे।</p>
-      <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem;">🏠 Home</a>
-    </div>
+
+  <main class="container section" id="main-content">
+    <div class="spinner"></div>
   </main>
+
   <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI } from './assets/js/ui.js';
+    import { mountUI, listingCardHTML, lazyLoad } from './assets/js/ui.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.getElementById('main-content').innerHTML =
+        `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const db = firebase.firestore();
     mountUI('dealer.html');
+
+    const id = new URLSearchParams(location.search).get('id');
+    const main = document.getElementById('main-content');
+
+    if (!id) {
+      main.innerHTML = `<div class="empty-state"><span class="empty-icon">🏢</span><p>कोई Dealer चुना नहीं गया।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
+    } else {
+      loadDealer(id);
+    }
+
+    async function loadDealer(uid) {
+      try {
+        const snap = await db.collection('dealers').doc(uid).get();
+        if (!snap.exists) {
+          main.innerHTML = `<div class="empty-state"><span class="empty-icon">❓</span><p>यह Dealer profile नहीं मिली।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
+          return;
+        }
+        const dealer = { id: snap.id, ...snap.data() };
+        renderDealer(dealer);
+
+        const listSnap = await db.collection('listings')
+          .where('ownerId', '==', uid)
+          .where('status', '==', 'live')
+          .orderBy('createdAt', 'desc')
+          .limit(24)
+          .get();
+        renderListings(listSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+      } catch (err) {
+        main.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function renderDealer(d) {
+      document.getElementById('page-title').textContent = `${d.shopName || 'Dealer'} — गंगोह.in`;
+      document.getElementById('page-desc').content = `${d.shopName || 'Dealer'} — गंगोह.in पर ${d.verified ? 'वेरिफाइड ' : ''}प्रॉपर्टी डीलर।`;
+
+      main.innerHTML = `
+<div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+  <div style="width:64px;height:64px;border-radius:50%;background:#EDE9FE;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0;">🏢</div>
+  <div>
+    <h1 style="font-size:1.4rem;margin:0 0 0.25rem;">${escapeHtml(d.shopName || 'Dealer')}</h1>
+    ${d.verified ? `<span class="badge badge-verified">✓ Verified Dealer</span>` : `<span style="font-size:0.85rem;color:#888;">📞 Direct Dealer</span>`}
+  </div>
+</div>
+<h2 style="font-size:1.1rem;margin:0 0 1rem;">🏘️ इस Dealer की Live Listings</h2>
+<div id="dealer-listings"><div class="spinner"></div></div>`;
+    }
+
+    function renderListings(listings) {
+      const container = document.getElementById('dealer-listings');
+      if (!listings.length) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">🏘️</span><p>अभी इस Dealer की कोई live listing नहीं है।</p></div>`;
+        return;
+      }
+      const grid = document.createElement('div');
+      grid.className = 'listings-grid';
+      listings.forEach(l => grid.insertAdjacentHTML('beforeend', listingCardHTML(l)));
+      container.innerHTML = '';
+      container.appendChild(grid);
+      lazyLoad();
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
   </script>
 </body>
 </html>
-

@@ -25,6 +25,7 @@
   <script type="module">
     import { mountUI, toast, formatPrice, waURL } from './assets/js/ui.js';
     import { initListings, fetchListing } from './assets/js/listings.js';
+    import { initReports, createReport } from './assets/js/reports.js';
     import { ALL_LOCATIONS } from './data/villages.js';
 
     let fbConfig;
@@ -41,6 +42,7 @@
     const db = firebase.firestore();
     mountUI();
     initListings(db, null, null);
+    initReports(db);
 
     const id = new URLSearchParams(location.search).get('id');
     const main = document.getElementById('main-content');
@@ -210,7 +212,7 @@
         <p style="font-size:0.85rem;color:#555;" id="posted-date">—</p>
       </div>
       <div style="margin-top:0.75rem;">
-        <a href="about.html#report" style="font-size:0.8rem;color:#DC2626;">🚩 फर्ज़ी लिस्टिंग रिपोर्ट करें</a>
+        <button id="report-btn" style="background:none;border:none;padding:0;font-size:0.8rem;color:#DC2626;cursor:pointer;font-family:inherit;text-decoration:underline;">🚩 फर्ज़ी लिस्टिंग रिपोर्ट करें</button>
       </div>
     </div>
   </div>
@@ -255,10 +257,91 @@
           toast('Link copy नहीं हो सका', 'error');
         }
       });
+
+      // Report fake listing
+      document.getElementById('report-btn')?.addEventListener('click', () => openReportModal(l));
+
+      // Structured data
+      injectJsonLd(l);
     }
 
     function escapeHtml(str) {
       return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── RealEstateListing structured data ─────────────────────
+    function injectJsonLd(l) {
+      document.querySelectorAll('script[data-listing-ld]').forEach(el => el.remove());
+      const ld = {
+        '@context': 'https://schema.org/',
+        '@type': 'RealEstateListing',
+        name: l.title,
+        description: l.description || l.title,
+        url: location.href,
+        ...(l.photos && l.photos.length ? { image: l.photos } : {}),
+        offers: {
+          '@type': 'Offer',
+          price: l.price,
+          priceCurrency: 'INR',
+          availability: l.purpose === 'rent' ? 'https://schema.org/InStock' : 'https://schema.org/InStock',
+        },
+        address: { '@type': 'PostalAddress', addressLocality: l.village || 'Gangoh', addressRegion: 'UP', addressCountry: 'IN' },
+      };
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.dataset.listingLd = '1';
+      script.textContent = JSON.stringify(ld);
+      document.head.appendChild(script);
+    }
+
+    // ── Report fake listing modal ─────────────────────────────
+    function openReportModal(l) {
+      const existing = document.getElementById('report-modal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'report-modal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      modal.innerHTML = `
+        <div style="background:white;border-radius:1rem;padding:1.5rem;width:100%;max-width:420px;">
+          <h3 style="margin:0 0 0.5rem;font-size:1.1rem;color:#DC2626;">🚩 फर्ज़ी लिस्टिंग रिपोर्ट करें</h3>
+          <p style="font-size:0.85rem;color:#888;margin:0 0 1rem;">हम 24 घंटे में review करेंगे। आपकी जानकारी सिर्फ़ admin देखेगा।</p>
+          <div class="form-group">
+            <label style="font-size:0.85rem;font-weight:600;">क्या गलत है? *</label>
+            <textarea id="report-reason" class="form-control" rows="3" placeholder="जैसे: फ़ोन नंबर काम नहीं करता, कीमत गलत है, प्रॉपर्टी मौजूद नहीं..."></textarea>
+          </div>
+          <div class="form-group">
+            <label style="font-size:0.85rem;font-weight:600;">आपका नंबर <span style="font-weight:400;color:#888;">(वैकल्पिक)</span></label>
+            <input id="report-contact" class="form-control" type="tel" maxlength="10" placeholder="10 अंक का नंबर">
+          </div>
+          <p id="report-error" style="color:#DC2626;font-size:0.85rem;margin:0 0 0.5rem;display:none;"></p>
+          <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+            <button id="report-submit-btn" class="btn btn-danger" style="flex:1;">🚩 Report करें</button>
+            <button id="report-cancel-btn" class="btn btn-outline" style="flex:1;">Cancel</button>
+          </div>
+        </div>`;
+
+      document.body.appendChild(modal);
+      document.getElementById('report-cancel-btn').onclick = () => modal.remove();
+      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+      document.getElementById('report-submit-btn').onclick = async () => {
+        const reason = document.getElementById('report-reason').value.trim();
+        const contact = document.getElementById('report-contact').value.trim();
+        const errEl = document.getElementById('report-error');
+        if (!reason) { errEl.textContent = 'कृपया कारण बताएं।'; errEl.style.display = 'block'; return; }
+
+        const btn = document.getElementById('report-submit-btn');
+        btn.disabled = true; btn.textContent = 'Submit हो रहा है...';
+        try {
+          await createReport({ listingId: l.id, listingTitle: l.title, reason, reporterContact: contact });
+          modal.remove();
+          toast('Report मिल गई — धन्यवाद! हम review करेंगे।', 'success');
+        } catch (err) {
+          errEl.textContent = `Error: ${err.message}`; errEl.style.display = 'block';
+          btn.disabled = false; btn.textContent = '🚩 Report करें';
+        }
+      };
     }
   </script>
 </body>

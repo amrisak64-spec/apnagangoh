@@ -106,12 +106,37 @@
       "collectionGroup": "listings",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "ownerId",       "order": "ASCENDING" },
+        { "fieldPath": "status",        "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "listings",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "status",        "order": "ASCENDING" },
         { "fieldPath": "createdAt",     "order": "ASCENDING" }
       ]
     },
     {
       "collectionGroup": "requirements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",        "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "jobs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",        "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reports",
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "status",        "order": "ASCENDING" },

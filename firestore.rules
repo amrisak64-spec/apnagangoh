@@ -69,6 +69,54 @@ service cloud.firestore {
       allow update: if isAdmin();
     }
 
+    // ── jobs (jobs board) ──────────────────────────────────────────
+    match /jobs/{jobId} {
+      // Public can read live jobs; owner and admin can read their own regardless of status
+      allow read: if resource.data.status == 'live'
+                  || isOwner(resource.data.postedBy)
+                  || isAdmin();
+
+      allow create: if request.auth != null
+                   && request.resource.data.postedBy == request.auth.uid
+                   && request.resource.data.status == 'live';
+
+      allow delete: if isOwner(resource.data.postedBy) || isAdmin();
+
+      allow update: if isAdmin();
+    }
+
+    // ── directory (business & mandi directory) ─────────────────────
+    match /directory/{bizId} {
+      // Always public — no moderation gate per spec
+      allow read: if true;
+
+      allow create: if request.auth != null
+                   && request.resource.data.ownerId == request.auth.uid;
+
+      allow delete: if isOwner(resource.data.ownerId) || isAdmin();
+
+      // Only admin can toggle isFeatured etc.
+      allow update: if isAdmin();
+    }
+
+    // ── dealers (dealer profiles) ───────────────────────────────────
+    match /dealers/{uid} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── reports (report-a-fake-listing) ─────────────────────────────
+    match /reports/{reportId} {
+      // Anyone (incl. anonymous browsers) can submit a report — low friction, admin-only visibility
+      allow create: if request.resource.data.keys().hasAll(['listingId', 'reason', 'status', 'createdAt'])
+                   && request.resource.data.reason is string
+                   && request.resource.data.reason.size() > 0
+                   && request.resource.data.reason.size() < 1000
+                   && request.resource.data.status == 'open';
+
+      allow read, update, delete: if isAdmin();
+    }
+
     // ── Block everything else ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
