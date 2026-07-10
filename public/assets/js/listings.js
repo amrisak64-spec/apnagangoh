@@ -120,6 +120,33 @@ export async function deleteListing(id) {
   await _db.collection('listings').doc(id).delete();
 }
 
+// ── Owner: update own listing (content + optional new photos) ─
+export async function updateOwnListing(id, formData, compressedFiles, existingPhotos, onProgress) {
+  const user = _auth.currentUser;
+  if (!user) throw new Error('Login ज़रूरी है।');
+
+  let photoURLs = existingPhotos || [];
+  if (compressedFiles && compressedFiles.length) {
+    photoURLs = [];
+    for (let i = 0; i < compressedFiles.length; i++) {
+      const file = compressedFiles[i];
+      const path = `listings/${user.uid}/${Date.now()}_${i}.jpg`;
+      const ref  = _storage.ref(path);
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+      photoURLs.push(url);
+      if (onProgress) onProgress(Math.round(((i + 1) / compressedFiles.length) * 80));
+    }
+  }
+
+  await _db.collection('listings').doc(id).update({
+    ...formData,
+    photos: photoURLs,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  if (onProgress) onProgress(100);
+}
+
 // ── Admin: delete listing + all Storage photos ────────────
 export async function deleteListingWithPhotos(id) {
   const snap = await _db.collection('listings').doc(id).get();

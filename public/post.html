@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>प्रॉपर्टी लिस्ट करें — गंगोह.in</title>
-  <meta name="description" content="गंगोह और आस-पास अपनी प्रॉपर्टी — प्लॉट, मकान, दुकान, खेती की ज़मीन — मुफ़्त में लिस्ट करें।">
+  <title>लिस्ट करें — गंगोह.in</title>
+  <meta name="description" content="गंगोह और आस-पास अपनी प्रॉपर्टी, नौकरी, करियर गाइडेंस — मुफ़्त में लिस्ट करें।">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+
   <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <style>
     .field-section { display: none; }
@@ -25,8 +25,8 @@
       color: #5B35D5;
     }
     .calc-box .calc-label { font-size: 0.82rem; color: #6B6B6B; margin-bottom: 0.25rem; }
-    .type-selector { display: grid; grid-template-columns: repeat(2,1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
-    @media(min-width:480px){ .type-selector { grid-template-columns: repeat(4,1fr); } }
+    .type-selector { display: grid; grid-template-columns: repeat(3,1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
+    @media(min-width:560px){ .type-selector { grid-template-columns: repeat(5,1fr); } }
     .type-btn {
       border: 2px solid #E2E8F0;
       border-radius: 0.75rem;
@@ -65,7 +65,7 @@
 
   <div class="page-header">
     <div class="container">
-      <h1>प्रॉपर्टी लिस्ट करें</h1>
+      <h1>लिस्ट करें</h1>
       <p style="color:#888;margin:0;font-size:0.9rem;">मुफ़्त में — तुरंत live होगी।</p>
     </div>
   </div>
@@ -93,16 +93,22 @@
             <span class="t-icon">🌾</span>
             <span class="t-label">खेती की ज़मीन</span>
           </button>
+          <button type="button" class="type-btn" data-type="career">
+            <span class="t-icon">🎓</span>
+            <span class="t-label">करियर & पढ़ाई</span>
+          </button>
         </div>
         <input type="hidden" id="f-type">
 
-        <!-- STEP 2: Purpose -->
+        <!-- STEP 2: Purpose (hidden for career) -->
+        <div id="purpose-section">
         <div class="section-divider">Step 2 — उद्देश्य</div>
         <div class="purpose-tabs">
           <button type="button" class="purpose-tab" data-purpose="sale">बिक्री (Sale)</button>
           <button type="button" class="purpose-tab" data-purpose="rent">किराया / लीज़</button>
         </div>
         <input type="hidden" id="f-purpose">
+        </div><!-- /purpose-section -->
 
         <!-- Dynamic fields wrapper (shown after type+purpose selected) -->
         <div id="dynamic-fields" style="display:none;">
@@ -111,10 +117,10 @@
           <div class="section-divider">Step 3 — लोकैशन</div>
           <div class="two-col">
             <div class="form-group">
-              <label>शहर / गाँव *</label>
+              <label id="f-city-label">शहर / गाँव *</label>
               <select class="form-control" id="f-townOrVillage" required>
                 <option value="">— चुनें —</option>
-                <option value="town">गंगोह नगर</option>
+                <option value="town" data-city="gangoh">गंगोह नगर</option>
                 <option value="village">गाँव</option>
               </select>
             </div>
@@ -126,9 +132,9 @@
             </div>
           </div>
           <div class="form-group" id="town-road-group" style="display:none;">
-            <label>गंगोह नगर — इलाका / रोड</label>
+            <label>गंगोह नगर — लोकेशन / रोड</label>
             <select class="form-control" id="f-town-road">
-              <option value="">— इलाका चुनें (वैकल्पिक) —</option>
+              <option value="">— लोकेशन चुनें (वैकल्पिक) —</option>
               <option>गंगोह, मैन रोड</option>
               <option>गंगोह सर्राफा बाजार</option>
               <option>गंगोह, नानौता रोड</option>
@@ -142,14 +148,14 @@
               <option>गंगोह, तीतरों रोड</option>
             </select>
           </div>
-          <div class="two-col">
+          <div class="two-col" id="generic-locality-group">
             <div class="form-group">
-              <label>मोहल्ला / इलाका</label>
-              <input type="text" class="form-control" id="f-locality" maxlength="80" placeholder="जैसे: सदर बाज़ार">
+              <label>मोहल्ला / लोकेशन</label>
+              <input type="text" class="form-control" id="f-locality" maxlength="80" placeholder="जैसे: सदर बाज़ार, सहारनपुर रोड, नानौता रोड">
             </div>
             <div class="form-group">
               <label>लैंडमार्क</label>
-              <input type="text" class="form-control" id="f-landmark" maxlength="100" placeholder="जैसे: स्कूल के सामने">
+              <input type="text" class="form-control" id="f-landmark" maxlength="100" placeholder="जैसे: स्कूल के पास, मंदिर के पास, अस्पताल के पास">
             </div>
           </div>
 
@@ -339,14 +345,59 @@
             </div>
           </div>
 
-          <!-- ═══════ TITLE ═══════ -->
-          <div class="section-divider">Step 5 — शीर्षक व विवरण</div>
-          <div class="form-group">
-            <label>शीर्षक (Title) *</label>
-            <input type="text" class="form-control" id="f-title" maxlength="120"
-              placeholder="जैसे: 200 गज प्लॉट, मैन रोड के पास, गंगोह" required>
-            <p class="form-hint" id="title-hint">स्पष्ट और जानकारीपूर्ण लिखें।</p>
+          <!-- ═══════ CAREER fields ═══════ -->
+          <div class="field-section" id="fields-career">
+            <div class="section-divider">Step 3 — करियर गाइडेंस की जानकारी</div>
+            <div class="form-group">
+              <label>किसके बाद मार्गदर्शन? *</label>
+              <select class="form-control" id="career-guidance-for" required>
+                <option value="">— चुनें —</option>
+                <option value="10th">10वीं के बाद</option>
+                <option value="12th">12वीं के बाद</option>
+                <option value="graduation">Graduation के बाद</option>
+                <option value="competitive">Competitive Exams</option>
+                <option value="skill">Skill Development</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>विषय / क्षेत्र *</label>
+              <select class="form-control" id="career-domain" required>
+                <option value="">— पहले ऊपर चुनें —</option>
+              </select>
+            </div>
+            <div class="two-col">
+              <div class="form-group">
+                <label>Mode</label>
+                <select class="form-control" id="career-mode">
+                  <option value="">— चुनें —</option>
+                  <option value="offline">Offline</option>
+                  <option value="online">Online</option>
+                  <option value="both">दोनों</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>फ़ीस</label>
+                <input type="text" class="form-control" id="career-fee" maxlength="60" placeholder="जैसे: ₹3000/माह या Free">
+              </div>
+            </div>
+            <div class="two-col">
+              <div class="form-group">
+                <label>अवधि (Duration)</label>
+                <input type="text" class="form-control" id="career-duration" maxlength="60" placeholder="जैसे: 3 माह, 1 साल">
+              </div>
+              <div class="form-group">
+                <label>Timing / Batch</label>
+                <input type="text" class="form-control" id="career-timing" maxlength="80" placeholder="जैसे: सुबह 8–10, शाम 5–7">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Mentor की Qualification</label>
+              <input type="text" class="form-control" id="career-mentor" maxlength="100" placeholder="जैसे: B.Ed, M.Sc Physics, 10 साल का experience">
+            </div>
           </div>
+
+          <!-- ═══════ DESCRIPTION ═══════ -->
+          <div class="section-divider" id="step-title-label">Step 5 — विवरण</div>
           <div class="form-group">
             <label>विवरण</label>
             <textarea class="form-control" id="f-description" rows="4" maxlength="1000"
@@ -395,7 +446,7 @@
       <div id="post-success" style="display:none;text-align:center;padding:2rem;">
         <div style="font-size:3.5rem;margin-bottom:1rem;">🎉</div>
         <h2>लिस्टिंग Submit हो गई!</h2>
-        <p style="color:#666;">आपकी प्रॉपर्टी तुरंत live हो गई!</p>
+        <p style="color:#666;">आपकी listing तुरंत live हो गई!</p>
         <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
           <a href="index.html" class="btn btn-outline">🏠 Home</a>
           <button class="btn btn-primary" id="post-another-btn">+ एक और लिस्ट करें</button>
@@ -414,7 +465,7 @@
   <script type="module">
     import { mountUI, toast, formatPrice } from './assets/js/ui.js';
     import { initAuth, requireAuth } from './assets/js/auth.js';
-    import { initListings, createListing } from './assets/js/listings.js';
+    import { initListings, createListing, fetchListing, updateOwnListing } from './assets/js/listings.js';
     import { compressImages } from './assets/js/image-compress.js';
     import { VILLAGES } from './data/villages.js';
 
@@ -442,6 +493,11 @@
       document.getElementById('f-whatsapp').value = user.phoneNumber.replace('+91', '');
     }
 
+    // ── Edit mode ──────────────────────────────────────────
+    const editId = new URLSearchParams(window.location.search).get('edit');
+    let existingPhotos = [];
+    let editingListing = null;
+
     // Populate village dropdown
     const villageSelect = document.getElementById('f-village');
     VILLAGES.forEach(v => {
@@ -453,12 +509,33 @@
     // ── Type selector ─────────────────────────────────────
     let selectedType = '', selectedPurpose = '';
 
+    const CITY_OPTIONS_DEFAULT = `
+      <option value="">— चुनें —</option>
+      <option value="town" data-city="gangoh">गंगोह नगर</option>
+      <option value="village">गाँव</option>`;
+    const CITY_OPTIONS_PLOT = `
+      <option value="">— चुनें —</option>
+      <option value="town" data-city="gangoh">गंगोह नगर</option>
+      <option value="town" data-city="saharanpur">सहारनपुर</option>
+      <option value="town" data-city="karnal">करनाल</option>
+      <option value="town" data-city="rampur-maniharan">रामपुर-मानिहारन</option>
+      <option value="town" data-city="ambehta">अंबेहटा</option>
+      <option value="town" data-city="nanauta">नानौता</option>`;
+
     document.querySelectorAll('.type-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedType = btn.dataset.type;
         document.getElementById('f-type').value = selectedType;
+
+        // Plot gets its own city list (no generic "गाँव" — plots aren't listed in villages)
+        const isPlot = selectedType === 'plot';
+        document.getElementById('f-townOrVillage').innerHTML = isPlot ? CITY_OPTIONS_PLOT : CITY_OPTIONS_DEFAULT;
+        document.getElementById('f-city-label').textContent = isPlot ? 'नगर *' : 'शहर / गाँव *';
+        document.getElementById('village-group').style.display = 'none';
+        document.getElementById('town-road-group').style.display = 'none';
+
         updateDynamicFields();
       });
     });
@@ -473,12 +550,41 @@
       });
     });
 
+    const CAREER_DOMAINS = {
+      '10th':        ['Science', 'Commerce', 'Arts', 'ITI', 'Polytechnic', 'Diploma'],
+      '12th':        ['B.Tech / Engineering', 'NEET / Medical', 'BA / Humanities', 'BCA / Computer', 'Hotel Management', 'Army / NDA', 'Police / PAC'],
+      'graduation':  ['MBA / Management', 'UPSC Civil Services', 'SSC / Govt Jobs', 'LLB / Law', 'Job Search / Placement', 'Business / Startup'],
+      'competitive': ['UPSC', 'SSC CGL/CHSL', 'NDA / Defence', 'UP Police', 'NEET', 'JEE', 'Railway (RRB)'],
+      'skill':       ['Computer / Typing', 'Tailoring / Fashion', 'Driving (LMV/HMV)', 'Beautician / Makeup', 'Electrical Work', 'Plumbing / Sanitation'],
+    };
+
+    document.getElementById('career-guidance-for').addEventListener('change', function() {
+      const domainSel = document.getElementById('career-domain');
+      const opts = CAREER_DOMAINS[this.value] || [];
+      domainSel.innerHTML = opts.length
+        ? '<option value="">— चुनें —</option>' + opts.map(o => `<option value="${o}">${o}</option>`).join('')
+        : '<option value="">— पहले ऊपर चुनें —</option>';
+    });
+
     function updateDynamicFields() {
-      if (!selectedType || !selectedPurpose) return;
+      const isCareer = selectedType === 'career';
+      if (!selectedType || (!isCareer && !selectedPurpose)) return;
+
       document.getElementById('dynamic-fields').style.display = 'block';
+      document.getElementById('purpose-section').style.display = isCareer ? 'none' : 'block';
 
       // Hide all field sections
       document.querySelectorAll('.field-section').forEach(s => s.classList.remove('active'));
+
+      if (isCareer) {
+        document.getElementById('fields-career').classList.add('active');
+        document.getElementById('step-title-label').textContent = 'Step 4 — विवरण';
+        document.getElementById('f-purpose').value = 'career';
+        window.scrollTo({ top: document.getElementById('dynamic-fields').offsetTop - 80, behavior: 'smooth' });
+        return;
+      }
+
+      document.getElementById('step-title-label').textContent = 'Step 5 — विवरण';
 
       const key = `${selectedType}-${selectedPurpose}`;
       const sectionMap = {
@@ -494,26 +600,14 @@
       const sectionId = sectionMap[key];
       if (sectionId) document.getElementById(sectionId)?.classList.add('active');
 
-      // Update title placeholder
-      const hints = {
-        'plot-sale':  'जैसे: 200 गज प्लॉट, मैन रोड के पास, गंगोह',
-        'plot-rent':  'जैसे: 100 गज प्लॉट लीज़ पर, गंगोह',
-        'agri-sale':  'जैसे: 3 बीघा खेत, नकुड़ रोड के पास',
-        'agri-rent':  'जैसे: 5 बीघा खेत ठेके पर',
-        'house-sale': 'जैसे: 2 BHK मकान, सदर बाज़ार, गंगोह',
-        'house-rent': 'जैसे: 2 कमरे किराये पर, रामबाग रोड, गंगोह',
-        'shop-sale':  'जैसे: 20 गज़ दुकान, मैन बाज़ार, गंगोह',
-        'shop-rent':  'जैसे: 15 गज़ दुकान किराये पर, सर्राफा बाज़ार',
-      };
-      document.getElementById('f-title').placeholder = hints[key] || 'शीर्षक लिखें';
-
       window.scrollTo({ top: document.getElementById('dynamic-fields').offsetTop - 80, behavior: 'smooth' });
     }
 
     // ── Location toggles ─────────────────────────────────
     document.getElementById('f-townOrVillage').addEventListener('change', function() {
+      const city = this.options[this.selectedIndex]?.dataset.city || '';
       document.getElementById('village-group').style.display   = this.value === 'village' ? 'block' : 'none';
-      document.getElementById('town-road-group').style.display = this.value === 'town'    ? 'block' : 'none';
+      document.getElementById('town-road-group').style.display = city === 'gangoh' ? 'block' : 'none';
     });
 
     // ── Auto-calculate: Plot ──────────────────────────────
@@ -616,6 +710,32 @@
       previewGrid.appendChild(item);
     }
 
+    // ── Auto-generate title from size + location ──────────
+    function buildTitle(type, purpose, ctx) {
+      const { areaSize, areaUnit, locality, landmark, cityLabel, extraFields } = ctx;
+      const loc = locality || landmark || cityLabel || 'गंगोह';
+      const key = `${type}-${purpose}`;
+      const rooms = extraFields.rooms ? `${extraFields.rooms} ` : '';
+      switch (key) {
+        case 'plot-sale':   return `${areaSize || ''} ${areaUnit || 'गज'} प्लॉट, ${loc}`.trim();
+        case 'plot-rent':   return `${areaSize || ''} ${areaUnit || 'गज'} प्लॉट लीज़ पर, ${loc}`.trim();
+        case 'agri-sale':   return `${areaSize || ''} ${areaUnit || 'बीघा'} खेती की ज़मीन, ${loc}`.trim();
+        case 'agri-rent':   return `${areaSize || ''} ${areaUnit || 'बीघा'} खेत ठेके पर, ${loc}`.trim();
+        case 'house-sale':  return `${rooms}मकान${areaSize ? ` (${areaSize} ${areaUnit})` : ''}, ${loc}`.trim();
+        case 'house-rent':  return `${rooms}मकान किराये पर, ${loc}`.trim();
+        case 'shop-sale':   return `दुकान / ऑफिस${areaSize ? ` (${areaSize} ${areaUnit})` : ''}, ${loc}`.trim();
+        case 'shop-rent':   return `दुकान किराये पर, ${loc}`.trim();
+        case 'career-career': {
+          const g = CAREER_GUIDANCE_LABELS[extraFields.guidanceFor] || '';
+          const d = extraFields.domain ? ` ${extraFields.domain}` : '';
+          return `${g}${d} — ${loc}`.trim();
+        }
+        default:            return `लिस्टिंग — ${loc}`;
+      }
+    }
+
+    const CAREER_GUIDANCE_LABELS = { '10th': '10वीं के बाद', '12th': '12वीं के बाद', graduation: 'Graduation के बाद', competitive: 'Competitive Exams', skill: 'Skill Development' };
+
     // ── Form submit ───────────────────────────────────────
     document.getElementById('post-form').addEventListener('submit', async e => {
       e.preventDefault();
@@ -624,17 +744,19 @@
 
       const type    = document.getElementById('f-type').value;
       const purpose = document.getElementById('f-purpose').value;
-      const title   = document.getElementById('f-title').value.trim();
-      const townOrVillage = document.getElementById('f-townOrVillage').value;
-      const village       = document.getElementById('f-village').value;
-      const townRoad      = document.getElementById('f-town-road').value;
-      const locality      = townRoad || document.getElementById('f-locality').value.trim();
-      const landmark      = document.getElementById('f-landmark').value.trim();
-      const description   = document.getElementById('f-description').value.trim();
-      const whatsapp      = document.getElementById('f-whatsapp').value.trim();
+      const cityField      = document.getElementById('f-townOrVillage');
+      const townOrVillage  = cityField.value;
+      const selectedCity   = cityField.options[cityField.selectedIndex]?.dataset.city || '';
+      const cityLabel      = cityField.options[cityField.selectedIndex]?.textContent || '';
+      const village        = document.getElementById('f-village').value;
+      const townRoad       = document.getElementById('f-town-road').value;
+      const locality       = townRoad || document.getElementById('f-locality').value.trim();
+      const landmark       = document.getElementById('f-landmark').value.trim();
+      const description    = document.getElementById('f-description').value.trim();
+      const whatsapp       = document.getElementById('f-whatsapp').value.trim();
 
-      if (!type || !purpose) { showErr('प्रकार और उद्देश्य चुनें।'); return; }
-      if (!title)            { showErr('शीर्षक ज़रूरी है।'); return; }
+      const isCareer = type === 'career';
+      if (!type || (!isCareer && !purpose)) { showErr('प्रकार और उद्देश्य चुनें।'); return; }
       if (!townOrVillage)    { showErr('शहर/गाँव चुनें।'); return; }
       if (townOrVillage === 'village' && !village) { showErr('गाँव चुनें।'); return; }
       if (!/^[6-9][0-9]{9}$/.test(whatsapp)) { showErr('सही WhatsApp नंबर दर्ज करें।'); return; }
@@ -643,7 +765,20 @@
       let price = 0, areaSize = null, areaUnit = '', extraFields = {};
       const key = `${type}-${purpose}`;
 
-      if (key === 'plot-sale' || key === 'plot-rent') {
+      if (isCareer) {
+        const guidanceFor = document.getElementById('career-guidance-for').value;
+        const domain = document.getElementById('career-domain').value;
+        if (!guidanceFor) { showErr('किसके बाद मार्गदर्शन — चुनें।'); return; }
+        if (!domain) { showErr('विषय / क्षेत्र चुनें।'); return; }
+        extraFields.guidanceFor        = guidanceFor;
+        extraFields.domain             = domain;
+        extraFields.mode               = document.getElementById('career-mode').value;
+        extraFields.fee                = document.getElementById('career-fee').value.trim();
+        extraFields.duration           = document.getElementById('career-duration').value.trim();
+        extraFields.timing             = document.getElementById('career-timing').value.trim();
+        extraFields.mentorQualification = document.getElementById('career-mentor').value.trim();
+        price = 0;
+      } else if (key === 'plot-sale' || key === 'plot-rent') {
         areaSize = Number(document.getElementById('plot-gaj').value) || null;
         areaUnit = 'गज';
         price    = Number(document.getElementById('plot-price').value);
@@ -679,20 +814,32 @@
         extraFields.pagdi = Number(document.getElementById('shop-pagdi').value) || null;
       }
 
-      if (!price || price < 100) { showErr('कीमत / किराया सही भरें।'); return; }
+      if (!isCareer && (!price || price < 100)) { showErr('कीमत / किराया सही भरें।'); return; }
 
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true;
       submitBtn.textContent = 'Uploading... 0%';
 
       try {
+        const villageValue = townOrVillage === 'town' ? (selectedCity || 'gangoh') : village;
+        const title = buildTitle(type, purpose, { areaSize, areaUnit, locality, landmark, cityLabel, extraFields });
+
         const formData = {
           type, purpose, title, townOrVillage,
-          village: townOrVillage === 'town' ? 'gangoh' : village,
+          village: villageValue,
           locality, landmark, price, areaSize, areaUnit,
           description, contactWhatsApp: whatsapp,
           ...extraFields
         };
+
+        if (editId) {
+          await updateOwnListing(editId, formData, compressedFiles, existingPhotos, pct => {
+            submitBtn.textContent = `Updating... ${pct}%`;
+          });
+          toast('लिस्टिंग update हो गई!', 'success');
+          window.location.href = 'my-listings.html';
+          return;
+        }
 
         await createListing(formData, compressedFiles, pct => {
           submitBtn.textContent = `Uploading... ${pct}%`;
@@ -704,7 +851,7 @@
       } catch (err) {
         showErr(`Error: ${err.message}`);
         submitBtn.disabled = false;
-        submitBtn.textContent = '📤 लिस्टिंग Submit करें';
+        submitBtn.textContent = editId ? '✏️ Update करें' : '📤 लिस्टिंग Submit करें';
       }
 
       function showErr(msg) {
@@ -714,6 +861,118 @@
     });
 
     document.getElementById('post-another-btn').addEventListener('click', () => location.reload());
+
+    // ── Edit mode: pre-fill form from existing listing ─────
+    async function initEditMode() {
+      if (!editId) return;
+      try {
+        editingListing = await fetchListing(editId);
+      } catch (err) {
+        toast('Listing लोड नहीं हो सकी।', 'error');
+        return;
+      }
+      if (!editingListing) { toast('Listing नहीं मिली।', 'error'); window.location.href = 'my-listings.html'; return; }
+      if (editingListing.ownerId !== user.uid) { toast('आपको यह listing edit करने की अनुमति नहीं है।', 'error'); window.location.href = 'my-listings.html'; return; }
+
+      const l = editingListing;
+      existingPhotos = l.photos || [];
+
+      const pageH1 = document.querySelector('.page-header h1');
+      if (pageH1) pageH1.textContent = 'Listing Edit करें';
+      document.getElementById('submit-btn').textContent = '✏️ Update करें';
+
+      // Type + purpose
+      document.querySelector(`.type-btn[data-type="${l.type}"]`)?.click();
+      if (l.type !== 'career') {
+        document.querySelector(`.purpose-tab[data-purpose="${l.purpose}"]`)?.click();
+      }
+
+      // Location
+      const cityField = document.getElementById('f-townOrVillage');
+      if (l.townOrVillage === 'town') {
+        const opt = Array.from(cityField.options).find(o => o.dataset.city === l.village);
+        if (opt) cityField.selectedIndex = Array.from(cityField.options).indexOf(opt);
+      } else {
+        cityField.value = 'village';
+      }
+      cityField.dispatchEvent(new Event('change'));
+      if (l.townOrVillage === 'village') {
+        document.getElementById('f-village').value = l.village || '';
+      }
+      document.getElementById('f-locality').value = l.locality || '';
+      document.getElementById('f-landmark').value = l.landmark || '';
+
+      // Type-specific fields
+      const key = `${l.type}-${l.purpose}`;
+      if (l.type === 'career') {
+        const gf = document.getElementById('career-guidance-for');
+        gf.value = l.guidanceFor || '';
+        gf.dispatchEvent(new Event('change'));
+        document.getElementById('career-domain').value = l.domain || '';
+        document.getElementById('career-mode').value = l.mode || '';
+        document.getElementById('career-fee').value = l.fee || '';
+        document.getElementById('career-duration').value = l.duration || '';
+        document.getElementById('career-timing').value = l.timing || '';
+        document.getElementById('career-mentor').value = l.mentorQualification || '';
+      } else if (key === 'plot-sale' || key === 'plot-rent') {
+        document.getElementById('plot-gaj').value = l.areaSize || '';
+        document.getElementById('plot-rate').value = l.ratePerGaj || '';
+        document.getElementById('plot-road').value = l.roadSizeFeet || '';
+        document.getElementById('plot-price').value = l.price || '';
+        calcPlot();
+      } else if (key === 'agri-sale' || key === 'agri-rent') {
+        document.getElementById('agri-bigha').value = l.areaSize || '';
+        document.getElementById('agri-rate').value = l.ratePerBigha || '';
+        document.getElementById('agri-road').value = l.roadSizeFeet || '';
+        document.getElementById('agri-price').value = l.price || '';
+        calcAgri();
+      } else if (key === 'house-sale') {
+        document.getElementById('house-gaj').value = l.areaSize || '';
+        document.getElementById('house-storey').value = l.storey || '';
+        document.getElementById('house-rooms').value = l.rooms || '';
+        document.getElementById('house-price').value = l.price || '';
+        document.getElementById('house-price-preview').textContent = l.price ? formatPrice(l.price) : '';
+      } else if (key === 'house-rent') {
+        document.getElementById('house-rent-gaj').value = l.areaSize || '';
+        document.getElementById('house-rent-storey').value = l.storey || '';
+        document.getElementById('house-rent-rooms').value = l.rooms || '';
+        document.getElementById('house-rent-monthly').value = l.price || '';
+        document.getElementById('house-rent-deposit').value = l.securityDeposit || '';
+        document.getElementById('house-rent-preview').textContent = l.price ? formatPrice(l.price) : '';
+      } else if (key === 'shop-sale') {
+        document.getElementById('shop-size').value = l.areaSize || '';
+        document.getElementById('shop-unit').value = l.areaUnit || 'guz';
+        document.getElementById('shop-price').value = l.price || '';
+        document.getElementById('shop-price-preview').textContent = l.price ? formatPrice(l.price) : '';
+      } else if (key === 'shop-rent') {
+        document.getElementById('shop-rent-size').value = l.areaSize || '';
+        document.getElementById('shop-rent-unit').value = l.areaUnit || 'guz';
+        document.getElementById('shop-rent-monthly').value = l.price || '';
+        document.getElementById('shop-pagdi').value = l.pagdi || '';
+        document.getElementById('shop-rent-preview').textContent = l.price ? formatPrice(l.price) : '';
+      }
+
+      document.getElementById('f-description').value = l.description || '';
+      document.getElementById('desc-count').textContent = (l.description || '').length;
+      if (l.contactWhatsApp) document.getElementById('f-whatsapp').value = l.contactWhatsApp;
+
+      // Existing photos — read-only preview (uploading new ones replaces these)
+      if (existingPhotos.length) {
+        const note = document.createElement('p');
+        note.className = 'form-hint';
+        note.style.cssText = 'flex-basis:100%;color:#B45309;';
+        note.textContent = '⚠️ मौजूदा फ़ोटो नीचे दिख रही हैं। नई फ़ोटो अपलोड करने पर पुरानी फ़ोटो की जगह नई फ़ोटो लग जाएँगी।';
+        previewGrid.parentElement.insertBefore(note, previewGrid);
+        existingPhotos.forEach(url => {
+          const item = document.createElement('div');
+          item.className = 'img-preview-item';
+          item.innerHTML = `<img src="${url}" alt="existing">`;
+          previewGrid.appendChild(item);
+        });
+      }
+    }
+
+    await initEditMode();
   </script>
 </body>
 </html>

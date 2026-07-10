@@ -61,6 +61,24 @@ export async function ensureUserDoc(user) {
   }
 }
 
+// ── Phone OTP Sign-In ─────────────────────────────────────
+let _confirmationResult = null;
+let _recaptchaVerifier  = null;
+
+export async function sendOTP(phone, containerId = 'recaptcha-container') {
+  if (_recaptchaVerifier) { try { _recaptchaVerifier.clear(); } catch {} }
+  _recaptchaVerifier = new firebase.auth.RecaptchaVerifier(containerId, { size: 'invisible' });
+  const num = '+91' + phone.replace(/\D/g, '');
+  _confirmationResult = await _auth.signInWithPhoneNumber(num, _recaptchaVerifier);
+}
+
+export async function verifyOTP(code) {
+  if (!_confirmationResult) throw new Error('पहले OTP भेजें');
+  const result = await _confirmationResult.confirm(code);
+  await ensureUserDoc(result.user);
+  return result.user;
+}
+
 // ── Google Sign-In ────────────────────────────────────────
 export async function signInWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();

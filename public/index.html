@@ -7,9 +7,11 @@
   <meta name="description" content="गंगोह और आस-पास के गाँवों में प्लॉट, मकान, दुकान, खेती की ज़मीन खरीदें-बेचें-किराये पर लें। Gangoh, Saharanpur, UP का सबसे भरोसेमंद classifieds portal।">
   <meta name="keywords" content="गंगोह property, Gangoh plot sale, Gangoh makan, Saharanpur land, apna gangoh">
   <link rel="canonical" href="https://gangoh.in/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
   <header id="site-header"></header>
@@ -17,19 +19,39 @@
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <h1>गंगोह का अपना Online Network</h1>
-      <p>प्रॉपर्टी खरीदें, बेचें या किराये पर लें — सीधे मालिक से</p>
+
+      <!-- Brand badge -->
+      <div class="hero-brand">
+        <div class="hero-brand-icon">🏘️</div>
+        <div class="hero-brand-text">गंगोह<span>.in</span></div>
+      </div>
+
+      <h1>गंगोह का <span class="hero-highlight">अपना</span> <span id="hero-typewriter"></span></h1>
+      <p>प्रॉपर्टी खरीदें, बेचें या किराये पर लें — सीधे मालिक से, बिना दलाल</p>
+
+      <!-- Trust pills -->
+      <div class="hero-trust">
+        <span class="hero-trust-pill">✅ 100% Free Listing</span>
+        <span class="hero-trust-pill">📍 Gangoh Local</span>
+        <span class="hero-trust-pill">🤝 Direct Owner</span>
+      </div>
+
+      <!-- Search bar -->
       <div class="hero-search">
-        <input type="text" id="hero-search-input" placeholder="गाँव, इलाका या प्रॉपर्टी खोजें…" autocomplete="off">
+        <input type="text" id="hero-search-input" placeholder="गाँव, location या प्रॉपर्टी खोजें…" autocomplete="off">
         <button id="hero-search-btn">खोजें</button>
       </div>
-      <div style="margin-top:1.25rem;display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;">
-        <a href="browse.html?type=plot" style="background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;text-decoration:none;">🏞️ प्लॉट</a>
-        <a href="browse.html?type=house" style="background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;text-decoration:none;">🏠 मकान</a>
-        <a href="browse.html?type=shop" style="background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;text-decoration:none;">🏪 दुकान</a>
-        <a href="browse.html?type=agri" style="background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;text-decoration:none;">🌾 खेती</a>
-        <a href="browse.html?purpose=rent" style="background:rgba(255,255,255,0.2);color:white;padding:0.35rem 0.9rem;border-radius:2rem;font-size:0.85rem;text-decoration:none;">🔑 किराया</a>
+
+      <!-- Quick links -->
+      <div class="hero-quick-links">
+        <a href="browse.html?type=plot">🏞️ प्लॉट</a>
+        <a href="browse.html?type=house">🏠 मकान</a>
+        <a href="browse.html?type=shop">🏪 दुकान</a>
+        <a href="browse.html?type=agri">🌾 खेती</a>
+        <a href="browse.html?purpose=rent">🔑 किराया</a>
+        <a href="browse.html?type=career">🎓 करियर</a>
       </div>
+
     </div>
   </section>
 
@@ -83,6 +105,16 @@
             </svg>
           </span>
           <span class="tile-label">खेती की ज़मीन</span>
+        </a>
+
+        <a href="browse.html?type=career" class="category-tile">
+          <span class="tile-icon" style="background:#FEF9C3;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#CA8A04" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3.33 1.67 8.67 1.67 12 0v-5"/>
+            </svg>
+          </span>
+          <span class="tile-label">करियर & पढ़ाई</span>
         </a>
 
         <a href="jobs.html" class="category-tile">
@@ -139,100 +171,34 @@
   </section>
 
   <!-- Trust bar -->
-  <section style="padding:1.5rem 0;background:white;margin-top:2rem;border-top:1.5px solid #F0EDE8;border-bottom:1.5px solid #F0EDE8;">
+  <section style="padding:1.25rem 0;background:white;margin-top:2rem;border-top:1.5px solid #F0EDE8;border-bottom:1.5px solid #F0EDE8;">
     <div class="container">
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem 3rem;text-align:center;">
-        <div><div style="font-size:1.5rem;font-weight:800;color:#1D4ED8;" id="trust-listings">—</div><div style="font-size:0.82rem;color:#888;">Live Listings</div></div>
-        <div><div style="font-size:1.5rem;font-weight:800;color:#1D4ED8;">150+</div><div style="font-size:0.82rem;color:#888;">गाँव & कस्बे</div></div>
-        <div><div style="font-size:1.5rem;font-weight:800;color:#1D4ED8;">✓</div><div style="font-size:0.82rem;color:#888;">Admin Verified</div></div>
-        <div><div style="font-size:1.5rem;font-weight:800;color:#1D4ED8;">Free</div><div style="font-size:0.82rem;color:#888;">लिस्ट करना मुफ़्त</div></div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.6rem 1.5rem;text-align:center;">
+        <span style="font-size:0.88rem;font-weight:700;color:#5B35D5;">🏘️ आपके area के लिए perfect</span>
+        <span style="color:#E2DDD8;">|</span>
+        <span style="font-size:0.88rem;font-weight:700;color:#138808;">📈 Business बढ़ाएँ</span>
+        <span style="color:#E2DDD8;">|</span>
+        <span style="font-size:0.88rem;font-weight:700;color:#B45309;">💼 HR & Office कम लागत में</span>
+        <span style="color:#E2DDD8;">|</span>
+        <span style="font-size:0.88rem;font-weight:700;color:#DC2626;">🤝 हर मौका, हर ज़रूरत</span>
       </div>
     </div>
   </section>
 
-  <!-- Ad Banner Slider -->
-  <section style="padding:1.5rem 0;overflow:hidden;">
+  <!-- Ad Slideshow -->
+  <section id="ad-section" style="padding:1.5rem 0;">
     <div class="container">
-      <div style="position:relative;">
-        <div id="ad-slider" style="display:flex;transition:transform 0.5s ease;gap:1rem;will-change:transform;">
-
-          <div class="ad-slide" style="background:linear-gradient(135deg,#5B35D5,#7C3AED);min-width:100%;border-radius:1rem;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(91,53,213,0.3);">
-            <div>
-              <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">विज्ञापन</div>
-              <div style="font-size:1.4rem;font-weight:900;color:white;line-height:1.2;margin-bottom:0.4rem;">बालाजी हार्डवेयर</div>
-              <div style="font-size:0.9rem;color:rgba(255,255,255,0.85);">सीमेंट · सरिया · पेंट · टाइल्स — गंगोह मैन रोड</div>
-              <div style="margin-top:0.75rem;font-size:0.85rem;font-weight:700;color:#FCD34D;">📞 98765-43210</div>
-            </div>
-            <div style="font-size:4rem;opacity:0.3;flex-shrink:0;">🏗️</div>
-          </div>
-
-          <div class="ad-slide" style="background:linear-gradient(135deg,#DC2626,#EF4444);min-width:100%;border-radius:1rem;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(220,38,38,0.3);">
-            <div>
-              <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">विज्ञापन</div>
-              <div style="font-size:1.4rem;font-weight:900;color:white;line-height:1.2;margin-bottom:0.4rem;">शर्मा मेडिकल स्टोर</div>
-              <div style="font-size:0.9rem;color:rgba(255,255,255,0.85);">सभी दवाइयाँ · 24 घंटे उपलब्ध — सर्राफा बाज़ार</div>
-              <div style="margin-top:0.75rem;font-size:0.85rem;font-weight:700;color:#FCD34D;">📞 91234-56789</div>
-            </div>
-            <div style="font-size:4rem;opacity:0.3;flex-shrink:0;">💊</div>
-          </div>
-
-          <div class="ad-slide" style="background:linear-gradient(135deg,#138808,#059669);min-width:100%;border-radius:1rem;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(19,136,8,0.3);">
-            <div>
-              <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">विज्ञापन</div>
-              <div style="font-size:1.4rem;font-weight:900;color:white;line-height:1.2;margin-bottom:0.4rem;">किसान बीज भंडार</div>
-              <div style="font-size:0.9rem;color:rgba(255,255,255,0.85);">उन्नत बीज · खाद · कीटनाशक — नानौता रोड, गंगोह</div>
-              <div style="margin-top:0.75rem;font-size:0.85rem;font-weight:700;color:#FCD34D;">📞 99887-76655</div>
-            </div>
-            <div style="font-size:4rem;opacity:0.3;flex-shrink:0;">🌱</div>
-          </div>
-
-          <div class="ad-slide" style="background:linear-gradient(135deg,#D97706,#F59E0B);min-width:100%;border-radius:1rem;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(217,119,6,0.3);">
-            <div>
-              <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">विज्ञापन</div>
-              <div style="font-size:1.4rem;font-weight:900;color:white;line-height:1.2;margin-bottom:0.4rem;">गंगोह ट्रेवल्स</div>
-              <div style="font-size:0.9rem;color:rgba(255,255,255,0.85);">दिल्ली · देहरादून · हरिद्वार बुकिंग — बस स्टैंड के पास</div>
-              <div style="margin-top:0.75rem;font-size:0.85rem;font-weight:700;color:#1A1A1A;">📞 98001-11223</div>
-            </div>
-            <div style="font-size:4rem;opacity:0.3;flex-shrink:0;">🚌</div>
-          </div>
-
-          <div class="ad-slide" style="background:linear-gradient(135deg,#0369a1,#0EA5E9);min-width:100%;border-radius:1rem;padding:1.5rem 2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 4px 20px rgba(3,105,161,0.3);">
-            <div>
-              <div style="font-size:0.75rem;font-weight:700;color:rgba(255,255,255,0.7);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.3rem;">विज्ञापन</div>
-              <div style="font-size:1.4rem;font-weight:900;color:white;line-height:1.2;margin-bottom:0.4rem;">अग्रवाल कोचिंग सेंटर</div>
-              <div style="font-size:0.9rem;color:rgba(255,255,255,0.85);">10th · 12th · Competitive Exams — सहारनपुर रोड</div>
-              <div style="margin-top:0.75rem;font-size:0.85rem;font-weight:700;color:#FCD34D;">📞 70001-22334</div>
-            </div>
-            <div style="font-size:4rem;opacity:0.3;flex-shrink:0;">📚</div>
-          </div>
-
+      <h2 class="section-title" style="margin:0 0 1rem;">📢 प्रायोजित विज्ञापन</h2>
+      <div class="ad-slideshow-wrap" style="position:relative;border-radius:1rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+        <div id="ad-slideshow" style="display:flex;height:100%;transition:transform 0.6s ease;">
+          <img src="assets/images/ads/website-banwaen.jpg" alt="वेबसाइट बनवाएं" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
+          <img src="assets/images/ads/prabha-school.jpg" alt="Prabha Gyan Jyoti Public School" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
+          <img src="assets/images/ads/vidya-devi-medicare.jpg" alt="Vidya Devi Medicare Center & Dental Clinic" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
         </div>
-
-        <!-- Dots -->
-        <div id="ad-dots" style="display:flex;justify-content:center;gap:0.4rem;margin-top:0.75rem;">
-          <button onclick="goToSlide(0)" class="ad-dot active" style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:#5B35D5;transition:all 0.2s;padding:0;"></button>
-          <button onclick="goToSlide(1)" class="ad-dot" style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:#CBD5E1;transition:all 0.2s;padding:0;"></button>
-          <button onclick="goToSlide(2)" class="ad-dot" style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:#CBD5E1;transition:all 0.2s;padding:0;"></button>
-          <button onclick="goToSlide(3)" class="ad-dot" style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:#CBD5E1;transition:all 0.2s;padding:0;"></button>
-          <button onclick="goToSlide(4)" class="ad-dot" style="width:8px;height:8px;border-radius:50%;border:none;cursor:pointer;background:#CBD5E1;transition:all 0.2s;padding:0;"></button>
-        </div>
+        <div id="ad-dots" style="position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;"></div>
       </div>
     </div>
   </section>
-  <script>
-    (function(){
-      let current = 0;
-      const total = 5;
-      const slider = document.getElementById('ad-slider');
-      const dots = document.querySelectorAll('.ad-dot');
-      window.goToSlide = function(n){
-        current = n;
-        slider.style.transform = `translateX(calc(-${current * 100}% - ${current}rem))`;
-        dots.forEach((d,i)=>{ d.style.background = i===current?'#5B35D5':'#CBD5E1'; d.style.width=i===current?'20px':'8px'; d.style.borderRadius='4px'; });
-      };
-      setInterval(()=>{ goToSlide((current+1)%total); }, 3500);
-    })();
-  </script>
 
   <!-- Featured listings -->
   <section class="section">
@@ -241,7 +207,7 @@
         <h2 class="section-title" style="margin:0;">⭐ Featured Listings</h2>
         <a href="browse.html" class="btn btn-outline btn-sm">सभी देखें →</a>
       </div>
-      <div id="featured-container">
+      <div id="featured-container" style="min-height:320px;">
         <div class="spinner"></div>
       </div>
     </div>
@@ -254,7 +220,7 @@
         <h2 class="section-title" style="margin:0;">🆕 नई Listings</h2>
         <a href="browse.html" class="btn btn-outline btn-sm">सभी देखें →</a>
       </div>
-      <div id="recent-container">
+      <div id="recent-container" style="min-height:320px;">
         <div class="spinner"></div>
       </div>
     </div>
@@ -278,22 +244,22 @@
         <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
           <div style="font-size:2.5rem;margin-bottom:0.75rem;">📱</div>
           <h3 style="font-size:1rem;margin-bottom:0.4rem;">Google से Login</h3>
-          <p style="font-size:0.88rem;color:#888;margin:0;">Google account से एक click में — कोई password नहीं।</p>
+          <p style="font-size:0.88rem;color:#555;margin:0;">Google account से एक click में — कोई password नहीं।</p>
         </div>
         <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
           <div style="font-size:2.5rem;margin-bottom:0.75rem;">📝</div>
           <h3 style="font-size:1rem;margin-bottom:0.4rem;">मुफ़्त लिस्ट करें</h3>
-          <p style="font-size:0.88rem;color:#888;margin:0;">फ़ोटो के साथ प्रॉपर्टी की जानकारी डालें।</p>
+          <p style="font-size:0.88rem;color:#555;margin:0;">फ़ोटो के साथ प्रॉपर्टी की जानकारी डालें।</p>
         </div>
         <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
           <div style="font-size:2.5rem;margin-bottom:0.75rem;">✅</div>
           <h3 style="font-size:1rem;margin-bottom:0.4rem;">तुरंत Live</h3>
-          <p style="font-size:0.88rem;color:#888;margin:0;">Listing submit करते ही तुरंत live — कोई इंतज़ार नहीं।</p>
+          <p style="font-size:0.88rem;color:#555;margin:0;">Listing submit करते ही तुरंत live — कोई इंतज़ार नहीं।</p>
         </div>
         <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
           <div style="font-size:2.5rem;margin-bottom:0.75rem;">💬</div>
           <h3 style="font-size:1rem;margin-bottom:0.4rem;">WhatsApp पर मिलें</h3>
-          <p style="font-size:0.88rem;color:#888;margin:0;">सीधे मालिक से बात करें — बिचौलिया नहीं।</p>
+          <p style="font-size:0.88rem;color:#555;margin:0;">सीधे मालिक से बात करें — बिचौलिया नहीं।</p>
         </div>
       </div>
     </div>
@@ -314,7 +280,7 @@
               <span style="background:#EDE9FE;color:#5B35D5;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">प्रॉपर्टी टिप्स</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में प्लॉट खरीदने से पहले ये 5 बातें जानें</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">रजिस्ट्री, नक्शा, और दाखिल-खारिज — इन तीन चीज़ों के बिना कोई ज़मीन न खरीदें।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 जून 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 जून 2025</span>
             </div>
           </article>
         </a>
@@ -326,7 +292,7 @@
               <span style="background:#D1FAE5;color:#065F46;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">खेती की ज़मीन</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">नकुड़ व रामपुर मानिहारन में कृषि भूमि के बढ़ते भाव</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">इस साल गंगोह तहसील में खेत की ज़मीन की माँग तेज़ी से बढ़ी है — जानें क्यों।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 मई 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 मई 2025</span>
             </div>
           </article>
         </a>
@@ -338,7 +304,7 @@
               <span style="background:#DBEAFE;color:#1E40AF;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">विकास</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह–सहारनपुर हाईवे — प्रॉपर्टी पर क्या असर?</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">नई सड़क से जुड़े इलाकों में ज़मीन के भाव और किराये में उछाल आने की उम्मीद।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 अप्रैल 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 अप्रैल 2025</span>
             </div>
           </article>
         </a>
@@ -350,7 +316,7 @@
               <span style="background:#FEF3C7;color:#92400E;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">किराया</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में किराये का मकान कैसे खोजें?</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">किराया दरें, सही इलाक़ा चुनने के टिप्स और agreement की पूरी जानकारी।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 मार्च 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 मार्च 2025</span>
             </div>
           </article>
         </a>
@@ -362,7 +328,7 @@
               <span style="background:#FEE2E2;color:#991B1B;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">व्यापार</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में दुकान के लिए सबसे अच्छी जगह कौन सी?</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">मैन बाज़ार, सर्राफा, सहारनपुर रोड — किसके लिए कौन सा इलाक़ा सही है।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 फ़रवरी 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 फ़रवरी 2025</span>
             </div>
           </article>
         </a>
@@ -374,7 +340,7 @@
               <span style="background:#EDE9FE;color:#5B35D5;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">नौकरी</span>
               <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह और आस-पास नौकरी के मौक़े</h3>
               <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">शिक्षा, स्वास्थ्य, व्यापार — किस क्षेत्र में मिल सकती है नौकरी और कैसे खोजें।</p>
-              <span style="font-size:0.78rem;color:#999;">📅 जनवरी 2025</span>
+              <span style="font-size:0.78rem;color:#666;">📅 जनवरी 2025</span>
             </div>
           </article>
         </a>
@@ -395,9 +361,9 @@
   <footer id="site-footer"></footer>
   <div id="toast-container"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
     import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
     import { initAuth, onAuthReady } from './assets/js/auth.js';
@@ -506,7 +472,54 @@
     document.getElementById('hero-search-input').addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('hero-search-btn').click();
     });
+
     } // end else (fbConfig exists)
+
+    // ── Ad Slideshow ───────────────────────────────────────
+    (function(){
+      const slideshow = document.getElementById('ad-slideshow');
+      const dotsEl = document.getElementById('ad-dots');
+      const slides = slideshow.querySelectorAll('img');
+      let cur = 0;
+      slides.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.style.cssText = `width:${i===0?'20px':'8px'};height:8px;border-radius:4px;border:none;cursor:pointer;background:${i===0?'#fff':'rgba(255,255,255,0.5)'};transition:all 0.2s;padding:0;`;
+        dot.onclick = () => goToSlide(i);
+        dotsEl.appendChild(dot);
+      });
+      function goToSlide(n) {
+        cur = n;
+        slideshow.style.transform = `translateX(-${cur*100}%)`;
+        dotsEl.querySelectorAll('button').forEach((d,i) => {
+          d.style.width = i===cur ? '20px' : '8px';
+          d.style.background = i===cur ? '#fff' : 'rgba(255,255,255,0.5)';
+        });
+      }
+      setInterval(() => goToSlide((cur+1) % slides.length), 4000);
+    })();
+
+    // ── Typewriter effect ─────────────────────────────────
+    (function(){
+      const el = document.getElementById('hero-typewriter');
+      if (!el) return;
+      const words = ['Online नेटवर्क', 'Digital बाज़ार', 'Property Hub', 'भरोसेमंद Platform'];
+      let ti = 0, ci = 0, deleting = false;
+      const TYPE_SPEED = 80, DELETE_SPEED = 40, PAUSE = 2000;
+      function tick() {
+        const full = words[ti];
+        if (!deleting) {
+          ci++;
+          el.textContent = full.slice(0, ci);
+          if (ci === full.length) { deleting = true; setTimeout(tick, PAUSE); return; }
+        } else {
+          ci--;
+          el.textContent = full.slice(0, ci);
+          if (ci === 0) { deleting = false; ti = (ti + 1) % words.length; }
+        }
+        setTimeout(tick, deleting ? DELETE_SPEED : TYPE_SPEED);
+      }
+      tick();
+    })();
   </script>
 </body>
 </html>

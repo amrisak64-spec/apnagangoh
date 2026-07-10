@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
   <header id="site-header"></header>
@@ -149,6 +149,7 @@
           ${l.status === 'rejected' ? `<div style="font-size:0.78rem;color:#DC2626;margin-top:0.25rem;">❗ Admin ने reject किया। नई listing डालें।</div>` : ''}
           <div style="display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;">
             ${l.status === 'live' ? `<a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁 देखें</a>` : ''}
+            <a href="post.html?edit=${l.id}" class="btn btn-outline btn-sm">✏️ Edit</a>
             <button class="btn btn-danger btn-sm" data-del="${l.id}">🗑️ Delete</button>
           </div>
         </div>`;

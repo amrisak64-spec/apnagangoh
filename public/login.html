@@ -1,14 +1,14 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — गंगोह.in | गंगोह का Online बाज़ार</title>
-  <meta name="description" content="Google से Login करें — गंगोह और आस-पास के गाँव का सबसे भरोसेमंद प्रॉपर्टी पोर्टल।">
+  <title>Login — गंगोह.in | गंगोह का Online Network</title>
+  <meta name="description" content="Google या Mobile OTP से Login करें — गंगोह का सबसे भरोसेमंद प्रॉपर्टी पोर्टल।">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
   <header id="site-header"></header>
@@ -21,10 +21,45 @@
         <p class="sub">Login करें और शुरू करें</p>
       </div>
 
+      <!-- Google Login -->
       <button id="google-signin-btn" class="btn btn-primary btn-full" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;font-size:1rem;padding:0.85rem;">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:22px;height:22px;background:#fff;border-radius:50%;padding:2px;">
         Google से Login करें
       </button>
+
+      <!-- Divider -->
+      <div style="display:flex;align-items:center;gap:0.75rem;margin:1.25rem 0;">
+        <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+        <span style="color:#888;font-size:0.85rem;white-space:nowrap;">या Mobile OTP से</span>
+        <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+      </div>
+
+      <!-- Phone OTP section -->
+      <div id="otp-section">
+        <!-- Step 1: Phone number -->
+        <div id="otp-step1">
+          <div style="display:flex;gap:0.5rem;">
+            <div style="background:#F1F5F9;border:1.5px solid #CBD5E1;border-radius:0.5rem;padding:0.65rem 0.75rem;font-size:0.95rem;white-space:nowrap;color:#333;">🇮🇳 +91</div>
+            <input type="tel" id="phone-input" class="form-control" placeholder="10 अंकों का मोबाइल नंबर" maxlength="10" inputmode="numeric" style="flex:1;">
+          </div>
+          <div id="recaptcha-container"></div>
+          <button id="send-otp-btn" class="btn btn-outline btn-full" style="margin-top:0.75rem;font-size:0.95rem;">
+            📱 OTP भेजें
+          </button>
+        </div>
+
+        <!-- Step 2: OTP verify -->
+        <div id="otp-step2" style="display:none;">
+          <p style="color:#555;font-size:0.9rem;margin-bottom:0.75rem;text-align:center;" id="otp-sent-msg"></p>
+          <input type="tel" id="otp-input" class="form-control" placeholder="6 अंकों का OTP दर्ज करें" maxlength="6" inputmode="numeric" style="text-align:center;letter-spacing:0.3rem;font-size:1.2rem;">
+          <button id="verify-otp-btn" class="btn btn-primary btn-full" style="margin-top:0.75rem;">
+            ✅ OTP Verify करें
+          </button>
+          <button id="resend-otp-btn" class="btn btn-outline btn-full" style="margin-top:0.5rem;font-size:0.85rem;">
+            🔄 OTP दोबारा भेजें
+          </button>
+        </div>
+      </div>
 
       <div id="auth-loading" style="display:none;text-align:center;padding:1rem;">
         <div class="spinner" style="margin:0 auto 0.75rem;"></div>
@@ -42,13 +77,12 @@
   <footer id="site-footer"></footer>
   <div id="toast-container"></div>
 
-  <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
     import { mountUI, toast } from './assets/js/ui.js';
-    import { initAuth, signInWithGoogle, handleRedirectResult, onAuthReady } from './assets/js/auth.js';
+    import { initAuth, signInWithGoogle, handleRedirectResult, onAuthReady, sendOTP, verifyOTP } from './assets/js/auth.js';
 
     let fbConfig;
     try {
@@ -68,7 +102,6 @@
 
     const nextURL = new URLSearchParams(location.search).get('next') || 'index.html';
 
-    // Handle redirect-based login result (popup was blocked, user came back via redirect)
     const redirectUser = await handleRedirectResult();
     if (redirectUser) {
       toast('Login सफल!', 'success');
@@ -79,27 +112,94 @@
       if (user) window.location.href = nextURL;
     });
 
-    const btn      = document.getElementById('google-signin-btn');
-    const loading  = document.getElementById('auth-loading');
-    const errEl    = document.getElementById('login-error');
+    const errEl   = document.getElementById('login-error');
+    const loading = document.getElementById('auth-loading');
 
-    btn.addEventListener('click', async () => {
-      btn.style.display = 'none';
-      loading.style.display = 'block';
-      errEl.style.display = 'none';
+    function showError(msg) {
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    }
+    function hideError() { errEl.style.display = 'none'; }
+    function showLoading(show) { loading.style.display = show ? 'block' : 'none'; }
+
+    // ── Google Login ───────────────────────────────────────
+    const googleBtn = document.getElementById('google-signin-btn');
+    googleBtn.addEventListener('click', async () => {
+      googleBtn.style.display = 'none';
+      showLoading(true);
+      hideError();
       try {
         await signInWithGoogle();
         toast('Login सफल!', 'success');
         setTimeout(() => window.location.href = nextURL, 800);
       } catch (err) {
-        loading.style.display = 'none';
-        btn.style.display = 'flex';
-        errEl.textContent = 'Login में error। दोबारा try करें।';
-        errEl.style.display = 'block';
+        showLoading(false);
+        googleBtn.style.display = 'flex';
+        showError('Login में error। दोबारा try करें।');
+      }
+    });
+
+    // ── OTP Login ──────────────────────────────────────────
+    const step1     = document.getElementById('otp-step1');
+    const step2     = document.getElementById('otp-step2');
+    const phoneInput= document.getElementById('phone-input');
+    const otpInput  = document.getElementById('otp-input');
+    const sendBtn   = document.getElementById('send-otp-btn');
+    const verifyBtn = document.getElementById('verify-otp-btn');
+    const resendBtn = document.getElementById('resend-otp-btn');
+
+    // Only allow digits in phone/otp
+    phoneInput.addEventListener('input', () => { phoneInput.value = phoneInput.value.replace(/\D/g,''); });
+    otpInput.addEventListener('input', () => { otpInput.value = otpInput.value.replace(/\D/g,''); });
+
+    async function doSendOTP() {
+      hideError();
+      const phone = phoneInput.value.trim();
+      if (!/^[6-9][0-9]{9}$/.test(phone)) {
+        showError('सही 10 अंकों का मोबाइल नंबर दर्ज करें।');
+        return;
+      }
+      sendBtn.disabled = true;
+      sendBtn.textContent = '⏳ भेज रहे हैं...';
+      try {
+        await sendOTP(phone);
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+        document.getElementById('otp-sent-msg').textContent = `+91 ${phone} पर OTP भेज दिया गया।`;
+        otpInput.focus();
+      } catch (err) {
+        showError('OTP नहीं गया। नंबर जांचें और दोबारा try करें।');
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📱 OTP भेजें';
+      }
+    }
+
+    sendBtn.addEventListener('click', doSendOTP);
+    resendBtn.addEventListener('click', () => {
+      step2.style.display = 'none';
+      step1.style.display = 'block';
+      sendBtn.disabled = false;
+      sendBtn.textContent = '📱 OTP भेजें';
+      otpInput.value = '';
+      hideError();
+    });
+
+    verifyBtn.addEventListener('click', async () => {
+      hideError();
+      const code = otpInput.value.trim();
+      if (code.length !== 6) { showError('6 अंकों का OTP दर्ज करें।'); return; }
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = '⏳ Verify हो रहा है...';
+      try {
+        await verifyOTP(code);
+        toast('Login सफल!', 'success');
+        setTimeout(() => window.location.href = nextURL, 800);
+      } catch (err) {
+        showError('OTP गलत है या समय सीमा समाप्त हो गई।');
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = '✅ OTP Verify करें';
       }
     });
   </script>
 </body>
 </html>
-
-

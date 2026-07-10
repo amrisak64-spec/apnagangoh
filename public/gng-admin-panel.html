@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 <body>
   <header id="site-header"></header>
@@ -135,7 +135,6 @@
     });
 
     function loadTab(status) {
-      // Unsubscribe old real-time listener if switching away from pending
       if (pendingUnsubscribe) { pendingUnsubscribe(); pendingUnsubscribe = null; }
 
       const content = document.getElementById('admin-content');
@@ -337,6 +336,7 @@
         }
       };
     }
+
 
     // Initial load — pending tab with real-time listener
     loadTab('pending');
