@@ -1,0 +1,27 @@
+name: Deploy Firestore Rules & Indexes on merge
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'firestore.rules'
+      - 'firestore.indexes.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_APNAGANGOH_WEB }}'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm install -g firebase-tools
+
+      - run: firebase deploy --only firestore:rules,firestore:indexes --project apnagangoh-web
