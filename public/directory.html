@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -11,21 +11,280 @@
 </head>
 <body>
   <header id="site-header"></header>
-  <div class="page-header"><div class="container"><h1>📒 बिज़नेस डायरेक्टरी</h1></div></div>
-  <main class="container section">
-    <div class="empty-state" style="max-width:500px;margin:0 auto;">
-      <span class="empty-icon">🚧</span>
-      <h2 style="font-size:1.2rem;margin-bottom:0.5rem;">जल्द आ रहा है!</h2>
-      <p>Business & Mandi Directory Phase 2 में launch होगा।</p>
-      <a href="index.html" class="btn btn-primary" style="margin-top:1.5rem;">🏠 Home</a>
+
+  <div class="page-header">
+    <div class="container">
+      <h1>📒 बिज़नेस डायरेक्टरी</h1>
+      <p style="color:#888;margin:0.25rem 0 0;font-size:0.9rem;">गंगोह का yellow-pages — दुकान, डॉक्टर, कोचिंग, बीज-खाद — मुफ़्त में listed करें</p>
+    </div>
+  </div>
+
+  <main class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:2rem;align-items:start;">
+
+      <!-- Post business form -->
+      <div style="background:white;border-radius:0.75rem;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.08);position:sticky;top:1rem;">
+        <h2 style="font-size:1.1rem;margin:0 0 1.25rem;">✍️ अपना बिज़नेस जोड़ें</h2>
+
+        <div id="biz-form-wrap">
+          <div class="form-group">
+            <label class="form-label">बिज़नेस का नाम *</label>
+            <input type="text" class="form-control" id="biz-name" maxlength="80" placeholder="जैसे: शर्मा बीज भंडार">
+          </div>
+          <div class="form-group">
+            <label class="form-label">श्रेणी *</label>
+            <select class="form-control" id="biz-category">
+              <option value="">चुनें</option>
+              <option value="seed">बीज / खाद</option>
+              <option value="tractor">ट्रैक्टर / कृषि यंत्र</option>
+              <option value="doctor">डॉक्टर / क्लिनिक</option>
+              <option value="coaching">कोचिंग</option>
+              <option value="shop">दुकान</option>
+              <option value="other">अन्य</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">पता</label>
+            <input type="text" class="form-control" id="biz-address" maxlength="120" placeholder="जैसे: मैन बाज़ार, गंगोह">
+          </div>
+          <div class="form-group">
+            <label class="form-label">गाँव / लोकेशन</label>
+            <select class="form-control" id="biz-village">
+              <option value="">गंगोह / आस-पास</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">फ़ोन नंबर *</label>
+            <input type="tel" class="form-control" id="biz-phone" placeholder="10 अंक का नंबर" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp नंबर <span style="font-weight:400;color:#888;font-size:0.85rem;">(अगर अलग हो)</span></label>
+            <input type="tel" class="form-control" id="biz-whatsapp" placeholder="10 अंक का नंबर" maxlength="10">
+          </div>
+          <p id="biz-error" class="form-error" style="display:none;"></p>
+          <div id="biz-login-notice" style="display:none;background:#FEF3C7;border-radius:0.5rem;padding:0.75rem;font-size:0.9rem;margin-bottom:0.75rem;">
+            ⚠️ जोड़ने के लिए <a href="login.html?next=directory.html" style="color:#1D4ED8;font-weight:700;">Login करें</a>
+          </div>
+          <button id="biz-submit-btn" class="btn btn-primary btn-full">📤 बिज़नेस जोड़ें</button>
+        </div>
+
+        <div id="biz-success" style="display:none;text-align:center;padding:1rem 0;">
+          <div style="font-size:2.5rem;">✅</div>
+          <h3 style="margin:0.5rem 0 0.25rem;">जुड़ गया!</h3>
+          <p style="color:#888;font-size:0.9rem;">आपका बिज़नेस अब डायरेक्टरी में दिख रहा है।</p>
+          <button id="biz-post-another" class="btn btn-outline btn-sm" style="margin-top:1rem;">+ और जोड़ें</button>
+        </div>
+      </div>
+
+      <!-- Directory list -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
+          <h2 style="font-size:1.1rem;margin:0;">📋 डायरेक्टरी</h2>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <select class="form-control" id="filter-category" style="min-width:150px;">
+              <option value="">सभी श्रेणियाँ</option>
+              <option value="seed">बीज / खाद</option>
+              <option value="tractor">ट्रैक्टर / कृषि यंत्र</option>
+              <option value="doctor">डॉक्टर / क्लिनिक</option>
+              <option value="coaching">कोचिंग</option>
+              <option value="shop">दुकान</option>
+              <option value="other">अन्य</option>
+            </select>
+            <button id="refresh-biz-btn" class="btn btn-outline btn-sm">🔄</button>
+          </div>
+        </div>
+        <div id="biz-board"><div class="spinner"></div></div>
+      </div>
     </div>
   </main>
+
   <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI } from './assets/js/ui.js';
+    import { mountUI, toast } from './assets/js/ui.js';
+    import { initAuth, onAuthReady } from './assets/js/auth.js';
+    import { initDirectory, createBusiness, fetchDirectory, deleteBusiness } from './assets/js/directory.js';
+    import { VILLAGES } from './data/villages.js';
+
+    let fbConfig;
+    try {
+      const m = await import('./assets/js/firebase-config.js');
+      fbConfig = m.firebaseConfig;
+    } catch {
+      document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;
+      throw new Error('missing');
+    }
+
+    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+    const auth = firebase.auth();
+    const db   = firebase.firestore();
+
     mountUI('directory.html');
+    initAuth(auth, db);
+    initDirectory(db, auth);
+
+    // Populate village dropdown
+    const villSel = document.getElementById('biz-village');
+    VILLAGES.filter(v => v.value !== 'other').forEach(v => {
+      const o = document.createElement('option');
+      o.value = v.value; o.textContent = v.label;
+      villSel.appendChild(o);
+    });
+
+    let currentUser = null;
+    let allBusinesses = [];
+    onAuthReady(user => {
+      currentUser = user;
+      document.getElementById('biz-login-notice').style.display = user ? 'none' : 'block';
+      document.getElementById('biz-submit-btn').style.display   = user ? 'block' : 'none';
+    });
+
+    // ── Submit business ─────────────────────────────────────
+    document.getElementById('biz-submit-btn').addEventListener('click', async () => {
+      const businessName = document.getElementById('biz-name').value.trim();
+      const category      = document.getElementById('biz-category').value;
+      const address        = document.getElementById('biz-address').value.trim();
+      const village         = document.getElementById('biz-village').value;
+      const phone            = document.getElementById('biz-phone').value.trim();
+      const whatsapp           = document.getElementById('biz-whatsapp').value.trim() || phone;
+      const errEl               = document.getElementById('biz-error');
+
+      if (!businessName || !category) { errEl.textContent = 'नाम और श्रेणी ज़रूरी है।'; errEl.style.display='block'; return; }
+      if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही फ़ोन नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+      errEl.style.display = 'none';
+
+      const btn = document.getElementById('biz-submit-btn');
+      btn.disabled = true; btn.textContent = 'जोड़ा जा रहा है...';
+
+      try {
+        await createBusiness({ businessName, category, address, village, phone, whatsapp });
+        document.getElementById('biz-form-wrap').style.display = 'none';
+        document.getElementById('biz-success').style.display   = 'block';
+        toast('बिज़नेस जुड़ गया!', 'success');
+        loadBoard();
+      } catch (err) {
+        errEl.textContent = `Error: ${err.message}`; errEl.style.display='block';
+      } finally {
+        btn.disabled = false; btn.textContent = '📤 बिज़नेस जोड़ें';
+      }
+    });
+
+    document.getElementById('biz-post-another').addEventListener('click', () => {
+      ['biz-name','biz-category','biz-address','biz-village','biz-phone','biz-whatsapp']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      document.getElementById('biz-form-wrap').style.display = 'block';
+      document.getElementById('biz-success').style.display   = 'none';
+    });
+
+    // ── Load board ──────────────────────────────────────────
+    const CATEGORY_LABELS = { seed:'🌱 बीज / खाद', tractor:'🚜 ट्रैक्टर / कृषि यंत्र', doctor:'⚕️ डॉक्टर / क्लिनिक', coaching:'📖 कोचिंग', shop:'🏪 दुकान', other:'📌 अन्य' };
+
+    async function loadBoard() {
+      const board = document.getElementById('biz-board');
+      board.innerHTML = '<div class="spinner"></div>';
+      try {
+        allBusinesses = await fetchDirectory();
+        renderBoard();
+      } catch (err) {
+        board.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+      }
+    }
+
+    function renderBoard() {
+      const board = document.getElementById('biz-board');
+      const catFilter = document.getElementById('filter-category').value;
+      const list = catFilter ? allBusinesses.filter(b => b.category === catFilter) : allBusinesses;
+      renderJsonLd(list);
+
+      if (!list.length) {
+        board.innerHTML = `<div class="empty-state"><span class="empty-icon">📒</span><p>अभी कोई बिज़नेस listed नहीं है।<br>पहले आप जोड़ें!</p></div>`;
+        return;
+      }
+      board.innerHTML = '';
+      list.forEach(b => board.appendChild(buildBizCard(b)));
+    }
+
+    function buildBizCard(b) {
+      const div = document.createElement('div');
+      div.id = `biz-${b.id}`;
+      div.style.cssText = 'background:white;border-radius:0.75rem;padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:0.85rem;';
+
+      const catLabel = CATEGORY_LABELS[b.category] || b.category;
+      const villageLabel = (VILLAGES.find(v => v.value === b.village) || {}).label || '';
+      const waLink = b.whatsapp ? `https://wa.me/91${b.whatsapp}?text=${encodeURIComponent(`नमस्ते! मैंने गंगोह.in डायरेक्टरी पर "${b.businessName}" देखा।`)}` : null;
+      const isMine = currentUser && b.ownerId === currentUser.uid;
+
+      div.innerHTML = `
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+          <div>
+            <span style="font-size:0.8rem;background:#DCFCE7;color:#15803D;padding:0.2rem 0.6rem;border-radius:1rem;font-weight:700;">${catLabel}</span>
+            ${b.isFeatured ? `<span style="font-size:0.8rem;margin-left:0.35rem;">⭐</span>` : ''}
+          </div>
+        </div>
+        <h3 style="margin:0.6rem 0 0.15rem;font-size:1.05rem;font-weight:800;">${escapeHtml(b.businessName)}</h3>
+        <div style="font-size:0.88rem;color:#555;margin-bottom:0.3rem;">
+          ${b.address ? `📍 ${escapeHtml(b.address)}` : ''}${villageLabel ? ` · ${villageLabel}` : ''}
+        </div>
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center;">
+          ${b.phone ? `<a href="tel:${b.phone}" style="display:inline-flex;align-items:center;gap:0.4rem;background:#EFF6FF;color:#1D4ED8;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">📞 Call करें</a>` : ''}
+          ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;background:#25D366;color:white;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">💬 WhatsApp</a>` : ''}
+          ${isMine ? `<button class="btn btn-danger btn-sm" data-del-biz="${b.id}">🗑️ Delete</button>` : ''}
+        </div>`;
+
+      if (isMine) {
+        div.querySelector(`[data-del-biz]`).addEventListener('click', async () => {
+          if (!confirm('इस बिज़नेस को delete करें?')) return;
+          try {
+            await deleteBusiness(b.id);
+            allBusinesses = allBusinesses.filter(x => x.id !== b.id);
+            renderBoard();
+            toast('Delete हो गया।', 'success');
+          } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+          }
+        });
+      }
+
+      return div;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── LocalBusiness structured data for the visible list ────
+    function renderJsonLd(list) {
+      document.querySelectorAll('script[data-localbusiness-ld]').forEach(el => el.remove());
+      list.slice(0, 20).forEach(b => {
+        const ld = {
+          '@context': 'https://schema.org/',
+          '@type': 'LocalBusiness',
+          name: b.businessName,
+          address: { '@type': 'PostalAddress', streetAddress: b.address || '', addressLocality: 'Gangoh', addressRegion: 'UP', addressCountry: 'IN' },
+          ...(b.phone ? { telephone: `+91${b.phone}` } : {}),
+        };
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.dataset.localbusinessLd = '1';
+        script.textContent = JSON.stringify(ld);
+        document.head.appendChild(script);
+      });
+    }
+
+    document.getElementById('filter-category').addEventListener('change', renderBoard);
+    document.getElementById('refresh-biz-btn').addEventListener('click', loadBoard);
+    loadBoard();
   </script>
+
+  <style>
+    @media (max-width: 700px) {
+      main .container > div { grid-template-columns: 1fr !important; }
+      main .container > div > div:first-child { position: static !important; }
+    }
+  </style>
 </body>
 </html>
-

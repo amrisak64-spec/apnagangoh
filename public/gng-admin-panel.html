@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel — गंगोह.in</title>
+  <meta name="description" content="गंगोह.in का listing moderation और admin panel।">
   <meta name="robots" content="noindex, nofollow">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/styles.css">
@@ -54,6 +55,9 @@
       <button class="tab-btn" data-tab="rejected" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
         Rejected
       </button>
+      <button class="tab-btn" data-tab="reports" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
+        🚩 Reports <span id="reports-count" style="background:#DC2626;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
+      </button>
     </div>
 
     <div id="admin-content">
@@ -72,6 +76,7 @@
     import { mountUI, updateNavUser, toast, formatPrice } from './assets/js/ui.js';
     import { initAuth, requireAdmin, logout } from './assets/js/auth.js';
     import { initListings, approveListing, rejectListing, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js';
+    import { initReports, fetchOpenReports, resolveReport } from './assets/js/reports.js';
 
     let fbConfig;
     try {
@@ -90,6 +95,7 @@
     mountUI('gng-admin-panel.html');
     initAuth(auth, db);
     initListings(db, storage, auth);
+    initReports(db);
 
     const { user } = await requireAdmin();
     updateNavUser(user, true);
@@ -104,15 +110,17 @@
     // ── Stats ─────────────────────────────────────────────
     async function loadStats() {
       try {
-        const [pSnap, lSnap, rSnap] = await Promise.all([
+        const [pSnap, lSnap, rSnap, reports] = await Promise.all([
           db.collection('listings').where('status','==','pending').get(),
           db.collection('listings').where('status','==','live').get(),
           db.collection('listings').where('status','==','rejected').get(),
+          fetchOpenReports(),
         ]);
         document.getElementById('stat-pending').textContent = pSnap.size;
         document.getElementById('stat-live').textContent    = lSnap.size;
         document.getElementById('stat-rejected').textContent= rSnap.size;
         document.getElementById('pending-count').textContent = pSnap.size;
+        document.getElementById('reports-count').textContent = reports.length || '';
       } catch {}
     }
     loadStats();
@@ -139,6 +147,16 @@
 
       const content = document.getElementById('admin-content');
       content.innerHTML = '<div class="spinner"></div>';
+
+      if (status === 'reports') {
+        fetchOpenReports().then(reports => {
+          renderReports(reports, content);
+          document.getElementById('reports-count').textContent = reports.length || '';
+        }).catch(err => {
+          content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        });
+        return;
+      }
 
       if (status === 'pending') {
         // Real-time listener — auto-updates when new posts arrive
@@ -182,6 +200,43 @@
       }
       tbody.innerHTML = '';
       listings.forEach(l => tbody.appendChild(buildRow(l, status)));
+    }
+
+    function renderReports(reports, container) {
+      if (!reports.length) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>कोई खुली Report नहीं — सब साफ़ है!</p></div>`;
+        return;
+      }
+      const wrap = document.createElement('div');
+      reports.forEach(r => {
+        const date = r.createdAt?.toDate ? r.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
+        const card = document.createElement('div');
+        card.id = `report-${r.id}`;
+        card.style.cssText = 'background:white;border-left:3px solid #DC2626;border-radius:0.5rem;padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:0.75rem;';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+            <a href="listing.html?id=${r.listingId}" target="_blank" style="font-weight:700;">${r.listingTitle || r.listingId}</a>
+            <span style="font-size:0.78rem;color:#bbb;">${date}</span>
+          </div>
+          <p style="margin:0.5rem 0;color:#333;">${r.reason}</p>
+          ${r.reporterContact ? `<p style="margin:0 0 0.5rem;font-size:0.85rem;color:#888;">📞 ${r.reporterContact}</p>` : ''}
+          <button class="btn btn-green btn-sm" data-resolve="${r.id}">✅ Resolve करें</button>`;
+        const resolveBtn = card.querySelector('[data-resolve]');
+        resolveBtn.addEventListener('click', async () => {
+          resolveBtn.disabled = true;
+          try {
+            await resolveReport(r.id);
+            card.remove();
+            toast('Report resolve हो गई।', 'success');
+          } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+            resolveBtn.disabled = false;
+          }
+        });
+        wrap.appendChild(card);
+      });
+      container.innerHTML = '';
+      container.appendChild(wrap);
     }
 
     function buildRow(l, status) {

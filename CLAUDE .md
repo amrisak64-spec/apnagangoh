@@ -49,21 +49,23 @@ Three launch categories only:
 │   ├── assets/
 │   │   ├── css/styles.css
 │   │   ├── js/
-│   │   │   ├── firebase-config.js        # gitignored; real keys
-│   │   │   ├── firebase-config.example.js# committed placeholder
+│   │   │   ├── firebase-config.js        # committed; Firebase web keys are public, protected by security rules
+│   │   │   ├── firebase-config.example.js# placeholder reference
 │   │   │   ├── auth.js                    # OTP login/logout, role check
-│   │   │   ├── listings.js                # CRUD + filters
-│   │   │   ├── jobs.js
-│   │   │   ├── directory.js
-│   │   │   ├── requirements.js
-│   │   │   ├── admin.js                   # approve/reject/verify/feature
+│   │   │   ├── listings.js                # listings + requirements CRUD + filters
+│   │   │   ├── jobs.js                    # jobs board CRUD
+│   │   │   ├── directory.js               # business/mandi directory CRUD
+│   │   │   ├── reports.js                 # fake-listing report flow
 │   │   │   ├── image-compress.js          # browser-image-compression wrapper
 │   │   │   └── ui.js                      # shared header/footer, helpers
-│   │   └── img/
+│   │   └── images/ads/          # sponsored/ad banner images
 │   ├── data/
-│   │   └── villages.js          # seed list: Gangoh Town + ~30 nearest villages
+│   │   └── villages.js          # seed list: Gangoh Town + ~180 surrounding villages
+│   ├── blog/                    # Gangoh Updates articles (Phase 3, shipped early)
 │   ├── sitemap.xml
 │   └── robots.txt
+
+Note: the moderation panel is `gng-admin-panel.html` (not `admin.html` as in earlier drafts of this spec) — its logic lives inline in the page rather than in a separate module.
 ├── firestore.rules
 ├── storage.rules
 ├── netlify.toml
@@ -75,10 +77,10 @@ Three launch categories only:
 
 **`listings`**
 ```
-type: "plot"|"house"|"shop"|"agri"
-purpose: "sale"|"rent"
+type: "plot"|"house"|"shop"|"agri"|"career"
+purpose: "sale"|"rent" (n/a for type "career")
 title, description
-price (number), areaSize (number), areaUnit: "gaj"|"bigha"|"sqft"
+price (number, 0 for "career"), areaSize (number), areaUnit: "गज"|"बीघा"|"guz"|"sqft"|"feet"
 townOrVillage: "town"|"village"
 village (string), locality, landmark
 photos: [string]            // compressed Storage URLs
@@ -86,17 +88,28 @@ ownerId, dealerId (nullable)
 isVerified (bool), isFeatured (bool)
 status: "pending"|"live"|"sold"|"rejected"
 createdAt, updatedAt (serverTimestamp)
+
+// type-specific extra fields (flat on the doc, not nested):
+ratePerGaj, ratePerBigha, roadSizeFeet   // plot/agri
+storey, rooms, securityDeposit           // house
+pagdi                                    // shop-rent
+// career: no purpose/price — guidance content instead
+guidanceFor: "10th"|"12th"|"graduation"|"competitive"|"skill"
+domain (string), mode: "offline"|"online"|"both"
+fee (string, free text), duration, timing, mentorQualification
 ```
 
-**`jobs`**: title, employerName, category("school"|"hospital"|"college"|"mandi"|"shop"|"other"), salary, location, description, contactWhatsApp, postedBy, status, createdAt
+**`jobs`**: title, employerName, category("school"|"hospital"|"college"|"mandi"|"shop"|"other"), salary, location, description, contactWhatsApp, postedBy, status("live"|"rejected"), createdAt
 
-**`directory`**: businessName, category("seed"|"tractor"|"doctor"|"coaching"|"shop"|"other"), phone, whatsapp, address, village, isFeatured, createdAt
+**`directory`**: businessName, category("seed"|"tractor"|"doctor"|"coaching"|"shop"|"other"), phone, whatsapp, address, village, ownerId, isFeatured, createdAt
 
-**`requirements`**: buyerId, type, budgetMin, budgetMax, preferredArea, note, contactWhatsApp, status, createdAt
+**`requirements`**: ownerId, ownerName, type, purpose, village, budgetMin, budgetMax, description, phone, status("active"), createdAt
 
 **`users`**: uid, name, phone, role("user"|"dealer"|"admin"), createdAt
 
-**`dealers`**: uid, shopName, verified(bool), subscriptionStatus("free"|"active"|"expired"), subscriptionExpiry, listingsCount, leadsReceived, createdAt
+**`dealers`**: uid, shopName, verified(bool), subscriptionStatus("free"|"active"|"expired"), subscriptionExpiry, listingsCount, leadsReceived, createdAt — self-serve dealer signup is gated behind Phase 3 (Razorpay subscriptions); `dealer.html` reads existing dealer docs but has no signup form yet.
+
+**`reports`**: listingId, listingTitle, reason, reporterContact (optional), status("open"|"resolved"), createdAt — one doc per "report fake listing" submission.
 
 ## Firestore security rules (intent)
 

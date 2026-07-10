@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /admin.html
+Disallow: /gng-admin-panel.html
 Disallow: /my-listings.html
 
 Sitemap: https://apnagangoh.in/sitemap.xml
