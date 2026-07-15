@@ -62,20 +62,20 @@ a:hover { text-decoration: underline; }
   overflow: visible;
 }
 #site-header .logo {
-  font-size: 2.2rem;
+  font-size: 2.7rem;
   font-weight: 900;
   letter-spacing: -0.04em;
   line-height: 1.15;
   overflow: visible;
   text-decoration: none;
-  background: linear-gradient(90deg, #FFD700, #FF6B00, #FF3B30, #FF9500, #FFD700, #FF6B00);
+  background: linear-gradient(90deg, #FFFFFF, #DCD6FF, #FFFFFF, #E8E8FF, #FFFFFF);
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: logoShine 3s linear infinite;
-  text-shadow: 1px 1px 0 rgba(120,60,0,0.35), 2px 2px 0 rgba(120,60,0,0.3),
-               3px 3px 0 rgba(120,60,0,0.25), 4px 4px 6px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 0 rgba(59,15,158,0.45), 2px 2px 0 rgba(59,15,158,0.4),
+               3px 3px 0 rgba(59,15,158,0.35), 4px 4px 6px rgba(0,0,0,0.3);
 }
 @keyframes logoShine {
   0%   { background-position: 0% center; }
