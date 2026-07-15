@@ -16,7 +16,7 @@ function getHeaderHTML(activePage = '') {
   ).join('');
   return `
 <div class="inner">
-  <a href="/" class="logo"><span style="-webkit-text-fill-color:#FFD700;color:#FFD700;">GAN</span><span style="-webkit-text-fill-color:#FF6B00;color:#FF6B00;">GOH</span><span style="-webkit-text-fill-color:#FFD700;color:#FFD700;">.IN</span></a>
+  <a href="/" class="logo">GANGOH.IN</a>
   <nav class="nav-desktop">
     ${links}
     <a href="post.html" class="btn-post-header" style="background:#DC2626;color:white;font-weight:800;border-color:#DC2626;">+ लिस्ट करें</a>

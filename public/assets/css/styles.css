@@ -77,7 +77,6 @@ a:hover { text-decoration: underline; }
   text-shadow: 1px 1px 0 rgba(120,60,0,0.35), 2px 2px 0 rgba(120,60,0,0.3),
                3px 3px 0 rgba(120,60,0,0.25), 4px 4px 6px rgba(0,0,0,0.3);
 }
-#site-header .logo span { -webkit-text-fill-color: inherit; }
 @keyframes logoShine {
   0%   { background-position: 0% center; }
   100% { background-position: 300% center; }
