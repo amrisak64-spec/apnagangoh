@@ -58,6 +58,9 @@
       <button class="tab-btn" data-tab="reports" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
         🚩 Reports <span id="reports-count" style="background:#DC2626;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
       </button>
+      <button class="tab-btn" data-tab="feedback" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
+        💬 Feedback <span id="feedback-count" style="background:#5B35D5;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
+      </button>
     </div>
 
     <div id="admin-content">
@@ -77,6 +80,7 @@
     import { initAuth, requireAdmin, logout } from './assets/js/auth.js';
     import { initListings, approveListing, rejectListing, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js';
     import { initReports, fetchOpenReports, resolveReport } from './assets/js/reports.js';
+    import { initFeedback, fetchNewFeedback, markFeedbackReviewed } from './assets/js/feedback.js';
 
     let fbConfig;
     try {
@@ -96,6 +100,7 @@
     initAuth(auth, db);
     initListings(db, storage, auth);
     initReports(db);
+    initFeedback(db);
 
     const { user } = await requireAdmin();
     updateNavUser(user, true);
@@ -110,17 +115,19 @@
     // ── Stats ─────────────────────────────────────────────
     async function loadStats() {
       try {
-        const [pSnap, lSnap, rSnap, reports] = await Promise.all([
+        const [pSnap, lSnap, rSnap, reports, feedback] = await Promise.all([
           db.collection('listings').where('status','==','pending').get(),
           db.collection('listings').where('status','==','live').get(),
           db.collection('listings').where('status','==','rejected').get(),
           fetchOpenReports(),
+          fetchNewFeedback(),
         ]);
         document.getElementById('stat-pending').textContent = pSnap.size;
         document.getElementById('stat-live').textContent    = lSnap.size;
         document.getElementById('stat-rejected').textContent= rSnap.size;
         document.getElementById('pending-count').textContent = pSnap.size;
         document.getElementById('reports-count').textContent = reports.length || '';
+        document.getElementById('feedback-count').textContent = feedback.length || '';
       } catch {}
     }
     loadStats();
@@ -152,6 +159,16 @@
         fetchOpenReports().then(reports => {
           renderReports(reports, content);
           document.getElementById('reports-count').textContent = reports.length || '';
+        }).catch(err => {
+          content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        });
+        return;
+      }
+
+      if (status === 'feedback') {
+        fetchNewFeedback().then(feedback => {
+          renderFeedback(feedback, content);
+          document.getElementById('feedback-count').textContent = feedback.length || '';
         }).catch(err => {
           content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
         });
@@ -228,6 +245,45 @@
             await resolveReport(r.id);
             card.remove();
             toast('Report resolve हो गई।', 'success');
+          } catch (err) {
+            toast(`Error: ${err.message}`, 'error');
+            resolveBtn.disabled = false;
+          }
+        });
+        wrap.appendChild(card);
+      });
+      container.innerHTML = '';
+      container.appendChild(wrap);
+    }
+
+    function renderFeedback(feedback, container) {
+      if (!feedback.length) {
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">💬</span><p>अभी कोई नया Feedback नहीं।</p></div>`;
+        return;
+      }
+      const wrap = document.createElement('div');
+      feedback.forEach(f => {
+        const date = f.createdAt?.toDate ? f.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
+        const stars = f.rating ? '★'.repeat(f.rating) + '☆'.repeat(5 - f.rating) : '';
+        const card = document.createElement('div');
+        card.id = `feedback-${f.id}`;
+        card.style.cssText = 'background:white;border-left:3px solid #5B35D5;border-radius:0.5rem;padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:0.75rem;';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
+            <span style="font-weight:700;">${f.name || 'अज्ञात'}</span>
+            <span style="font-size:0.78rem;color:#bbb;">${date}</span>
+          </div>
+          ${stars ? `<div style="color:#D97706;font-size:0.95rem;margin-top:0.15rem;">${stars}</div>` : ''}
+          <p style="margin:0.5rem 0;color:#333;">${f.message}</p>
+          ${f.contact ? `<p style="margin:0 0 0.5rem;font-size:0.85rem;color:#888;">📞 ${f.contact}</p>` : ''}
+          <button class="btn btn-green btn-sm" data-resolve="${f.id}">✅ Reviewed मार्क करें</button>`;
+        const resolveBtn = card.querySelector('[data-resolve]');
+        resolveBtn.addEventListener('click', async () => {
+          resolveBtn.disabled = true;
+          try {
+            await markFeedbackReviewed(f.id);
+            card.remove();
+            toast('Feedback reviewed मार्क हुआ।', 'success');
           } catch (err) {
             toast(`Error: ${err.message}`, 'error');
             resolveBtn.disabled = false;

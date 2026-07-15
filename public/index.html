@@ -358,6 +358,42 @@
     </div>
   </section>
 
+  <!-- Feedback & Suggestions -->
+  <section class="section" style="background:white;">
+    <div class="container">
+      <div style="max-width:640px;margin:0 auto;text-align:center;">
+        <h2 class="section-title" style="justify-content:center;">💬 आपकी राय हमारे लिए ज़रूरी है</h2>
+        <p style="color:#6B6B6B;font-size:0.9rem;margin:-0.5rem 0 1.5rem;">साइट कैसी लगी? कोई सुझाव, शिकायत या नया feature चाहिए? नीचे बताएं — हम सुनते हैं।</p>
+      </div>
+      <div style="max-width:640px;margin:0 auto;background:#F9F7F4;border-radius:1rem;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+        <div id="feedback-form-wrap">
+          <div style="text-align:center;margin-bottom:1.25rem;">
+            <div id="feedback-stars" style="font-size:1.9rem;letter-spacing:0.2rem;">
+              <span data-star="1" style="cursor:pointer;">☆</span><span data-star="2" style="cursor:pointer;">☆</span><span data-star="3" style="cursor:pointer;">☆</span><span data-star="4" style="cursor:pointer;">☆</span><span data-star="5" style="cursor:pointer;">☆</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <textarea class="form-control" id="feedback-message" rows="3" placeholder="अपना सुझाव या feedback यहाँ लिखें..." maxlength="1000"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div class="form-group">
+              <input class="form-control" id="feedback-name" placeholder="नाम (वैकल्पिक)">
+            </div>
+            <div class="form-group">
+              <input class="form-control" id="feedback-contact" type="tel" placeholder="फ़ोन / WhatsApp (वैकल्पिक)" maxlength="10">
+            </div>
+          </div>
+          <button id="feedback-submit-btn" class="btn btn-primary btn-full">📤 भेजें</button>
+        </div>
+        <div id="feedback-thanks" style="display:none;text-align:center;padding:1rem 0;">
+          <div style="font-size:2.5rem;margin-bottom:0.5rem;">🙏</div>
+          <p style="font-weight:700;margin:0 0 0.25rem;">धन्यवाद!</p>
+          <p style="color:#6B6B6B;font-size:0.88rem;margin:0;">आपका feedback मिल गया है।</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <footer id="site-footer"></footer>
   <div id="toast-container"></div>
 
@@ -365,9 +401,10 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
+    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice, toast } from './assets/js/ui.js';
     import { initAuth, onAuthReady } from './assets/js/auth.js';
     import { initListings, fetchFeatured, fetchListings } from './assets/js/listings.js';
+    import { initFeedback, createFeedback } from './assets/js/feedback.js';
     import { ALL_LOCATIONS, VILLAGES, TOWN } from './data/villages.js';
 
     let fbConfig;
@@ -389,6 +426,7 @@
     const db   = firebase.firestore();
     initAuth(auth, db);
     initListings(db, null, null);
+    initFeedback(db);
     onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
 
     // Trust counter
@@ -496,6 +534,43 @@
         });
       }
       setInterval(() => goToSlide((cur+1) % slides.length), 4000);
+    })();
+
+    // ── Feedback & Suggestions ────────────────────────────
+    (function(){
+      let rating = 0;
+      const starsEl = document.getElementById('feedback-stars');
+      const stars = starsEl ? starsEl.querySelectorAll('[data-star]') : [];
+      stars.forEach(s => {
+        s.addEventListener('click', () => {
+          rating = Number(s.dataset.star);
+          stars.forEach(x => { x.textContent = Number(x.dataset.star) <= rating ? '★' : '☆'; });
+        });
+      });
+
+      const btn = document.getElementById('feedback-submit-btn');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const messageEl = document.getElementById('feedback-message');
+        const message = messageEl.value;
+        if (!message.trim()) { toast('कृपया अपना सुझाव लिखें।', 'error'); messageEl.focus(); return; }
+        btn.disabled = true;
+        btn.textContent = 'भेजा जा रहा है...';
+        try {
+          await createFeedback({
+            name: document.getElementById('feedback-name').value,
+            contact: document.getElementById('feedback-contact').value,
+            rating: rating || null,
+            message,
+          });
+          document.getElementById('feedback-form-wrap').style.display = 'none';
+          document.getElementById('feedback-thanks').style.display = 'block';
+        } catch (err) {
+          toast(`Error: ${err.message}`, 'error');
+          btn.disabled = false;
+          btn.textContent = '📤 भेजें';
+        }
+      });
     })();
 
     // ── Typewriter effect ─────────────────────────────────

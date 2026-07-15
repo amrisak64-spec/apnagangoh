@@ -117,6 +117,22 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // ── feedback (homepage user feedback & suggestions) ─────────────
+    match /feedback/{feedbackId} {
+      // Anyone (incl. anonymous browsers) can submit feedback — low friction, admin-only visibility
+      allow create: if request.resource.data.keys().hasAll(['message', 'status', 'createdAt'])
+                   && request.resource.data.message is string
+                   && request.resource.data.message.size() > 0
+                   && request.resource.data.message.size() < 1000
+                   && request.resource.data.status == 'new'
+                   && (!('rating' in request.resource.data)
+                       || (request.resource.data.rating is int
+                           && request.resource.data.rating >= 1
+                           && request.resource.data.rating <= 5));
+
+      allow read, update, delete: if isAdmin();
+    }
+
     // ── Block everything else ─────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
