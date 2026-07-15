@@ -68,14 +68,14 @@ a:hover { text-decoration: underline; }
   line-height: 1.15;
   overflow: visible;
   text-decoration: none;
-  background: linear-gradient(90deg, #FFFFFF, #DCD6FF, #FFFFFF, #E8E8FF, #FFFFFF);
+  background: linear-gradient(90deg, #FFFFFF, #FFFFFF, #FFD700, #FFFFFF, #FFFFFF);
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: logoShine 3s linear infinite;
-  text-shadow: 1px 1px 0 rgba(59,15,158,0.45), 2px 2px 0 rgba(59,15,158,0.4),
-               3px 3px 0 rgba(59,15,158,0.35), 4px 4px 6px rgba(0,0,0,0.3);
+  text-shadow: 1px 1px 0 rgba(59,15,158,0.55), 2px 2px 0 rgba(59,15,158,0.5),
+               3px 3px 0 rgba(59,15,158,0.45), 4px 4px 8px rgba(0,0,0,0.4);
 }
 @keyframes logoShine {
   0%   { background-position: 0% center; }
