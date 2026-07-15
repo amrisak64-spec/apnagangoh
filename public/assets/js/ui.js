@@ -46,7 +46,8 @@ function getFooterHTML() {
     <h4>गंगोह.in</h4>
     <p style="font-size:0.85rem;color:#999;margin:0 0 0.75rem;">गंगोह और आस-पास के गाँव का अपना ऑनलाइन बाज़ार।</p>
     <a href="about.html" style="font-size:0.85rem;">हमारे बारे में</a><br>
-    <a href="about.html#contact" style="font-size:0.85rem;">संपर्क करें</a>
+    <a href="about.html#contact" style="font-size:0.85rem;">संपर्क करें</a><br>
+    <a href="feedback.html" style="font-size:0.85rem;">💡 सुझाव / फीडबैक दें</a>
   </div>
   <div>
     <h4>श्रेणियाँ</h4>
@@ -81,6 +82,18 @@ export function mountUI(activePage = '') {
   }
   const footer = document.getElementById('site-footer');
   if (footer) footer.innerHTML = getFooterHTML();
+
+  if (activePage !== 'feedback.html' && !document.getElementById('fb-fab')) {
+    const fab = document.createElement('a');
+    fab.id = 'fb-fab';
+    fab.href = 'feedback.html';
+    fab.title = 'सुझाव / फीडबैक दें';
+    fab.innerHTML = '💡';
+    fab.style.cssText = 'position:fixed;bottom:1.5rem;right:1.25rem;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FFD700,#FF6B00);display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 6px 20px rgba(0,0,0,0.25);z-index:90;text-decoration:none;transition:transform 0.15s;';
+    fab.addEventListener('mouseenter', () => fab.style.transform = 'scale(1.1)');
+    fab.addEventListener('mouseleave', () => fab.style.transform = 'scale(1)');
+    document.body.appendChild(fab);
+  }
 }
 
 // ── Update nav after auth resolves ────────────────────────
