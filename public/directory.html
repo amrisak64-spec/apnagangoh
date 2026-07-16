@@ -107,7 +107,7 @@
   <script type="module">
     import { mountUI, toast } from './assets/js/ui.js';
     import { initAuth, onAuthReady } from './assets/js/auth.js';
-    import { initDirectory, createBusiness, fetchDirectory, deleteBusiness } from './assets/js/directory.js';
+    import { initDirectory, createBusiness, fetchDirectory, updateOwnBusiness, deleteBusiness } from './assets/js/directory.js';
     import { VILLAGES } from './data/villages.js';
 
     let fbConfig;
@@ -232,10 +232,12 @@
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center;">
           ${b.phone ? `<a href="tel:${b.phone}" style="display:inline-flex;align-items:center;gap:0.4rem;background:#EFF6FF;color:#1D4ED8;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">📞 Call करें</a>` : ''}
           ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;background:#25D366;color:white;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">💬 WhatsApp</a>` : ''}
+          ${isMine ? `<button class="btn btn-outline btn-sm" data-edit-biz="${b.id}">✏️ Edit</button>` : ''}
           ${isMine ? `<button class="btn btn-danger btn-sm" data-del-biz="${b.id}">🗑️ Delete</button>` : ''}
         </div>`;
 
       if (isMine) {
+        div.querySelector(`[data-edit-biz]`).addEventListener('click', () => openEditModal(b));
         div.querySelector(`[data-del-biz]`).addEventListener('click', async () => {
           if (!confirm('इस बिज़नेस को delete करें?')) return;
           try {
@@ -250,6 +252,68 @@
       }
 
       return div;
+    }
+
+    // ── Edit modal ────────────────────────────────────────
+    function openEditModal(b) {
+      document.getElementById('biz-edit-modal')?.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'biz-edit-modal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      modal.innerHTML = `
+        <div style="background:white;border-radius:1rem;padding:1.5rem;width:100%;max-width:420px;max-height:90vh;overflow-y:auto;">
+          <h3 style="margin:0 0 1rem;font-size:1.1rem;">✏️ बिज़नेस Edit करें</h3>
+          <div class="form-group">
+            <label class="form-label">बिज़नेस का नाम</label>
+            <input id="be-name" class="form-control" value="${escapeHtml(b.businessName)}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">पता</label>
+            <input id="be-address" class="form-control" value="${escapeHtml(b.address || '')}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">फ़ोन नंबर</label>
+            <input id="be-phone" class="form-control" value="${escapeHtml(b.phone || '')}" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label class="form-label">WhatsApp नंबर</label>
+            <input id="be-whatsapp" class="form-control" value="${escapeHtml(b.whatsapp || '')}" maxlength="10">
+          </div>
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+            <button id="be-save-btn" class="btn btn-primary" style="flex:1;">💾 Save करें</button>
+            <button id="be-cancel-btn" class="btn btn-outline" style="flex:1;">Cancel</button>
+          </div>
+          <p id="be-error" class="form-error" style="display:none;"></p>
+        </div>`;
+      document.body.appendChild(modal);
+
+      document.getElementById('be-cancel-btn').onclick = () => modal.remove();
+      modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+
+      document.getElementById('be-save-btn').onclick = async () => {
+        const phone = document.getElementById('be-phone').value.trim();
+        const errEl = document.getElementById('be-error');
+        if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही फ़ोन नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+        errEl.style.display = 'none';
+
+        const saveBtn = document.getElementById('be-save-btn');
+        saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+        try {
+          await updateOwnBusiness(b.id, {
+            businessName: document.getElementById('be-name').value.trim(),
+            address:      document.getElementById('be-address').value.trim(),
+            phone,
+            whatsapp:     document.getElementById('be-whatsapp').value.trim() || phone,
+          });
+          toast('बिज़नेस update हो गया!', 'success');
+          modal.remove();
+          loadBoard();
+        } catch (err) {
+          errEl.textContent = `Error: ${err.message}`; errEl.style.display='block';
+          saveBtn.disabled = false; saveBtn.textContent = '💾 Save करें';
+        }
+      };
     }
 
     function escapeHtml(str) {

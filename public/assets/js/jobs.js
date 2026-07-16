@@ -29,6 +29,10 @@ export async function fetchJobs(lim = 40) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+export async function updateOwnJob(id, data) {
+  await _db.collection('jobs').doc(id).update({ ...data });
+}
+
 export async function deleteJob(id) {
   await _db.collection('jobs').doc(id).delete();
 }

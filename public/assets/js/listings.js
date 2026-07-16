@@ -191,6 +191,10 @@ export async function fetchRequirements(lim = 40) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+export async function updateOwnRequirement(id, data) {
+  await _db.collection('requirements').doc(id).update({ ...data });
+}
+
 export async function deleteRequirement(id) {
   await _db.collection('requirements').doc(id).delete();
 }

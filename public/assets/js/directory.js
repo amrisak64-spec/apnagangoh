@@ -28,6 +28,10 @@ export async function fetchDirectory(lim = 60) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+export async function updateOwnBusiness(id, data) {
+  await _db.collection('directory').doc(id).update({ ...data });
+}
+
 export async function deleteBusiness(id) {
   await _db.collection('directory').doc(id).delete();
 }
