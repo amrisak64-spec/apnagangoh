@@ -142,3 +142,6 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 # firebase-config.js is intentionally committed (Firebase web keys are public)
+
+# Claude Code local settings
+.claude/
