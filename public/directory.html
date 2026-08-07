@@ -211,29 +211,41 @@
     function buildBizCard(b) {
       const div = document.createElement('div');
       div.id = `biz-${b.id}`;
-      div.style.cssText = 'background:white;border-radius:0.75rem;padding:1rem 1.25rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);margin-bottom:0.85rem;';
+      div.className = 'biz-card';
 
       const catLabel = CATEGORY_LABELS[b.category] || b.category;
       const villageLabel = (VILLAGES.find(v => v.value === b.village) || {}).label || '';
+      const addressLine = [b.address, villageLabel].filter(Boolean).map(escapeHtml).join(' · ') || '—';
       const waLink = b.whatsapp ? `https://wa.me/91${b.whatsapp}?text=${encodeURIComponent(`नमस्ते! मैंने गंगोह.in डायरेक्टरी पर "${b.businessName}" देखा।`)}` : null;
       const isMine = currentUser && b.ownerId === currentUser.uid;
 
       div.innerHTML = `
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
-          <div>
-            <span style="font-size:0.8rem;background:#DCFCE7;color:#15803D;padding:0.2rem 0.6rem;border-radius:1rem;font-weight:700;">${catLabel}</span>
-            ${b.isFeatured ? `<span style="font-size:0.8rem;margin-left:0.35rem;">⭐</span>` : ''}
+        <div class="biz-card-body">
+          <div class="biz-card-banner">
+            <span class="biz-cat-pill">${catLabel}${b.isFeatured ? ' <span class="biz-featured-star">⭐</span>' : ''}</span>
+            <h3 class="biz-card-name">${escapeHtml(b.businessName)}</h3>
+            <hr class="biz-card-divider">
+          </div>
+          <div class="biz-card-info">
+            <div class="biz-info-row">
+              <span class="biz-icon-circle is-purple">🏪</span>
+              <span class="biz-info-text"><span class="biz-info-label">श्रेणी</span><span class="biz-info-value">${catLabel}</span></span>
+            </div>
+            <div class="biz-info-row">
+              <span class="biz-icon-circle is-gold">📞</span>
+              <span class="biz-info-text"><span class="biz-info-label">मोबाइल नंबर</span><span class="biz-info-value">${b.phone ? '+91 ' + escapeHtml(b.phone) : '—'}</span></span>
+            </div>
+            <div class="biz-info-row">
+              <span class="biz-icon-circle is-purple">📍</span>
+              <span class="biz-info-text"><span class="biz-info-label">पता</span><span class="biz-info-value">${addressLine}</span></span>
+            </div>
           </div>
         </div>
-        <h3 style="margin:0.6rem 0 0.15rem;font-size:1.05rem;font-weight:800;">${escapeHtml(b.businessName)}</h3>
-        <div style="font-size:0.88rem;color:#555;margin-bottom:0.3rem;">
-          ${b.address ? `📍 ${escapeHtml(b.address)}` : ''}${villageLabel ? ` · ${villageLabel}` : ''}
-        </div>
-        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.6rem;align-items:center;">
-          ${b.phone ? `<a href="tel:${b.phone}" style="display:inline-flex;align-items:center;gap:0.4rem;background:#EFF6FF;color:#1D4ED8;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">📞 Call करें</a>` : ''}
-          ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.4rem;background:#25D366;color:white;padding:0.4rem 0.85rem;border-radius:0.5rem;font-size:0.85rem;font-weight:700;text-decoration:none;">💬 WhatsApp</a>` : ''}
-          ${isMine ? `<button class="btn btn-outline btn-sm" data-edit-biz="${b.id}">✏️ Edit</button>` : ''}
-          ${isMine ? `<button class="btn btn-danger btn-sm" data-del-biz="${b.id}">🗑️ Delete</button>` : ''}
+        <div class="biz-card-footer">
+          ${b.phone ? `<a href="tel:${b.phone}" class="biz-footer-item">📞 Call करें</a>` : ''}
+          ${waLink ? `<a href="${waLink}" target="_blank" rel="noopener" class="biz-footer-item is-whatsapp">💬 WhatsApp</a>` : ''}
+          ${isMine ? `<button class="biz-footer-item" data-edit-biz="${b.id}" style="border:none;cursor:pointer;">✏️ Edit</button>` : ''}
+          ${isMine ? `<button class="biz-footer-item is-danger" data-del-biz="${b.id}" style="border:none;cursor:pointer;">🗑️ Delete</button>` : ''}
         </div>`;
 
       if (isMine) {

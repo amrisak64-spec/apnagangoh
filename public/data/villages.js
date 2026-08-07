@@ -9,13 +9,10 @@ export const VILLAGES = [
   { value: "ambehata",              label: "अम्बेहटा" },
   { value: "ambehti",               label: "अम्बेहटी" },
   // आ
-  { value: "atepur",                label: "आतेपुर" },
-  { value: "abha",                  label: "आभा" },
   { value: "aryanagar",             label: "आर्यनगर" },
   { value: "alampur",               label: "आलमपुर" },
   { value: "asafgarh",              label: "आसफगढ़" },
   // इ
-  { value: "indravali_kalyanpur",   label: "इंद्रावली कल्याणपुर" },
   { value: "imampura",              label: "इमामपुरा" },
   { value: "islamanagar",           label: "इस्लामनगर" },
   { value: "issapur",               label: "इस्सापुर" },
@@ -27,18 +24,15 @@ export const VILLAGES = [
   { value: "olra",                  label: "ओलरा" },
   // क
   { value: "kachrai",               label: "कचराई" },
-  { value: "katla",                 label: "कटला" },
-  { value: "kamhera",               label: "कमहेरा" },
+  { value: "kamhera",               label: "कमहेड़ा" },
   { value: "kamalpur_bagdoli",      label: "कमालपुर बगडोली" },
   { value: "kallarpur_rajput",      label: "कल्लरपुर राजपूत" },
-  { value: "kallarhedi",            label: "कल्लरहेड़ी" },
-  { value: "kankrala",              label: "कांकराला" },
   { value: "kashipur",              label: "काशीपुर" },
   { value: "kuankheda",             label: "कुआंखेड़ा" },
   { value: "kunda_kalan",           label: "कुंडा कलां" },
   { value: "kunda_khurd",           label: "कुंडा खुर्द" },
   { value: "kutubkhedi",            label: "कुतुबखेड़ी" },
-  { value: "kaindal",               label: "कैंदल" },
+  { value: "kaindal",               label: "कैंडल" },
   { value: "kothda",                label: "कोठड़ा" },
   { value: "kolakhedi",             label: "कोलाखेड़ी" },
   { value: "kolimajra",             label: "कोलीमाजरा" },
@@ -63,7 +57,6 @@ export const VILLAGES = [
   { value: "chachrauli",            label: "छछरौली" },
   // ज
   { value: "jandheda",              label: "जंधेड़ा" },
-  { value: "jandhera",              label: "जंधेरा" },
   { value: "jandheri",              label: "जंधेरी" },
   { value: "janpur_urf_majri",      label: "जानपुर उर्फ माजरी" },
   { value: "jamboogarh",            label: "जाम्बूगढ़" },
@@ -72,7 +65,7 @@ export const VILLAGES = [
   { value: "jaidpura",              label: "जैदपुरा" },
   { value: "jogipura",              label: "जोगीपुरा" },
   // झ
-  { value: "jhadvan",               label: "झड़वन" },
+  { value: "jhadvan",               label: "झाड़वन" },
   { value: "jhabiran",              label: "झबीरन" },
   // ट
   { value: "tikraul",               label: "टिकरौल" },
@@ -84,23 +77,19 @@ export const VILLAGES = [
   { value: "tatarpur",              label: "तातारपुर" },
   { value: "tatahedi",              label: "ताताहेड़ी" },
   { value: "titro",                 label: "तितरो" },
-  { value: "tilfara_ainabad",       label: "तिलफरा ऐनाबाद" },
   // थ
-  { value: "thaska",                label: "थसका" },
-  { value: "thavni",                label: "थावनी" },
-  { value: "tholla_fatehpur",       label: "थोल्ला फतेहपुर" },
+  { value: "thaska",                label: "ठसका" },
+  { value: "tholla_fatehpur",       label: "ठोल्ला फतेहपुर" },
   // द
   { value: "dariyapur",             label: "दरियापुर" },
-  { value: "dadanpur",              label: "दादनपुर" },
   { value: "dudhla",                label: "दुधला" },
-  { value: "dubhar_kishanpur",      label: "दुभर किशनपुर" },
-  { value: "daulatpur_urf_chaparchidi", label: "दौलतपुर उर्फ चपरचिड़ी" },
+  { value: "dubhar_kishanpur",      label: "डूभर किशनपुर" },
+  { value: "daulatpur_urf_chaparchidi", label: "दौलतपुर उर्फ चापरचिड़ी" },
   { value: "devpura",               label: "देवपुरा" },
-  { value: "delhedi",               label: "देलहेड़ी" },
   { value: "daidnaur",              label: "दैदनौर" },
   { value: "daidpura",              label: "दैदपुरा" },
   // ध
-  { value: "dhanva",                label: "धनवा" },
+  { value: "dhanva",                label: "धानवा" },
   // न
   { value: "nai_nagli_urf_majri",   label: "नई नगली उर्फ माजरी" },
   { value: "nagal_gurjar",          label: "नागल गुर्जर" },
@@ -147,7 +136,7 @@ export const VILLAGES = [
   { value: "birakhedi",             label: "बीराखेड़ी" },
   { value: "budhanpur",             label: "बुढ़नपुर" },
   { value: "budhakhera",            label: "बूढ़ाखेरा" },
-  { value: "bodpur",                label: "बोदपुर" },
+  { value: "bodpur",                label: "बोडपुर" },
   // भ
   { value: "bhagwanpur",            label: "भगवानपुर" },
   { value: "bhari_dindarpur",       label: "भारी दिंदारपुर" },
@@ -166,7 +155,6 @@ export const VILLAGES = [
   { value: "mitragarh",             label: "मित्रगढ़" },
   { value: "mubarakpur",            label: "मुबारकपुर" },
   { value: "muradkhedi",            label: "मुरादखेड़ी" },
-  { value: "mora",                  label: "मोरा" },
   { value: "mohda",                 label: "मोहड़ा" },
   { value: "mohanpura",             label: "मोहनपुरा" },
   { value: "mohammadpur_gada",      label: "मोहम्मदपुर गड़ा" },
@@ -189,7 +177,7 @@ export const VILLAGES = [
   // व
   { value: "wajirpur",              label: "वजीरपुर" },
   // श
-  { value: "shakrpur_sakraur",      label: "शाकरपुर सकरौर" },
+  { value: "shakrpur_sakraur",      label: "शकरपुर" },
   { value: "shahalipur_urf_hamirpur", label: "शाहअलीपुर उर्फ हमीरपुर" },
   { value: "shahpur_road",          label: "शाहपुर रोड" },
   { value: "shekhpura_urf_khospura",label: "शेखपुरा उर्फ खोसपुरा" },

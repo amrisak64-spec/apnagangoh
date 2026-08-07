@@ -62,17 +62,21 @@ a:hover { text-decoration: underline; }
   overflow: visible;
 }
 #site-header .logo {
-  font-size: 2.7rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
   overflow: visible;
   text-decoration: none;
-  color: #FFD700;
-  text-shadow: 1px 1px 0 rgba(59,15,158,0.55), 2px 2px 0 rgba(59,15,158,0.5),
-               3px 3px 0 rgba(59,15,158,0.45), 4px 4px 8px rgba(0,0,0,0.4);
+  background: white;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 #site-header .logo:hover { text-decoration: none; opacity: 0.9; }
+#site-header .logo-img {
+  height: 2.6rem;
+  width: auto;
+  display: block;
+}
 #site-header nav a {
   color: white;
   margin-left: 1.25rem;
@@ -579,6 +583,109 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .img-preview-item { position: relative; width: 80px; height: 80px; }
 .img-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 0.35rem; }
 .img-preview-item .remove-img { position: absolute; top: -6px; right: -6px; background: var(--color-danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 0.75rem; line-height: 1; display: flex; align-items: center; justify-content: center; }
+
+/* ── Business directory card ─────────────────────────────── */
+.biz-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  margin-bottom: 1.1rem;
+}
+.biz-card-body { display: flex; align-items: stretch; }
+.biz-card-banner {
+  flex: 0 0 38%;
+  max-width: 260px;
+  background: linear-gradient(150deg, var(--color-saffron-lt), var(--color-saffron));
+  color: white;
+  padding: 1.1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  border-right: 5px solid #FFD700;
+}
+.biz-cat-pill {
+  align-self: flex-start;
+  background: #FFD700;
+  color: #3B1F8A;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  margin-bottom: 0.6rem;
+  white-space: nowrap;
+}
+.biz-card-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.3;
+  margin: 0;
+  word-break: break-word;
+}
+.biz-card-divider {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,215,0,0.2));
+  margin: 0.6rem 0;
+  border: none;
+}
+.biz-featured-star { color: #FFD700; font-size: 0.9rem; }
+.biz-card-info { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.biz-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1rem;
+  flex: 1;
+}
+.biz-info-row:nth-child(odd)  { background: #F4F1FD; }
+.biz-info-row:nth-child(even) { background: #FFFBEA; }
+.biz-icon-circle {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+}
+.biz-icon-circle.is-purple { background: var(--color-saffron); color: white; }
+.biz-icon-circle.is-gold   { background: #FFD700; color: #3B1F8A; }
+.biz-info-text { min-width: 0; }
+.biz-info-label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--color-muted); font-weight: 700; }
+.biz-info-value { display: block; font-size: 0.92rem; font-weight: 700; color: var(--color-text); overflow-wrap: break-word; }
+.biz-card-footer {
+  background: #2A1B5E;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  padding: 0.65rem 1rem;
+  align-items: center;
+}
+.biz-footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.5rem;
+  background: rgba(255,255,255,0.08);
+}
+.biz-footer-item:hover { background: rgba(255,255,255,0.18); text-decoration: none; color: white; }
+.biz-footer-item.is-whatsapp { background: #25D366; }
+.biz-footer-item.is-whatsapp:hover { background: #22C55E; }
+.biz-footer-item.is-danger { background: rgba(220,38,38,0.85); }
+.biz-footer-item.is-danger:hover { background: var(--color-danger); }
+@media (max-width: 560px) {
+  .biz-card-body { flex-direction: column; }
+  .biz-card-banner { flex: 1 1 auto; max-width: none; border-right: none; border-bottom: 5px solid #FFD700; }
+}
 
 /* ── Misc ────────────────────────────────────────────────── */
 .section-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
