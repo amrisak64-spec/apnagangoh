@@ -106,7 +106,7 @@
       const photos = l.photos && l.photos.length ? l.photos : [];
       const galleryHTML = photos.length
         ? `<div class="gallery">
-            <img class="gallery-main" id="gallery-main" src="${photos[0]}" alt="${l.title}">
+            <img class="gallery-main" id="gallery-main" src="${photos[0]}" alt="${escapeHtml(l.title)}">
             ${photos.length > 1 ? `<div class="gallery-thumbs">${photos.map((p,i) =>
               `<img class="gallery-thumb${i===0?' active':''}" data-full="${p}" src="${p}" alt="photo ${i+1}">`
             ).join('')}</div>` : ''}
@@ -143,9 +143,9 @@
 
       <!-- Location -->
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem 1.25rem;font-size:0.95rem;color:#444;">
-        <span>📍 <strong>${l.village || 'गंगोह'}</strong></span>
-        ${l.locality ? `<span>🏘️ ${l.locality}</span>` : ''}
-        ${l.landmark ? `<span>🚩 ${l.landmark}</span>` : ''}
+        <span>📍 <strong>${escapeHtml(l.village || 'गंगोह')}</strong></span>
+        ${l.locality ? `<span>🏘️ ${escapeHtml(l.locality)}</span>` : ''}
+        ${l.landmark ? `<span>🚩 ${escapeHtml(l.landmark)}</span>` : ''}
       </div>
 
       <hr style="margin:1rem 0;border:none;border-top:1.5px solid #F5F3FF;">
@@ -266,7 +266,7 @@
     }
 
     function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     // ── RealEstateListing structured data ─────────────────────

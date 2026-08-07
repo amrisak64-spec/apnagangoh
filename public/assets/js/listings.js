@@ -46,21 +46,31 @@ export async function createListing(formData, compressedFiles, onProgress) {
 }
 
 // ── Read listings with filters ────────────────────────────
+// Note: price is filtered client-side (not via Firestore .where()) because a
+// range filter on price would force orderBy('price') as the primary sort
+// (Firestore requires the first orderBy to match an inequality field),
+// which would break the "newest first" ordering and createdAt-based pagination.
 export async function fetchListings({ type, purpose, townOrVillage, village, priceMax, priceMin, limit: lim = 24, after } = {}) {
+  const hasPriceFilter = priceMin != null && priceMin !== '' || priceMax != null && priceMax !== '';
+  const fetchSize = hasPriceFilter ? Math.min(lim * 4, 100) : lim;
+
   let q = _db.collection('listings').where('status', '==', 'live');
 
   if (type)          q = q.where('type', '==', type);
   if (purpose)       q = q.where('purpose', '==', purpose);
   if (townOrVillage) q = q.where('townOrVillage', '==', townOrVillage);
   if (village)       q = q.where('village', '==', village);
-  if (priceMin)      q = q.where('price', '>=', Number(priceMin));
-  if (priceMax)      q = q.where('price', '<=', Number(priceMax));
 
-  q = q.orderBy('createdAt', 'desc').limit(lim);
+  q = q.orderBy('createdAt', 'desc').limit(fetchSize);
   if (after)         q = q.startAfter(after);
 
   const snap = await q.get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  let results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  if (priceMin) results = results.filter(l => Number(l.price) >= Number(priceMin));
+  if (priceMax) results = results.filter(l => Number(l.price) <= Number(priceMax));
+
+  return results.slice(0, lim);
 }
 
 // ── Fetch a single listing ────────────────────────────────
