@@ -3,4 +3,4 @@ Allow: /
 Disallow: /gng-admin-panel.html
 Disallow: /my-listings.html
 
-Sitemap: https://apnagangoh.in/sitemap.xml
+Sitemap: https://gangoh.in/sitemap.xml
