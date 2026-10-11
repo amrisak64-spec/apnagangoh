@@ -152,6 +152,7 @@ In-app chat · ratings/reviews · user-to-user payments/escrow · maps integrati
 - Use Firestore `serverTimestamp()` for createdAt/updatedAt.
 - Graceful empty states ("Abhi koi listing nahi — pehle aap daaliye!").
 - Always show a loading state on weak networks.
+- Local JS imports carry a `?v=N` cache-buster (e.g. `./assets/js/ui.js?v=2`). Use the same N everywhere — a module imported under two URLs loads twice with separate state. Bump N across all files when a change must reach browsers immediately.
 
 ## Deployment
 

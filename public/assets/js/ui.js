@@ -1,5 +1,5 @@
 // ui.js — shared header, footer, toast, helpers
-import { VILLAGES } from '../../data/villages.js';
+import { VILLAGES } from '../../data/villages.js?v=2';
 
 // ── Header HTML ───────────────────────────────────────────
 function getHeaderHTML(activePage = '') {

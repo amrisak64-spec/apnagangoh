@@ -94,14 +94,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js';
-    import { initAuth, onAuthReady } from './assets/js/auth.js';
-    import { initListings, fetchListings } from './assets/js/listings.js';
-    import { VILLAGES } from './data/villages.js';
+    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js?v=2';
+    import { initAuth, onAuthReady } from './assets/js/auth.js?v=2';
+    import { initListings, fetchListings } from './assets/js/listings.js?v=2';
+    import { VILLAGES } from './data/villages.js?v=2';
 
     let fbConfig;
     try {
-      const m = await import('./assets/js/firebase-config.js');
+      const m = await import('./assets/js/firebase-config.js?v=2');
       fbConfig = m.firebaseConfig;
     } catch {
       document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;

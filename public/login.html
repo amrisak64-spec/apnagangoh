@@ -81,12 +81,12 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast } from './assets/js/ui.js';
-    import { initAuth, signInWithGoogle, handleRedirectResult, onAuthReady, sendOTP, verifyOTP } from './assets/js/auth.js';
+    import { mountUI, toast } from './assets/js/ui.js?v=2';
+    import { initAuth, signInWithGoogle, handleRedirectResult, onAuthReady, sendOTP, verifyOTP } from './assets/js/auth.js?v=2';
 
     let fbConfig;
     try {
-      const m = await import('./assets/js/firebase-config.js');
+      const m = await import('./assets/js/firebase-config.js?v=2');
       fbConfig = m.firebaseConfig;
     } catch {
       document.body.innerHTML = `<div style="text-align:center;padding:4rem;font-size:1.1rem;">⚠️ Firebase config नहीं मिला।</div>`;
