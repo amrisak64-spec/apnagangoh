@@ -19,7 +19,10 @@
         <h1>📋 मेरी Listings</h1>
         <p id="user-name-line" style="color:#888;margin:0;font-size:0.85rem;"></p>
       </div>
-      <a href="post.html" class="btn btn-primary btn-sm">+ नई Listing डालें</a>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <a href="post.html" class="btn btn-primary btn-sm">+ नई Listing डालें</a>
+        <button class="btn btn-danger btn-sm" id="logout-btn">Logout</button>
+      </div>
     </div>
   </div>
 
@@ -61,7 +64,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
     import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=2';
-    import { initAuth, requireAuth } from './assets/js/auth.js?v=2';
+    import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=2';
     import { initListings, fetchUserListings, deleteListing } from './assets/js/listings.js?v=2';
 
     let fbConfig;
@@ -83,7 +86,12 @@
     initListings(db, storage, auth);
 
     const { user } = await requireAuth('login.html');
-    document.getElementById('user-name-line').textContent = user.displayName || user.email || '';
+    document.getElementById('user-name-line').textContent = user.displayName || user.email || user.phoneNumber || '';
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await logout();
+      window.location.href = 'index.html';
+    });
 
     let allListings = [];
     let currentTab  = 'all';
