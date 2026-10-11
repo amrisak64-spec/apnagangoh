@@ -40,8 +40,14 @@ service cloud.firestore {
 
     // ── users ─────────────────────────────────────────────────────
     match /users/{uid} {
-      // User can read/write their own profile
-      allow read, create: if request.auth != null && request.auth.uid == uid;
+      // User can read their own profile
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      // User can create their own profile only as a plain 'user' —
+      // otherwise anyone could self-assign role 'admin' on first write
+      allow create: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.data.role == 'user';
 
       // User can update their own profile but NOT change their role
       allow update: if request.auth != null
