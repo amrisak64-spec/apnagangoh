@@ -62,17 +62,25 @@ a:hover { text-decoration: underline; }
   overflow: visible;
 }
 #site-header .logo {
-  font-size: 2.7rem;
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
   overflow: visible;
   text-decoration: none;
-  color: #FFD700;
-  text-shadow: 1px 1px 0 rgba(59,15,158,0.55), 2px 2px 0 rgba(59,15,158,0.5),
-               3px 3px 0 rgba(59,15,158,0.45), 4px 4px 8px rgba(0,0,0,0.4);
+  background: white;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 #site-header .logo:hover { text-decoration: none; opacity: 0.9; }
+#site-header .logo-img {
+  display: block;
+  height: 3.4rem;
+  width: auto;
+}
+@media (max-width: 640px) {
+  #site-header .logo-img { height: 2.6rem; }
+}
 #site-header nav a {
   color: white;
   margin-left: 1.25rem;

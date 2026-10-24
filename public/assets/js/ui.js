@@ -17,7 +17,7 @@ function getHeaderHTML(activePage = '') {
   ).join('');
   return `
 <div class="inner">
-  <a href="/" class="logo">GANGOH.IN</a>
+  <a href="/" class="logo"><img src="/assets/images/logo-horizontal.svg" alt="Gangoh.in — गंगोह का अपना बिज़नेस हब" class="logo-img" width="186" height="54"></a>
   <nav class="nav-desktop">
     ${links}
     <a href="post.html" class="btn-post-header" style="background:#DC2626;color:white;font-weight:800;border-color:#DC2626;">+ लिस्ट करें</a>
