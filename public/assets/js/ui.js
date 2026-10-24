@@ -1,5 +1,6 @@
 // ui.js — shared header, footer, toast, helpers
 import { VILLAGES } from '../../data/villages.js?v=2';
+import { initAnalytics } from './analytics.js?v=2';
 
 // ── Header HTML ───────────────────────────────────────────
 function getHeaderHTML(activePage = '') {
@@ -72,6 +73,7 @@ function getFooterHTML() {
 
 // ── Mount header + footer ──────────────────────────────────
 export function mountUI(activePage = '') {
+  initAnalytics();
   const header = document.getElementById('site-header');
   if (header) {
     header.innerHTML = getHeaderHTML(activePage);
