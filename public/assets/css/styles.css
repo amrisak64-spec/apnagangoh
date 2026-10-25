@@ -296,33 +296,63 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
 .hero {
   position: relative;
-  background: linear-gradient(135deg, #1a0050 0%, #3B0F9E 25%, #FF6B00 50%, #5B35D5 75%, #0f3460 100%);
+  /* deep sea -> shallow lagoon, drifting slowly like a current */
+  background: linear-gradient(135deg, #021b3a 0%, #034e86 28%, #0a86b8 55%, #14b8b0 78%, #0b6fa8 100%);
   background-size: 300% 300%;
-  animation: heroShift 12s ease infinite;
+  animation: heroShift 14s ease infinite;
   color: white;
-  padding: 3.5rem 1rem 3rem;
+  padding: 3.5rem 1rem 6.5rem;
   text-align: center;
   overflow: hidden;
 }
+.hero > .container { position: relative; z-index: 2; }
 
-/* subtle decorative circles */
+/* soft light patches drifting through the water */
 .hero::before,
 .hero::after {
   content: '';
   position: absolute;
   border-radius: 50%;
-  opacity: 0.12;
   pointer-events: none;
+  z-index: 0;
 }
 .hero::before {
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, #FF9933 0%, transparent 70%);
-  top: -120px; right: -80px;
+  width: 520px; height: 520px;
+  background: radial-gradient(circle, rgba(125,235,255,0.35) 0%, transparent 70%);
+  top: -160px; right: -100px;
+  animation: lightDrift 16s ease-in-out infinite;
 }
 .hero::after {
-  width: 320px; height: 320px;
-  background: radial-gradient(circle, #ffffff 0%, transparent 70%);
-  bottom: -100px; left: -60px;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%);
+  bottom: -120px; left: -80px;
+  animation: lightDrift 20s ease-in-out -6s infinite reverse;
+}
+@keyframes lightDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-60px, 40px) scale(1.15); }
+}
+
+/* flowing waves along the bottom edge; last layer matches the page background */
+.hero-waves {
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 70px;
+  z-index: 1;
+  pointer-events: none;
+}
+.hero-waves svg { display: block; width: 100%; height: 100%; }
+.hero-waves use { animation: waveFlow 25s cubic-bezier(.55,.5,.45,.5) infinite; }
+.hero-waves use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+.hero-waves use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+.hero-waves use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+.hero-waves use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+@keyframes waveFlow {
+  0%   { transform: translate3d(-90px, 0, 0); }
+  100% { transform: translate3d(85px, 0, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero, .hero::before, .hero::after, .hero-waves use { animation: none; }
 }
 
 /* logo badge */
@@ -460,7 +490,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .hero-quick-links a:hover { background: rgba(255,255,255,0.3); }
 
 @media (max-width: 480px) {
-  .hero { padding: 2.5rem 1rem 2.2rem; }
+  .hero { padding: 2.5rem 1rem 4.5rem; }
+  .hero-waves { height: 44px; }
   .hero h1 { font-size: 1.55rem; }
   .hero-brand { margin-bottom: 1rem; }
   .hero-search button { padding: 0 1rem; min-width: 70px; font-size: 0.9rem; }
