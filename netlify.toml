@@ -2,7 +2,7 @@
   publish = "public"
   # No build command — static files only
 
-# SPA fallback — let client-side routing handle ?id= params
+# Static multi-page site; listing.html?id=... is served directly with its query string.
 [[headers]]
   for = "/*"
   [headers.values]
@@ -13,6 +13,11 @@
 
 [[headers]]
   for = "/assets/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/assets/css/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 

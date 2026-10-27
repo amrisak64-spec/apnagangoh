@@ -110,9 +110,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast } from './assets/js/ui.js?v=2';
+    import { mountUI, toast } from './assets/js/ui.js?v=3';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=2';
-    import { initDirectory, createBusiness, fetchDirectory, updateOwnBusiness, deleteBusiness } from './assets/js/directory.js?v=2';
+    import { initDirectory, createBusiness, fetchDirectory, updateOwnBusiness, deleteBusiness } from './assets/js/directory.js?v=3';
     import { VILLAGES } from './data/villages.js?v=2';
 
     let fbConfig;
@@ -159,7 +159,7 @@
       const errEl               = document.getElementById('biz-error');
 
       if (!businessName || !category) { errEl.textContent = 'नाम और श्रेणी ज़रूरी है।'; errEl.style.display='block'; return; }
-      if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही फ़ोन नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+      if (!/^[6-9][0-9]{9}$/.test(phone) || !/^[6-9][0-9]{9}$/.test(whatsapp)) { errEl.textContent = 'फ़ोन और WhatsApp नंबर 10 अंकों का सही मोबाइल नंबर होना चाहिए।'; errEl.style.display='block'; return; }
       errEl.style.display = 'none';
 
       const btn = document.getElementById('biz-submit-btn');
@@ -283,11 +283,11 @@
           <h3 style="margin:0 0 1rem;font-size:1.1rem;">✏️ बिज़नेस Edit करें</h3>
           <div class="form-group">
             <label class="form-label">बिज़नेस का नाम</label>
-            <input id="be-name" class="form-control" value="${escapeHtml(b.businessName)}">
+            <input id="be-name" class="form-control" maxlength="80" value="${escapeHtml(b.businessName)}">
           </div>
           <div class="form-group">
             <label class="form-label">पता</label>
-            <input id="be-address" class="form-control" value="${escapeHtml(b.address || '')}">
+            <input id="be-address" class="form-control" maxlength="120" value="${escapeHtml(b.address || '')}">
           </div>
           <div class="form-group">
             <label class="form-label">फ़ोन नंबर</label>
@@ -310,18 +310,22 @@
 
       document.getElementById('be-save-btn').onclick = async () => {
         const phone = document.getElementById('be-phone').value.trim();
+        const whatsapp = document.getElementById('be-whatsapp').value.trim() || phone;
+        const businessName = document.getElementById('be-name').value.trim();
+        const address = document.getElementById('be-address').value.trim();
         const errEl = document.getElementById('be-error');
-        if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही फ़ोन नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+        if (!businessName || businessName.length > 80 || address.length > 120) { errEl.textContent = 'बिज़नेस का नाम ज़रूरी है; नाम 80 और पता 120 अक्षरों से कम रखें।'; errEl.style.display='block'; return; }
+        if (!/^[6-9][0-9]{9}$/.test(phone) || !/^[6-9][0-9]{9}$/.test(whatsapp)) { errEl.textContent = 'फ़ोन और WhatsApp नंबर 10 अंकों का सही मोबाइल नंबर होना चाहिए।'; errEl.style.display='block'; return; }
         errEl.style.display = 'none';
 
         const saveBtn = document.getElementById('be-save-btn');
         saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
         try {
           await updateOwnBusiness(b.id, {
-            businessName: document.getElementById('be-name').value.trim(),
-            address:      document.getElementById('be-address').value.trim(),
+            businessName,
+            address,
             phone,
-            whatsapp:     document.getElementById('be-whatsapp').value.trim() || phone,
+            whatsapp,
           });
           toast('बिज़नेस update हो गया!', 'success');
           modal.remove();

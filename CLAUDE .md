@@ -16,10 +16,10 @@ Three launch categories only:
 
 - **Hindi-first, mobile-first.** Default UI language Hindi (Devanagari), English secondary. Big tap targets.
 - **Fast on weak 2G/4G.** Compress every uploaded image **in the browser before upload** (use `browser-image-compression`). Lazy-load images. Keep JS light.
-- **Trust = product.** Every listing is `status: "pending"` on creation and goes live ONLY after admin approval. No auto-publish.
+- **Trust = product.** New authenticated property listings and job posts publish immediately. Owners submit listing edits for admin review; the current live version stays public until approval. Admins can reject or remove misleading posts and control verified/featured status.
 - **No in-app chat.** Contact happens via a `wa.me` WhatsApp button with a pre-filled message. Website = discovery, WhatsApp = closing.
 - **Phone OTP only.** No email/password login (rural users don't use email).
-- **Secrets via env vars.** Never hardcode Firebase keys in committed source; read from a config injected at deploy (Netlify env). Provide a `firebase-config.example.js` placeholder.
+- **Protect secrets.** Firebase web config is public client configuration and may be committed; never put server secrets in frontend files. Protect Firebase data with security rules and keep a `firebase-config.example.js` reference.
 
 ## Stack
 
@@ -69,7 +69,7 @@ Note: the moderation panel is `gng-admin-panel.html` (not `admin.html` as in ear
 ├── firestore.rules
 ├── storage.rules
 ├── netlify.toml
-├── .gitignore                   # must include firebase-config.js
+├── .gitignore                   # standard ignores; Firebase web config is intentionally committed
 └── CLAUDE.md
 ```
 
@@ -99,6 +99,8 @@ domain (string), mode: "offline"|"online"|"both"
 fee (string, free text), duration, timing, mentorQualification
 ```
 
+**`listingEdits`**: listingId, ownerId, changes (proposed listing fields and photos), status("pending"|"approved"|"rejected"), createdAt, reviewedAt. Public listing data changes only after admin approval.
+
 **`jobs`**: title, employerName, category("school"|"hospital"|"college"|"mandi"|"shop"|"other"), salary, location, description, contactWhatsApp, postedBy, status("live"|"rejected"), createdAt
 
 **`directory`**: businessName, category("seed"|"tractor"|"doctor"|"coaching"|"shop"|"other"), phone, whatsapp, address, village, ownerId, isFeatured, createdAt
@@ -114,8 +116,9 @@ fee (string, free text), duration, timing, mentorQualification
 ## Firestore security rules (intent)
 
 - Public can **read** docs only where `status == "live"` (listings/jobs/requirements) and all `directory`.
-- Authenticated users can **create** listings/jobs/requirements, but cannot set `status: "live"`, `isVerified`, or `isFeatured` themselves (those are admin-only).
-- Users can update/delete only their **own** docs (`ownerId == request.auth.uid`).
+- Authenticated users can **create** their own listings and jobs with `status: "live"` for immediate publication, but cannot set `isVerified` or `isFeatured` (admin-only). Requirements are published with `status: "active"`.
+- Firestore rules enforce allowed categories, required fields, text-length limits, valid 10-digit Indian mobile numbers, nonnegative budgets/prices, and a maximum of five listing photos; forms show the same checks before submission.
+- Users can update/delete only their **own** docs (`ownerId == request.auth.uid`). Listing owners submit edits to `listingEdits`; only admins apply them to a live listing.
 - `role: "admin"` (checked via a custom claim or an `admins/{uid}` doc) can change `status`, `isVerified`, `isFeatured`.
 - Storage: only authenticated users can upload to their own path; images only, size-limited.
 
@@ -124,10 +127,10 @@ fee (string, free text), duration, timing, mentorQualification
 **Phase 1 — Core property loop (build this first):**
 1. Phone OTP login (`login.html`, `auth.js`) with reCAPTCHA.
 2. Shared header/footer + Hindi UI shell (`ui.js`, `styles.css`).
-3. Post Property form with browser-side image compression → saves as `status: "pending"`.
+3. Post Property form with browser-side image compression → publishes as `status: "live"` immediately.
 4. Browse page with filters: type → purpose → townOrVillage → village → price.
 5. Listing detail page with photo gallery + WhatsApp contact button (`wa.me`).
-6. Admin moderation panel: list pending, approve/reject, toggle verified/featured.
+6. Admin panel: review edit requests, reject/remove misleading posts, and toggle verified/featured status.
 7. Home page assembling: hero search, category tiles, featured listings, browse-by-area, footer with village list.
 
 **Phase 2:** Jobs board, Directory, Property Requirement board, My Listings dashboard, Dealer profiles, Report-fake-listing.
@@ -157,5 +160,7 @@ In-app chat · ratings/reviews · user-to-user payments/escrow · maps integrati
 ## Deployment
 
 - Netlify: no build command, publish `public/`.
-- Firebase config keys come from Netlify env / injected `firebase-config.js` (gitignored).
+- Netlify serves the static HTML pages directly; do not add a catch-all rewrite to `index.html`.
+- Use Firebase CLI only to deploy Firestore rules/indexes and Storage rules; `firebase.json` intentionally has no Hosting target.
+- Firebase web config is public client configuration; secure data with Firestore and Storage rules.
 - Region: Firestore `asia-south1` (Mumbai).

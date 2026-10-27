@@ -514,6 +514,8 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .category-tile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); transform: translateY(-2px); text-decoration: none; color: var(--color-text); }
 .category-tile .tile-icon { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border-radius: 1rem; margin: 0 auto 0.6rem; }
 .category-tile .tile-icon svg { width: 34px; height: 34px; }
+.category-tile .tile-icon-img { width: 72px; height: 72px; border-radius: 0; background: none; margin-bottom: 0.4rem; }
+.tile-icon-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .category-tile .tile-label { font-size: 0.9rem; font-weight: 600; }
 
 /* ── Photo gallery ───────────────────────────────────────── */

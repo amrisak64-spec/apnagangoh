@@ -28,8 +28,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice, waURL } from './assets/js/ui.js?v=2';
-    import { initListings, fetchListing } from './assets/js/listings.js?v=2';
+    import { mountUI, toast, formatPrice, waURL } from './assets/js/ui.js?v=3';
+    import { initListings, fetchListing } from './assets/js/listings.js?v=3';
     import { initReports, createReport } from './assets/js/reports.js?v=2';
     import { ALL_LOCATIONS } from './data/villages.js?v=2';
 
@@ -102,8 +102,8 @@
         <div style="border:1.5px solid #EDE9FE;border-radius:0.75rem;overflow:hidden;margin-top:1rem;">
           ${breakupRows.map(([k,v], i) => `
           <div style="display:flex;justify-content:space-between;align-items:center;padding:0.65rem 1rem;${i<breakupRows.length-1?'border-bottom:1px solid #F5F3FF;':''}background:${i%2===0?'#FAFAFA':'white'};">
-            <span style="font-size:0.88rem;color:#6B6B6B;">${k}</span>
-            <span style="font-size:0.95rem;font-weight:700;color:#1A1A1A;">${v}</span>
+            <span style="font-size:0.88rem;color:#6B6B6B;">${escapeHtml(k)}</span>
+            <span style="font-size:0.95rem;font-weight:700;color:#1A1A1A;">${escapeHtml(v)}</span>
           </div>`).join('')}
         </div>` : '';
 
@@ -111,9 +111,9 @@
       const photos = l.photos && l.photos.length ? l.photos : [];
       const galleryHTML = photos.length
         ? `<div class="gallery">
-            <img class="gallery-main" id="gallery-main" src="${photos[0]}" alt="${l.title}">
+            <img class="gallery-main" id="gallery-main" src="${escapeHtml(photos[0])}" alt="${escapeHtml(l.title)}">
             ${photos.length > 1 ? `<div class="gallery-thumbs">${photos.map((p,i) =>
-              `<img class="gallery-thumb${i===0?' active':''}" data-full="${p}" src="${p}" alt="photo ${i+1}">`
+              `<img class="gallery-thumb${i===0?' active':''}" data-full="${escapeHtml(p)}" src="${escapeHtml(p)}" alt="photo ${i+1}">`
             ).join('')}</div>` : ''}
            </div>`
         : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:4rem;">🏘️</div>`;
@@ -141,16 +141,16 @@
       </div>
 
       <!-- Size + Type — BIG RED -->
-      <h1 style="font-size:clamp(1.8rem,6vw,2.6rem);font-weight:900;color:#DC2626;line-height:1.15;margin-bottom:0.35rem;letter-spacing:-0.02em;">${headline}</h1>
+      <h1 style="font-size:clamp(1.8rem,6vw,2.6rem);font-weight:900;color:#DC2626;line-height:1.15;margin-bottom:0.35rem;letter-spacing:-0.02em;">${escapeHtml(headline)}</h1>
 
       <!-- User title as subtitle -->
       <p style="font-size:1rem;color:#555;margin:0 0 0.85rem;line-height:1.5;">${escapeHtml(l.title)}</p>
 
       <!-- Location -->
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem 1.25rem;font-size:0.95rem;color:#444;">
-        <span>📍 <strong>${l.village || 'गंगोह'}</strong></span>
-        ${l.locality ? `<span>🏘️ ${l.locality}</span>` : ''}
-        ${l.landmark ? `<span>🚩 ${l.landmark}</span>` : ''}
+        <span>📍 <strong>${escapeHtml(l.village || 'गंगोह')}</strong></span>
+        ${l.locality ? `<span>🏘️ ${escapeHtml(l.locality)}</span>` : ''}
+        ${l.landmark ? `<span>🚩 ${escapeHtml(l.landmark)}</span>` : ''}
       </div>
 
       <hr style="margin:1rem 0;border:none;border-top:1.5px solid #F5F3FF;">
@@ -174,7 +174,7 @@
     ${l.description ? `
     <div style="background:white;border-radius:0.75rem;padding:1.25rem 1.5rem;margin-top:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
       <h3 style="font-size:1rem;font-weight:800;margin-bottom:0.5rem;">विवरण</h3>
-      <p style="color:#555;line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">${escapeHtml(l.description)}</p>
+      <p style="color:#555;line-height:1.8;white-space:pre-wrap;font-size:0.95rem;">${formatDescription(l.description)}</p>
     </div>` : ''}
   </div>
 
@@ -182,7 +182,7 @@
   <div>
     <div class="detail-info-card" style="position:sticky;top:80px;">
       <!-- Mini price repeat for sticky sidebar -->
-      <div style="font-size:1.4rem;font-weight:900;color:#DC2626;margin-bottom:0.15rem;">${headline}</div>
+      <div style="font-size:1.4rem;font-weight:900;color:#DC2626;margin-bottom:0.15rem;">${escapeHtml(headline)}</div>
       <div style="font-size:1.1rem;font-weight:800;color:#5B35D5;margin-bottom:1rem;">${formatPrice(l.price)}${l.purpose==='rent'?' / माह':''}</div>
       <hr style="margin:0 0 1rem;border:none;border-top:1.5px solid #F0EDE8;">
 
@@ -270,8 +270,16 @@
       injectJsonLd(l);
     }
 
-    function escapeHtml(str) {
-      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    // Descriptions accept a small Markdown subset. Escape first so raw HTML is never trusted.
+    function formatDescription(value) {
+      return escapeHtml(value)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\r?\n/g, '<br>');
     }
 
     // ── RealEstateListing structured data ─────────────────────
@@ -295,7 +303,7 @@
       const script = document.createElement('script');
       script.type = 'application/ld+json';
       script.dataset.listingLd = '1';
-      script.textContent = JSON.stringify(ld);
+      script.textContent = JSON.stringify(ld).replace(/</g, '\\u003c');
       document.head.appendChild(script);
     }
 

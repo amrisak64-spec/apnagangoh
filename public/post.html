@@ -407,7 +407,7 @@
             <label>विवरण</label>
             <textarea class="form-control" id="f-description" rows="4" maxlength="1000"
               placeholder="अतिरिक्त जानकारी — पानी, बिजली, सड़क, आस-पास की सुविधाएँ..."></textarea>
-            <p class="form-hint"><span id="desc-count">0</span>/1000 अक्षर</p>
+            <p class="form-hint"><span id="desc-count">0</span>/1000 अक्षर · **bold**, *italic* लिखें; नई लाइन अलग दिखाई देगी।</p>
           </div>
 
           <!-- ═══════ PHOTOS ═══════ -->
@@ -468,9 +468,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=2';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=3';
     import { initAuth, requireAuth } from './assets/js/auth.js?v=2';
-    import { initListings, createListing, fetchListing, updateOwnListing } from './assets/js/listings.js?v=2';
+    import { initListings, createListing, fetchListing, updateOwnListing } from './assets/js/listings.js?v=3';
     import { compressImages } from './assets/js/image-compress.js?v=2';
     import { VILLAGES } from './data/villages.js?v=2';
 
@@ -819,7 +819,7 @@
         extraFields.pagdi = Number(document.getElementById('shop-pagdi').value) || null;
       }
 
-      if (!isCareer && (!price || price < 100)) { showErr('कीमत / किराया सही भरें।'); return; }
+      if (!isCareer && (!Number.isFinite(price) || price < 100 || price > 1e13)) { showErr('कीमत / किराया ₹100 से ₹10,000,000,000,000 के बीच दर्ज करें।'); return; }
 
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true;
@@ -841,7 +841,7 @@
           await updateOwnListing(editId, formData, compressedFiles, existingPhotos, pct => {
             submitBtn.textContent = `Updating... ${pct}%`;
           });
-          toast('लिस्टिंग update हो गई!', 'success');
+          toast('अपडेट समीक्षा के लिए भेजा गया; पुरानी listing live रहेगी।', 'success');
           window.location.href = 'my-listings.html';
           return;
         }

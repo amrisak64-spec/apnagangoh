@@ -13,6 +13,99 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == ownerId;
     }
 
+    function validPhone(phone) {
+      return phone is string && phone.matches('^[6-9][0-9]{9}$');
+    }
+
+    function validOptionalAmount(data, field) {
+      return !(field in data) || data[field] == null
+             || (data[field] is number && data[field] >= 0 && data[field] <= 10000000000000);
+    }
+
+    function validOptionalText(data, field, maxLength) {
+      return !(field in data) || data[field] == null
+             || (data[field] is string && data[field].size() <= maxLength);
+    }
+
+    function validListingFields(data) {
+      return data.keys().hasAll([
+               'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
+               'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos'
+             ])
+             && data.keys().hasOnly([
+               'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
+               'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
+               'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
+               'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+               'ownerId', 'status', 'isVerified', 'isFeatured', 'createdAt', 'updatedAt'
+             ])
+             && data.type in ['plot', 'house', 'shop', 'agri', 'career']
+             && data.purpose is string
+             && (data.type == 'career' || data.purpose in ['sale', 'rent'])
+             && data.title is string && data.title.size() > 0 && data.title.size() <= 250
+             && data.townOrVillage in ['town', 'village']
+             && data.village is string && data.village.size() <= 100
+             && data.locality is string && data.locality.size() <= 120
+             && data.landmark is string && data.landmark.size() <= 120
+             && data.price is number && data.price >= 0 && data.price <= 10000000000000
+             && (data.type == 'career' ? data.price == 0 : data.price >= 100)
+             && (data.areaSize == null || (data.areaSize is number && data.areaSize > 0 && data.areaSize <= 10000000000))
+             && data.areaUnit is string && data.areaUnit.size() <= 20
+             && data.description is string && data.description.size() <= 1000
+             && validPhone(data.contactWhatsApp)
+             && data.photos is list && data.photos.size() <= 5
+             && validOptionalAmount(data, 'ratePerGaj')
+             && validOptionalAmount(data, 'ratePerBigha')
+             && validOptionalAmount(data, 'roadSizeFeet')
+             && validOptionalAmount(data, 'securityDeposit')
+             && validOptionalAmount(data, 'pagdi')
+             && validOptionalText(data, 'storey', 30)
+             && validOptionalText(data, 'rooms', 30)
+             && validOptionalText(data, 'domain', 100)
+             && validOptionalText(data, 'fee', 100)
+             && validOptionalText(data, 'duration', 100)
+             && validOptionalText(data, 'timing', 100)
+             && validOptionalText(data, 'mentorQualification', 150)
+             && (data.type != 'career' || (data.guidanceFor in ['10th', '12th', 'graduation', 'competitive', 'skill']
+                 && data.domain is string && data.domain.size() > 0 && data.domain.size() <= 100
+                 && data.mode in ['offline', 'online', 'both']));
+    }
+
+    function validBudget(value) {
+      return value == null || (value is number && value >= 0 && value <= 10000000000000);
+    }
+
+    function validJobFields(data) {
+      return data.keys().hasAll(['title', 'employerName', 'category', 'salary', 'location', 'description', 'contactWhatsApp'])
+             && data.title is string && data.title.size() > 0 && data.title.size() <= 80
+             && data.employerName is string && data.employerName.size() > 0 && data.employerName.size() <= 80
+             && data.category in ['school', 'hospital', 'college', 'mandi', 'shop', 'other']
+             && data.salary is string && data.salary.size() <= 40
+             && data.location is string && data.location.size() <= 100
+             && data.description is string && data.description.size() <= 1000
+             && validPhone(data.contactWhatsApp);
+    }
+
+    function validRequirementFields(data) {
+      return data.keys().hasAll(['type', 'purpose', 'village', 'budgetMin', 'budgetMax', 'description', 'phone'])
+             && data.type in ['plot', 'house', 'shop', 'agri']
+             && data.purpose in ['sale', 'rent']
+             && data.village is string && data.village.size() <= 100
+             && validBudget(data.budgetMin) && validBudget(data.budgetMax)
+             && (data.budgetMin == null || data.budgetMax == null || data.budgetMin <= data.budgetMax)
+             && data.description is string && data.description.size() <= 1000
+             && validPhone(data.phone);
+    }
+
+    function validDirectoryFields(data) {
+      return data.keys().hasAll(['businessName', 'category', 'phone', 'whatsapp', 'address', 'village'])
+             && data.businessName is string && data.businessName.size() > 0 && data.businessName.size() <= 80
+             && data.category in ['seed', 'tractor', 'doctor', 'coaching', 'shop', 'other']
+             && validPhone(data.phone) && validPhone(data.whatsapp)
+             && data.address is string && data.address.size() <= 120
+             && data.village is string && data.village.size() <= 100;
+    }
+
     // ── listings ──────────────────────────────────────────────────
     match /listings/{listingId} {
       // Public can read live listings; owner can read their own; admin can read all
@@ -22,22 +115,52 @@ service cloud.firestore {
 
       // Authenticated user can create with status 'live' (no admin review)
       allow create: if request.auth != null
+                   && request.resource.data.keys().hasOnly([
+                     'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
+                     'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
+                     'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
+                     'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+                     'ownerId', 'status', 'isVerified', 'isFeatured', 'createdAt', 'updatedAt'
+                   ])
                    && request.resource.data.ownerId == request.auth.uid
                    && request.resource.data.status == 'live'
                    && request.resource.data.isVerified == false
-                   && request.resource.data.isFeatured == false;
+                   && request.resource.data.isFeatured == false
+                   && request.resource.data.createdAt == request.time
+                   && request.resource.data.updatedAt == request.time
+                   && validListingFields(request.resource.data);
 
-      // Admin can update anything (approve/reject/verify/feature).
-      // Owner can edit their own listing's details, but not moderation fields.
-      allow update: if isAdmin()
-                   || (isOwner(resource.data.ownerId)
-                       && request.resource.data.ownerId == resource.data.ownerId
-                       && request.resource.data.status == resource.data.status
-                       && request.resource.data.isVerified == resource.data.isVerified
-                       && request.resource.data.isFeatured == resource.data.isFeatured);
+      // Admin can update anything. Owners submit edits through listingEdits so
+      // the currently published version remains unchanged until admin approval.
+      allow update: if isAdmin();
 
       // Owner can delete their own; admin can delete any
       allow delete: if isOwner(resource.data.ownerId) || isAdmin();
+    }
+
+    // ── listing edit requests ────────────────────────────────────
+    match /listingEdits/{editId} {
+      allow read: if isAdmin() || isOwner(resource.data.ownerId);
+
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(['listingId', 'ownerId', 'changes', 'status', 'createdAt'])
+                    && request.resource.data.keys().hasAll(['listingId', 'ownerId', 'changes', 'status', 'createdAt'])
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.listingId is string
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.createdAt == request.time
+                    && request.resource.data.changes is map
+                    && request.resource.data.changes.keys().hasOnly([
+                         'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
+                         'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
+                         'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
+                         'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification'
+                       ])
+                    && validListingFields(request.resource.data.changes)
+                    && get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.ownerId == request.auth.uid
+                    && get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.status == 'live';
+
+      allow update, delete: if isAdmin();
     }
 
     // ── users ─────────────────────────────────────────────────────
@@ -73,8 +196,16 @@ service cloud.firestore {
 
       // Authenticated user can post their own requirement
       allow create: if request.auth != null
+                   && request.resource.data.keys().hasOnly([
+                     'type', 'purpose', 'village', 'budgetMin', 'budgetMax', 'description', 'phone',
+                     'ownerId', 'ownerName', 'status', 'createdAt'
+                   ])
                    && request.resource.data.ownerId == request.auth.uid
-                   && request.resource.data.status == 'active';
+                   && request.resource.data.ownerName is string
+                   && request.resource.data.ownerName.size() <= 80
+                   && request.resource.data.status == 'active'
+                   && request.resource.data.createdAt == request.time
+                   && validRequirementFields(request.resource.data);
 
       // Owner or admin can delete
       allow delete: if isOwner(resource.data.ownerId) || isAdmin();
@@ -84,7 +215,11 @@ service cloud.firestore {
       allow update: if isAdmin()
                    || (isOwner(resource.data.ownerId)
                        && request.resource.data.ownerId == resource.data.ownerId
-                       && request.resource.data.status == resource.data.status);
+                       && request.resource.data.status == resource.data.status
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                         'type', 'purpose', 'village', 'budgetMin', 'budgetMax', 'description', 'phone'
+                       ])
+                       && validRequirementFields(request.resource.data));
     }
 
     // ── jobs (jobs board) ──────────────────────────────────────────
@@ -95,8 +230,14 @@ service cloud.firestore {
                   || isAdmin();
 
       allow create: if request.auth != null
+                   && request.resource.data.keys().hasOnly([
+                     'title', 'employerName', 'category', 'salary', 'location', 'description',
+                     'contactWhatsApp', 'postedBy', 'status', 'createdAt'
+                   ])
                    && request.resource.data.postedBy == request.auth.uid
-                   && request.resource.data.status == 'live';
+                   && request.resource.data.status == 'live'
+                   && request.resource.data.createdAt == request.time
+                   && validJobFields(request.resource.data);
 
       allow delete: if isOwner(resource.data.postedBy) || isAdmin();
 
@@ -105,7 +246,11 @@ service cloud.firestore {
       allow update: if isAdmin()
                    || (isOwner(resource.data.postedBy)
                        && request.resource.data.postedBy == resource.data.postedBy
-                       && request.resource.data.status == resource.data.status);
+                       && request.resource.data.status == resource.data.status
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                         'title', 'employerName', 'category', 'salary', 'location', 'description', 'contactWhatsApp'
+                       ])
+                       && validJobFields(request.resource.data));
     }
 
     // ── directory (business & mandi directory) ─────────────────────
@@ -114,8 +259,14 @@ service cloud.firestore {
       allow read: if true;
 
       allow create: if request.auth != null
+                   && request.resource.data.keys().hasOnly([
+                     'businessName', 'category', 'phone', 'whatsapp', 'address', 'village',
+                     'ownerId', 'isFeatured', 'createdAt'
+                   ])
                    && request.resource.data.ownerId == request.auth.uid
-                   && request.resource.data.isFeatured == false;
+                   && request.resource.data.isFeatured == false
+                   && request.resource.data.createdAt == request.time
+                   && validDirectoryFields(request.resource.data);
 
       allow delete: if isOwner(resource.data.ownerId) || isAdmin();
 
@@ -124,7 +275,11 @@ service cloud.firestore {
       allow update: if isAdmin()
                    || (isOwner(resource.data.ownerId)
                        && request.resource.data.ownerId == resource.data.ownerId
-                       && request.resource.data.isFeatured == resource.data.isFeatured);
+                       && request.resource.data.isFeatured == resource.data.isFeatured
+                       && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                         'businessName', 'category', 'phone', 'whatsapp', 'address', 'village'
+                       ])
+                       && validDirectoryFields(request.resource.data));
     }
 
     // ── dealers (dealer profiles) ───────────────────────────────────

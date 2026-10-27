@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
@@ -60,16 +60,16 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
             <div class="form-group">
               <label class="form-label">न्यूनतम बजट</label>
-              <input type="number" class="form-control" id="req-budget-min" placeholder="₹" min="0">
+              <input type="number" class="form-control" id="req-budget-min" placeholder="₹" min="0" max="10000000000000">
             </div>
             <div class="form-group">
               <label class="form-label">अधिकतम बजट</label>
-              <input type="number" class="form-control" id="req-budget-max" placeholder="₹" min="0">
+              <input type="number" class="form-control" id="req-budget-max" placeholder="₹" min="0" max="10000000000000">
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">विवरण</label>
-            <textarea class="form-control" id="req-desc" rows="3" placeholder="जैसे: 2 कमरे चाहिए, जमीन की तरफ हो, सड़क के पास..."></textarea>
+            <textarea class="form-control" id="req-desc" rows="3" maxlength="1000" placeholder="जैसे: 2 कमरे चाहिए, जमीन की तरफ हो, सड़क के पास..."></textarea>
           </div>
           <div class="form-group">
             <label class="form-label">WhatsApp नंबर *</label>
@@ -108,9 +108,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=2';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=3';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=2';
-    import { initListings, createRequirement, fetchRequirements, updateOwnRequirement, deleteRequirement } from './assets/js/listings.js?v=2';
+    import { initListings, createRequirement, fetchRequirements, updateOwnRequirement, deleteRequirement } from './assets/js/listings.js?v=3';
     import { VILLAGES } from './data/villages.js?v=2';
 
     let fbConfig;
@@ -158,14 +158,20 @@
       const errEl   = document.getElementById('req-error');
 
       if (!type || !purpose) { errEl.textContent = 'प्रकार और उद्देश्य ज़रूरी है।'; errEl.style.display='block'; return; }
-      if (!phone || phone.length !== 10) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+      if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+      const minBudget = budMin ? Number(budMin) : null;
+      const maxBudget = budMax ? Number(budMax) : null;
+      if ((minBudget != null && (!Number.isFinite(minBudget) || minBudget < 0)) || (maxBudget != null && (!Number.isFinite(maxBudget) || maxBudget < 0)) || (minBudget != null && maxBudget != null && minBudget > maxBudget)) {
+        errEl.textContent = 'बजट सही भरें; न्यूनतम बजट अधिकतम से बड़ा नहीं हो सकता।'; errEl.style.display='block'; return;
+      }
+      if (desc.length > 1000) { errEl.textContent = 'विवरण 1000 अक्षरों से कम रखें।'; errEl.style.display='block'; return; }
       errEl.style.display = 'none';
 
       const btn = document.getElementById('req-submit-btn');
       btn.disabled = true; btn.textContent = 'Post हो रहा है...';
 
       try {
-        await createRequirement({ type, purpose, village, budgetMin: budMin ? Number(budMin) : null, budgetMax: budMax ? Number(budMax) : null, description: desc, phone });
+        await createRequirement({ type, purpose, village, budgetMin: minBudget, budgetMax: maxBudget, description: desc, phone });
         document.getElementById('req-form-wrap').style.display = 'none';
         document.getElementById('req-success').style.display   = 'block';
         toast('ज़रूरत post हो गई!', 'success');
@@ -274,16 +280,16 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
             <div class="form-group">
               <label class="form-label">न्यूनतम बजट</label>
-              <input id="re-budget-min" type="number" class="form-control" value="${r.budgetMin ?? ''}" min="0">
+            <input id="re-budget-min" type="number" class="form-control" value="${r.budgetMin ?? ''}" min="0" max="10000000000000">
             </div>
             <div class="form-group">
               <label class="form-label">अधिकतम बजट</label>
-              <input id="re-budget-max" type="number" class="form-control" value="${r.budgetMax ?? ''}" min="0">
+              <input id="re-budget-max" type="number" class="form-control" value="${r.budgetMax ?? ''}" min="0" max="10000000000000">
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">विवरण</label>
-            <textarea id="re-desc" class="form-control" rows="3">${escapeHtml(r.description || '')}</textarea>
+            <textarea id="re-desc" class="form-control" rows="3" maxlength="1000">${escapeHtml(r.description || '')}</textarea>
           </div>
           <div class="form-group">
             <label class="form-label">WhatsApp नंबर</label>
@@ -303,18 +309,24 @@
       document.getElementById('re-save-btn').onclick = async () => {
         const phone = document.getElementById('re-phone').value.trim();
         const errEl = document.getElementById('re-error');
-        if (!phone || phone.length !== 10) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
+        if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
         errEl.style.display = 'none';
 
         const budMin = document.getElementById('re-budget-min').value;
         const budMax = document.getElementById('re-budget-max').value;
+        const minBudget = budMin ? Number(budMin) : null;
+        const maxBudget = budMax ? Number(budMax) : null;
+        const description = document.getElementById('re-desc').value.trim();
+        if ((minBudget != null && (!Number.isFinite(minBudget) || minBudget < 0)) || (maxBudget != null && (!Number.isFinite(maxBudget) || maxBudget < 0)) || (minBudget != null && maxBudget != null && minBudget > maxBudget) || description.length > 1000) {
+          errEl.textContent = 'बजट और विवरण की जानकारी सही भरें।'; errEl.style.display='block'; return;
+        }
         const saveBtn = document.getElementById('re-save-btn');
         saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
         try {
           await updateOwnRequirement(r.id, {
-            budgetMin:   budMin ? Number(budMin) : null,
-            budgetMax:   budMax ? Number(budMax) : null,
-            description: document.getElementById('re-desc').value.trim(),
+            budgetMin: minBudget,
+            budgetMax: maxBudget,
+            description,
             phone,
           });
           toast('ज़रूरत update हो गई!', 'success');

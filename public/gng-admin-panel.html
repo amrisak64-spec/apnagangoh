@@ -54,6 +54,9 @@
       <button class="tab-btn active" data-tab="pending" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#1D4ED8;border-bottom:2px solid #1D4ED8;margin-bottom:-2px;">
         Pending <span id="pending-count" style="background:#1D4ED8;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
       </button>
+      <button class="tab-btn" data-tab="edits" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
+        Edit Requests <span id="edit-count" style="background:#5B35D5;color:white;border-radius:1rem;padding:0.1rem 0.4rem;font-size:0.75rem;margin-left:0.25rem;"></span>
+      </button>
       <button class="tab-btn" data-tab="live" style="padding:0.5rem 1rem;border:none;background:none;cursor:pointer;font-weight:600;font-size:1rem;font-family:inherit;color:#888;">
         Live
       </button>
@@ -81,9 +84,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, toast, formatPrice } from './assets/js/ui.js?v=2';
+    import { mountUI, updateNavUser, toast, formatPrice } from './assets/js/ui.js?v=3';
     import { initAuth, requireAdmin, logout } from './assets/js/auth.js?v=2';
-    import { initListings, approveListing, rejectListing, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js?v=2';
+    import { initListings, approveListing, rejectListing, approveListingEdit, rejectListingEdit, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js?v=3';
     import { initReports, fetchOpenReports, resolveReport } from './assets/js/reports.js?v=2';
     import { initFeedback, fetchNewFeedback, markFeedbackReviewed } from './assets/js/feedback.js?v=2';
 
@@ -120,10 +123,11 @@
     // ── Stats ─────────────────────────────────────────────
     async function loadStats() {
       try {
-        const [pSnap, lSnap, rSnap, reports, feedback] = await Promise.all([
+        const [pSnap, lSnap, rSnap, editSnap, reports, feedback] = await Promise.all([
           db.collection('listings').where('status','==','pending').get(),
           db.collection('listings').where('status','==','live').get(),
           db.collection('listings').where('status','==','rejected').get(),
+          db.collection('listingEdits').where('status','==','pending').get(),
           fetchOpenReports(),
           fetchNewFeedback(),
         ]);
@@ -131,6 +135,7 @@
         document.getElementById('stat-live').textContent    = lSnap.size;
         document.getElementById('stat-rejected').textContent= rSnap.size;
         document.getElementById('pending-count').textContent = pSnap.size;
+        document.getElementById('edit-count').textContent = editSnap.size || '';
         document.getElementById('reports-count').textContent = reports.length || '';
         document.getElementById('feedback-count').textContent = feedback.length || '';
       } catch {}
@@ -180,6 +185,31 @@
         return;
       }
 
+      if (status === 'edits') {
+        const q = db.collection('listingEdits').where('status','==','pending').orderBy('createdAt','asc').limit(50);
+        pendingUnsubscribe = q.onSnapshot(async snap => {
+          try {
+            const edits = await Promise.all(snap.docs.map(async doc => {
+              const edit = doc.data();
+              const listingSnap = await db.collection('listings').doc(edit.listingId).get();
+              return {
+                ...edit,
+                id: edit.listingId,
+                editId: doc.id,
+                currentData: listingSnap.exists ? listingSnap.data() : {},
+              };
+            }));
+            renderTable(edits, 'edits', content);
+            document.getElementById('edit-count').textContent = edits.length || '';
+          } catch (err) {
+            content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+          }
+        }, err => {
+          content.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
+        });
+        return;
+      }
+
       if (status === 'pending') {
         // Real-time listener — auto-updates when new posts arrive
         const q = db.collection('listings').where('status','==','pending').orderBy('createdAt','asc').limit(50);
@@ -205,7 +235,8 @@
 
     function renderTable(listings, status, container) {
       if (!listings.length) {
-        container.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>कोई ${status} listing नहीं।</p></div>`;
+        const emptyMessage = status === 'edits' ? 'कोई edit request pending नहीं।' : `कोई ${status} listing नहीं।`;
+        container.innerHTML = `<div class="empty-state"><span class="empty-icon">✅</span><p>${emptyMessage}</p></div>`;
         return;
       }
       // Preserve existing tbody if real-time update, else rebuild
@@ -302,14 +333,18 @@
 
     function buildRow(l, status) {
       const tr = document.createElement('tr');
-      tr.id = `row-${l.id}`;
-      const thumb = l.photos?.length
-        ? `<img src="${l.photos[0]}" style="width:64px;height:48px;object-fit:cover;border-radius:0.35rem;" loading="lazy">`
+      tr.id = status === 'edits' ? `row-edit-${l.editId}` : `row-${l.id}`;
+      const shown = status === 'edits' ? { ...l.currentData, ...l.changes } : l;
+      const moderation = status === 'edits' ? l.currentData : l;
+      const thumb = shown.photos?.length
+        ? `<img src="${escapeHtml(shown.photos[0])}" style="width:64px;height:48px;object-fit:cover;border-radius:0.35rem;" loading="lazy">`
         : `<span style="font-size:2rem;">🏘️</span>`;
       const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
-      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि'}[l.type] || l.type;
+      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि'}[shown.type] || shown.type;
 
-      const actionBtns = status === 'pending'
+      const actionBtns = status === 'edits'
+        ? `<button class="btn btn-outline btn-sm" data-action="review-edit" data-id="${escapeHtml(l.editId)}">🔎 Review changes</button>`
+        : status === 'pending'
         ? `<button class="btn btn-green btn-sm" data-action="approve" data-id="${l.id}">✅ Approve</button>
            <button class="btn btn-danger btn-sm" data-action="reject" data-id="${l.id}">❌ Reject</button>`
         : status === 'live'
@@ -318,23 +353,24 @@
 
       tr.innerHTML = `
 <td data-label="फ़ोटो">${thumb}</td>
-<td data-label="टाइटल"><strong>${l.title||'—'}</strong><br><span style="font-size:0.8rem;color:#888;">📍 ${l.village||'गंगोह'} | ${l.ownerId?.slice(0,8)||''}...</span></td>
-<td data-label="कीमत">${formatPrice(l.price)}</td>
-<td data-label="प्रकार">${typeLabel}/${l.purpose==='sale'?'बिक्री':'किराया'}</td>
+<td data-label="टाइटल"><strong>${status === 'edits' ? `${escapeHtml(l.currentData?.title || '—')} → ${escapeHtml(shown.title || l.currentData?.title || '—')}` : escapeHtml(shown.title||'—')}</strong><br><span style="font-size:0.8rem;color:#888;">📍 ${escapeHtml(shown.village||'गंगोह')} | ${escapeHtml(l.ownerId?.slice(0,8)||'')}...</span></td>
+<td data-label="कीमत">${formatPrice(shown.price)}</td>
+<td data-label="प्रकार">${escapeHtml(typeLabel)}/${shown.purpose==='sale'?'बिक्री':'किराया'}</td>
 <td data-label="तारीख">${date}</td>
 <td data-label="Actions" style="display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;">
   ${actionBtns}
-  <a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁</a>
-  <button class="btn btn-outline btn-sm" data-action="verify" data-id="${l.id}" data-current="${l.isVerified}"
-    style="${l.isVerified?'background:#DBEAFE;':''}">
-    ${l.isVerified?'☑ Verified':'Verify'}
+  <a href="listing.html?id=${encodeURIComponent(String(l.id))}" class="btn btn-outline btn-sm" target="_blank" rel="noopener">👁</a>
+  ${status === 'edits' ? '' : `
+  <button class="btn btn-outline btn-sm" data-action="verify" data-id="${escapeHtml(l.id)}" data-current="${Boolean(moderation.isVerified)}"
+    style="${moderation.isVerified?'background:#DBEAFE;':''}">
+    ${moderation.isVerified?'☑ Verified':'Verify'}
   </button>
-  <button class="btn btn-outline btn-sm" data-action="feature" data-id="${l.id}" data-current="${l.isFeatured}"
-    style="${l.isFeatured?'background:#FDE68A;':''}">
-    ${l.isFeatured?'⭐ Featured':'Feature'}
+  <button class="btn btn-outline btn-sm" data-action="feature" data-id="${escapeHtml(l.id)}" data-current="${Boolean(moderation.isFeatured)}"
+    style="${moderation.isFeatured?'background:#FDE68A;':''}">
+    ${moderation.isFeatured?'⭐ Featured':'Feature'}
   </button>
-  <button class="btn btn-outline btn-sm" data-action="edit" data-id="${l.id}" style="background:#EFF6FF;color:#1D4ED8;border-color:#1D4ED8;">✏️ Edit</button>
-  <button class="btn btn-danger btn-sm" data-action="delete" data-id="${l.id}" title="हमेशा के लिए Delete करें">🗑️</button>
+  <button class="btn btn-outline btn-sm" data-action="edit" data-id="${escapeHtml(l.id)}" style="background:#EFF6FF;color:#1D4ED8;border-color:#1D4ED8;">✏️ Edit</button>
+  <button class="btn btn-danger btn-sm" data-action="delete" data-id="${escapeHtml(l.id)}" title="हमेशा के लिए Delete करें">🗑️</button>`}
 </td>`;
 
       tr.querySelectorAll('[data-action]').forEach(btn => {
@@ -347,7 +383,11 @@
       btn.disabled = true;
       try {
         const action = btn.dataset.action;
-        if (action === 'approve') {
+        if (action === 'review-edit') {
+          openEditReviewModal(l);
+          btn.disabled = false;
+          return;
+        } else if (action === 'approve') {
           await approveListing(l.id);
           document.getElementById(`row-${l.id}`)?.remove();
           toast('Approved!', 'success');
@@ -387,6 +427,82 @@
       } finally {
         btn.disabled = false;
       }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function openEditReviewModal(edit) {
+      document.getElementById('edit-review-modal')?.remove();
+      const fieldLabels = {
+        type:'Type', purpose:'Purpose', title:'Title', townOrVillage:'Area type', village:'Village',
+        locality:'Locality', landmark:'Landmark', price:'Price', areaSize:'Area size', areaUnit:'Area unit',
+        description:'Description', contactWhatsApp:'WhatsApp', photos:'Photos', ratePerGaj:'Rate per gaj',
+        ratePerBigha:'Rate per bigha', roadSizeFeet:'Road width', storey:'Storeys', rooms:'Rooms',
+        securityDeposit:'Security deposit', pagdi:'Pagdi', guidanceFor:'Guidance level', domain:'Domain',
+        mode:'Mode', fee:'Fee', duration:'Duration', timing:'Timing', mentorQualification:'Mentor qualification',
+      };
+      const fields = Object.keys(edit.changes || {}).map(key => [
+        fieldLabels[key] || key,
+        key,
+        edit.currentData?.[key],
+        edit.changes[key],
+      ]);
+      const modal = document.createElement('div');
+      modal.id = 'edit-review-modal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem;';
+      modal.innerHTML = `
+        <div style="background:white;border-radius:1rem;padding:1.25rem;width:100%;max-width:680px;max-height:90vh;overflow:auto;">
+          <h3 style="margin:0 0 1rem;">Listing edit request review</h3>
+          ${fields.map(([label,key,before,after]) => {
+            if (after === undefined || JSON.stringify(before) === JSON.stringify(after)) return '';
+            const text = value => Array.isArray(value) ? value.join('\n') : value;
+            return `<section style="border-top:1px solid #eee;padding:0.65rem 0;">
+              <strong>${label}</strong>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.35rem;">
+                <div><small>Current</small><div style="white-space:pre-wrap;overflow-wrap:anywhere;">${escapeHtml(text(before) ?? '—')}</div></div>
+                <div><small>Requested</small><div style="white-space:pre-wrap;overflow-wrap:anywhere;">${escapeHtml(text(after) ?? '—')}</div></div>
+              </div>
+            </section>`;
+          }).join('')}
+          <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+            <button class="btn btn-green" data-review-approve style="flex:1;">✅ Approve update</button>
+            <button class="btn btn-danger" data-review-reject style="flex:1;">❌ Reject update</button>
+            <button class="btn btn-outline" data-review-close>Close</button>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+      modal.querySelector('[data-review-close]').onclick = () => modal.remove();
+      modal.addEventListener('click', event => { if (event.target === modal) modal.remove(); });
+      modal.querySelector('[data-review-approve]').onclick = async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          await approveListingEdit(edit.editId);
+          document.getElementById(`row-edit-${edit.editId}`)?.remove();
+          modal.remove();
+          toast('Edit approved; updated listing is live.', 'success');
+          loadStats();
+        } catch (err) {
+          toast(`Error: ${err.message}`, 'error');
+          button.disabled = false;
+        }
+      };
+      modal.querySelector('[data-review-reject]').onclick = async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          await rejectListingEdit(edit.editId);
+          document.getElementById(`row-edit-${edit.editId}`)?.remove();
+          modal.remove();
+          toast('Edit rejected; current listing remains live.', 'success');
+          loadStats();
+        } catch (err) {
+          toast(`Error: ${err.message}`, 'error');
+          button.disabled = false;
+        }
+      };
     }
 
     // ── Edit Modal ────────────────────────────────────────

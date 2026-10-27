@@ -157,11 +157,15 @@ export function lazyLoad() {
 }
 
 // ── Listing card HTML ─────────────────────────────────────
+function escapeHtml(value) {
+  return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 export function listingCardHTML(listing) {
   const { id, title, price, type, purpose, village, locality, photos, isVerified, isFeatured, areaSize, areaUnit, guidanceFor, domain, mode, fee } = listing;
   const isCareer = type === 'career';
   const img = photos && photos.length
-    ? `<img class="card-img" data-src="${photos[0]}" src="" alt="${title}" loading="lazy">`
+    ? `<img class="card-img" data-src="${escapeHtml(photos[0])}" src="" alt="${escapeHtml(title)}" loading="lazy">`
     : `<div class="card-img-placeholder">${isCareer ? '🎓' : '🏘️'}</div>`;
   const purposeBadge = isCareer
     ? `<span class="badge" style="background:#FEF9C3;color:#854D0E;">🎓 करियर</span>`
@@ -187,13 +191,13 @@ export function listingCardHTML(listing) {
     ? `<span style="background:#F0FDF4;color:#15803D;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">✓ Verified</span>`
     : `<span style="background:#F9F7F4;color:#666;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">📞 Direct</span>`;
   const priceLabel = isCareer
-    ? (fee ? `<span style="font-size:0.9rem;font-weight:700;color:#CA8A04;">${fee}</span>` : `<span style="font-size:0.88rem;color:#888;">फ़ीस जानें</span>`)
+    ? (fee ? `<span style="font-size:0.9rem;font-weight:700;color:#CA8A04;">${escapeHtml(fee)}</span>` : `<span style="font-size:0.88rem;color:#888;">फ़ीस जानें</span>`)
     : purpose === 'rent' ? `${formatPrice(price)}<span style="font-size:0.75rem;font-weight:600;color:#888;">/माह</span>` : formatPrice(price);
   const shareText = encodeURIComponent(`${headline} — ${formatPrice(price)}\n📍 ${locationStr}\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
 
   return `
 <div class="listing-card" style="display:flex;flex-direction:column;">
-  <a href="listing.html?id=${id}" style="text-decoration:none;color:inherit;flex:1;">
+  <a href="listing.html?id=${encodeURIComponent(String(id ?? ''))}" style="text-decoration:none;color:inherit;flex:1;">
     ${img}
     <div class="card-body" style="padding:1rem;">
       <!-- Badges -->
@@ -201,11 +205,11 @@ export function listingCardHTML(listing) {
         ${purposeBadge}${featuredBadge}${verifiedChip}
       </div>
       <!-- Smart headline in red -->
-      <div style="font-size:1.05rem;font-weight:900;color:#DC2626;line-height:1.25;margin-bottom:0.2rem;">${headline}</div>
+      <div style="font-size:1.05rem;font-weight:900;color:#DC2626;line-height:1.25;margin-bottom:0.2rem;">${escapeHtml(headline)}</div>
       <!-- User title as subtitle -->
-      <div style="font-size:0.8rem;color:#555;line-height:1.3;margin-bottom:0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
+      <div style="font-size:0.8rem;color:#555;line-height:1.3;margin-bottom:0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div>
       <!-- Location -->
-      <div style="font-size:1rem;font-weight:600;color:#16A34A;margin-bottom:0.45rem;display:flex;align-items:center;gap:0.25rem;"><svg width="15" height="18" viewBox="0 0 52 63" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="57" rx="16" ry="6" fill="#4CAF50" opacity="0.7"/><ellipse cx="26" cy="57" rx="8" ry="3" fill="#2E7D32" opacity="0.5"/><path d="M26 2C15.5 2 7 10.5 7 21c0 14 19 38 19 38S45 35 45 21C45 10.5 36.5 2 26 2z" fill="#E53935"/><path d="M26 2C26 2 45 10.5 45 21c0 14-19 38-19 38V2z" fill="#B71C1C"/><circle cx="26" cy="21" r="9" fill="white"/></svg> ${locationStr}</div>
+      <div style="font-size:1rem;font-weight:600;color:#16A34A;margin-bottom:0.45rem;display:flex;align-items:center;gap:0.25rem;"><svg width="15" height="18" viewBox="0 0 52 63" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="57" rx="16" ry="6" fill="#4CAF50" opacity="0.7"/><ellipse cx="26" cy="57" rx="8" ry="3" fill="#2E7D32" opacity="0.5"/><path d="M26 2C15.5 2 7 10.5 7 21c0 14 19 38 19 38S45 35 45 21C45 10.5 36.5 2 26 2z" fill="#E53935"/><path d="M26 2C26 2 45 10.5 45 21c0 14-19 38-19 38V2z" fill="#B71C1C"/><circle cx="26" cy="21" r="9" fill="white"/></svg> ${escapeHtml(locationStr)}</div>
       <!-- Price -->
       <div style="font-size:1.15rem;font-weight:900;color:#5B35D5;">${priceLabel}</div>
     </div>

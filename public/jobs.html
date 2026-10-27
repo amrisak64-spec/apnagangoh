@@ -64,7 +64,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">विवरण</label>
-            <textarea class="form-control" id="job-desc" rows="3" placeholder="काम की जानकारी, योग्यता, समय..."></textarea>
+            <textarea class="form-control" id="job-desc" rows="3" maxlength="1000" placeholder="काम की जानकारी, योग्यता, समय..."></textarea>
           </div>
           <div class="form-group">
             <label class="form-label">WhatsApp नंबर *</label>
@@ -103,9 +103,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast } from './assets/js/ui.js?v=2';
+    import { mountUI, toast } from './assets/js/ui.js?v=3';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=2';
-    import { initJobs, createJob, fetchJobs, updateOwnJob, deleteJob } from './assets/js/jobs.js?v=2';
+    import { initJobs, createJob, fetchJobs, updateOwnJob, deleteJob } from './assets/js/jobs.js?v=3';
     import { VILLAGES } from './data/villages.js?v=2';
 
     let fbConfig;
@@ -152,6 +152,7 @@
       const errEl    = document.getElementById('job-error');
 
       if (!title || !employer || !category) { errEl.textContent = 'पद, employer और श्रेणी ज़रूरी है।'; errEl.style.display='block'; return; }
+      if (title.length > 80 || employer.length > 80 || salary.length > 40 || desc.length > 1000) { errEl.textContent = 'कृपया टाइटल और employer 80, सैलरी 40 और विवरण 1000 अक्षरों के अंदर रखें।'; errEl.style.display='block'; return; }
       if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
       errEl.style.display = 'none';
 
@@ -260,19 +261,19 @@
           <h3 style="margin:0 0 1rem;font-size:1.1rem;">✏️ नौकरी Edit करें</h3>
           <div class="form-group">
             <label class="form-label">पद / टाइटल</label>
-            <input id="je-title" class="form-control" value="${escapeHtml(j.title)}">
+            <input id="je-title" class="form-control" maxlength="80" value="${escapeHtml(j.title)}">
           </div>
           <div class="form-group">
             <label class="form-label">Employer / Business का नाम</label>
-            <input id="je-employer" class="form-control" value="${escapeHtml(j.employerName)}">
+            <input id="je-employer" class="form-control" maxlength="80" value="${escapeHtml(j.employerName)}">
           </div>
           <div class="form-group">
             <label class="form-label">सैलरी</label>
-            <input id="je-salary" class="form-control" value="${escapeHtml(j.salary || '')}">
+            <input id="je-salary" class="form-control" maxlength="40" value="${escapeHtml(j.salary || '')}">
           </div>
           <div class="form-group">
             <label class="form-label">विवरण</label>
-            <textarea id="je-desc" class="form-control" rows="3">${escapeHtml(j.description || '')}</textarea>
+            <textarea id="je-desc" class="form-control" rows="3" maxlength="1000">${escapeHtml(j.description || '')}</textarea>
           </div>
           <div class="form-group">
             <label class="form-label">WhatsApp नंबर</label>
@@ -292,6 +293,12 @@
       document.getElementById('je-save-btn').onclick = async () => {
         const phone = document.getElementById('je-phone').value.trim();
         const errEl = document.getElementById('je-error');
+        const title = document.getElementById('je-title').value.trim();
+        const employer = document.getElementById('je-employer').value.trim();
+        const salary = document.getElementById('je-salary').value.trim();
+        const description = document.getElementById('je-desc').value.trim();
+        if (!title || !employer) { errEl.textContent = 'पद और employer का नाम ज़रूरी है।'; errEl.style.display='block'; return; }
+        if (title.length > 80 || employer.length > 80 || salary.length > 40 || description.length > 1000) { errEl.textContent = 'कृपया टाइटल और employer 80, सैलरी 40 और विवरण 1000 अक्षरों के अंदर रखें।'; errEl.style.display='block'; return; }
         if (!/^[6-9][0-9]{9}$/.test(phone)) { errEl.textContent = 'सही WhatsApp नंबर डालें (10 अंक)।'; errEl.style.display='block'; return; }
         errEl.style.display = 'none';
 
@@ -299,10 +306,10 @@
         saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
         try {
           await updateOwnJob(j.id, {
-            title:           document.getElementById('je-title').value.trim(),
-            employerName:    document.getElementById('je-employer').value.trim(),
-            salary:          document.getElementById('je-salary').value.trim(),
-            description:     document.getElementById('je-desc').value.trim(),
+            title,
+            employerName: employer,
+            salary,
+            description,
             contactWhatsApp: phone,
           });
           toast('नौकरी update हो गई!', 'success');

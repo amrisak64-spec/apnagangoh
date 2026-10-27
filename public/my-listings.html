@@ -68,9 +68,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=2';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=3';
     import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=2';
-    import { initListings, fetchUserListings, deleteListing } from './assets/js/listings.js?v=2';
+    import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=3';
 
     let fbConfig;
     try {
@@ -99,12 +99,18 @@
     });
 
     let allListings = [];
+    let pendingEditListingIds = new Set();
     let currentTab  = 'all';
 
     async function loadMyListings() {
       document.getElementById('my-content').innerHTML = '<div class="spinner"></div>';
       try {
-        allListings = await fetchUserListings(user.uid);
+        const [listings, edits] = await Promise.all([
+          fetchUserListings(user.uid),
+          fetchUserListingEdits(user.uid),
+        ]);
+        allListings = listings;
+        pendingEditListingIds = new Set(edits.filter(e => e.status === 'pending').map(e => e.listingId));
         updateStats();
         renderTab(currentTab);
       } catch (err) {
@@ -160,6 +166,7 @@
           <div style="font-weight:700;font-size:1rem;margin:0.35rem 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.title || '—'}</div>
           <div style="font-size:0.85rem;color:#1D4ED8;font-weight:700;">${formatPrice(l.price)}</div>
           <div style="font-size:0.8rem;color:#888;margin-top:0.15rem;">📍 ${l.village||'गंगोह'} · ${typeLabel} · ${l.purpose==='sale'?'बिक्री':'किराया'}</div>
+          ${pendingEditListingIds.has(l.id) ? `<div style="font-size:0.78rem;color:#1D4ED8;margin-top:0.25rem;">✏️ बदलाव समीक्षा में हैं; पुरानी listing अभी live है।</div>` : ''}
           ${l.status === 'rejected' ? `<div style="font-size:0.78rem;color:#DC2626;margin-top:0.25rem;">❗ Admin ने reject किया। नई listing डालें।</div>` : ''}
           <div style="display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;">
             ${l.status === 'live' ? `<a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁 देखें</a>` : ''}
