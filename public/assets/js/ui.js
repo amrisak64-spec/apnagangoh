@@ -161,12 +161,19 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+// Category artwork shown in place of a photo when a post has none.
+const CATEGORY_ICONS = { plot: 'plot', house: 'house', shop: 'shop', agri: 'agri', career: 'career' };
+export function categoryIconHTML(type, cls = '') {
+  const name = CATEGORY_ICONS[type] || 'house';
+  return `<img class="category-icon ${cls}" src="/assets/images/categories/${name}.webp" alt="" loading="lazy">`;
+}
+
 export function listingCardHTML(listing) {
   const { id, title, price, type, purpose, village, locality, photos, isVerified, isFeatured, areaSize, areaUnit, guidanceFor, domain, mode, fee } = listing;
   const isCareer = type === 'career';
   const img = photos && photos.length
     ? `<img class="card-img" data-src="${escapeHtml(photos[0])}" src="" alt="${escapeHtml(title)}" loading="lazy">`
-    : `<div class="card-img-placeholder">${isCareer ? '🎓' : '🏘️'}</div>`;
+    : `<div class="card-img-placeholder">${categoryIconHTML(type)}</div>`;
   const purposeBadge = isCareer
     ? `<span class="badge" style="background:#FEF9C3;color:#854D0E;">🎓 करियर</span>`
     : purpose === 'sale'

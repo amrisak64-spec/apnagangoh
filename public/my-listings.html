@@ -68,7 +68,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=3';
+    import { mountUI, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=3';
     import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=2';
     import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=3';
 
@@ -150,7 +150,7 @@
       const statusLabel = { pending:'⏳ Review में', live:'✅ Live', rejected:'❌ Rejected' }[l.status] || l.status;
       const thumb = l.photos?.length
         ? `<img src="${l.photos[0]}" style="width:110px;min-width:110px;height:90px;object-fit:cover;" loading="lazy">`
-        : `<div style="width:110px;min-width:110px;height:90px;background:#F3EEE8;display:flex;align-items:center;justify-content:center;font-size:2rem;">🏘️</div>`;
+        : `<div style="width:110px;min-width:110px;height:90px;background:#F3EEE8;display:flex;align-items:center;justify-content:center;">${categoryIconHTML(l.type).replace('<img ', '<img style="height:76px;width:auto;" ')}</div>`;
       const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
       const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि भूमि'}[l.type] || '';
 

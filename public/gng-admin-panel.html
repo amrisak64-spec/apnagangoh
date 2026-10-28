@@ -84,7 +84,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, toast, formatPrice } from './assets/js/ui.js?v=3';
+    import { mountUI, updateNavUser, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=3';
     import { initAuth, requireAdmin, logout } from './assets/js/auth.js?v=2';
     import { initListings, approveListing, rejectListing, approveListingEdit, rejectListingEdit, toggleVerified, toggleFeatured, deleteListingWithPhotos } from './assets/js/listings.js?v=3';
     import { initReports, fetchOpenReports, resolveReport } from './assets/js/reports.js?v=2';
@@ -338,7 +338,7 @@
       const moderation = status === 'edits' ? l.currentData : l;
       const thumb = shown.photos?.length
         ? `<img src="${escapeHtml(shown.photos[0])}" style="width:64px;height:48px;object-fit:cover;border-radius:0.35rem;" loading="lazy">`
-        : `<span style="font-size:2rem;">🏘️</span>`;
+        : categoryIconHTML(shown.type).replace('<img ', '<img style="height:48px;width:auto;" ');
       const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
       const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि'}[shown.type] || shown.type;
 

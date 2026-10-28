@@ -28,7 +28,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice, waURL } from './assets/js/ui.js?v=3';
+    import { mountUI, toast, formatPrice, waURL, categoryIconHTML } from './assets/js/ui.js?v=3';
     import { initListings, fetchListing } from './assets/js/listings.js?v=3';
     import { initReports, createReport } from './assets/js/reports.js?v=2';
     import { ALL_LOCATIONS } from './data/villages.js?v=2';
@@ -116,7 +116,7 @@
               `<img class="gallery-thumb${i===0?' active':''}" data-full="${escapeHtml(p)}" src="${escapeHtml(p)}" alt="photo ${i+1}">`
             ).join('')}</div>` : ''}
            </div>`
-        : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;font-size:4rem;">🏘️</div>`;
+        : `<div style="width:100%;aspect-ratio:16/10;background:linear-gradient(135deg,#F0EDE8,#E5E0DA);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;">${categoryIconHTML(l.type, 'gallery-fallback-icon')}</div>`;
 
       const waMsg  = `नमस्ते, मुझे ${headline} (${purposeLabel} | ${formatPrice(l.price)}) के बारे में जानकारी चाहिए। गंगोह.in पर देखा।`;
       const waLink = l.contactWhatsApp ? waURL(l.contactWhatsApp, waMsg) : '#';

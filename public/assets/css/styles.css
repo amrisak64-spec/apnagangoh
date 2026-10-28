@@ -219,6 +219,7 @@ a:hover { text-decoration: underline; }
   font-size: 2.5rem;
   color: #BBB;
 }
+.listing-card .card-img-placeholder .category-icon { height: 82%; width: auto; object-fit: contain; }
 .listing-card .card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; }
 .listing-card .card-price {
   font-size: 1.2rem;
@@ -521,6 +522,7 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 /* ── Photo gallery ───────────────────────────────────────── */
 .gallery { position: relative; }
 .gallery-main { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: var(--radius-md); background: #E8E4DF; display: block; }
+.gallery-fallback-icon { height: 80%; width: auto; object-fit: contain; }
 .gallery-thumbs { display: flex; gap: 0.5rem; margin-top: 0.5rem; overflow-x: auto; }
 .gallery-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: 0.35rem; cursor: pointer; opacity: 0.65; flex-shrink: 0; border: 2px solid transparent; }
 .gallery-thumb.active { opacity: 1; border-color: var(--color-saffron); }
