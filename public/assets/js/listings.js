@@ -1,6 +1,6 @@
 // listings.js — Firestore CRUD + Storage upload for listings
 
-import { toast } from './ui.js?v=3';
+import { toast } from './ui.js?v=5';
 
 let _db      = null;
 let _storage = null;

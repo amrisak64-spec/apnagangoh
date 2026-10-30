@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=4">
+  <link rel="stylesheet" href="assets/css/styles.css?v=5">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -187,9 +187,9 @@
       <h2 class="section-title" style="margin:0 0 1rem;">📢 प्रायोजित विज्ञापन</h2>
       <div class="ad-slideshow-wrap" style="position:relative;border-radius:1rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
         <div id="ad-slideshow" style="display:flex;height:100%;transition:transform 0.6s ease;">
-          <img src="assets/images/ads/website-banwaen.jpg" alt="वेबसाइट बनवाएं" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
-          <img src="assets/images/ads/prabha-school.jpg" alt="Prabha Gyan Jyoti Public School" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
-          <img src="assets/images/ads/vidya-devi-medicare.jpg" alt="Vidya Devi Medicare Center & Dental Clinic" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
+          <img src="assets/images/ads/website-banwaen.jpg" alt="वेबसाइट बनवाएं" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
+          <img src="assets/images/ads/prabha-school.jpg" alt="Prabha Gyan Jyoti Public School" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
+          <img src="assets/images/ads/vidya-devi-medicare.jpg" alt="Vidya Devi Medicare Center & Dental Clinic" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
         </div>
         <div id="ad-dots" style="position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;"></div>
       </div>
@@ -397,15 +397,15 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice, toast } from './assets/js/ui.js?v=2';
-    import { initAuth, onAuthReady } from './assets/js/auth.js?v=2';
-    import { initListings, fetchFeatured, fetchListings } from './assets/js/listings.js?v=2';
-    import { initFeedback, createFeedback } from './assets/js/feedback.js?v=2';
-    import { ALL_LOCATIONS, VILLAGES, TOWN } from './data/villages.js?v=2';
+    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice, toast } from './assets/js/ui.js?v=5';
+    import { initAuth, onAuthReady } from './assets/js/auth.js?v=5';
+    import { initListings, fetchFeatured, fetchListings } from './assets/js/listings.js?v=5';
+    import { initFeedback, createFeedback } from './assets/js/feedback.js?v=5';
+    import { ALL_LOCATIONS, VILLAGES, TOWN } from './data/villages.js?v=5';
 
     let fbConfig;
     try {
-      const m = await import('./assets/js/firebase-config.js?v=2');
+      const m = await import('./assets/js/firebase-config.js?v=5');
       fbConfig = m.firebaseConfig;
     } catch { /* config missing */ }
 

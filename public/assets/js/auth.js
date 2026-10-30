@@ -1,7 +1,7 @@
 // auth.js — Phone OTP login/logout + role check
 // Uses Firebase JS SDK v10 compat (loaded via CDN)
 
-import { toast } from './ui.js?v=3';
+import { toast } from './ui.js?v=5';
 
 let _auth = null;
 let _db   = null;

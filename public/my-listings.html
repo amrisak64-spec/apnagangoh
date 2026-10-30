@@ -7,7 +7,7 @@
   <meta name="description" content="गंगोह.in पर आपकी पोस्ट की गई सभी प्रॉपर्टी listings — एक जगह मैनेज करें।">
   <meta name="robots" content="noindex">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=3">
+  <link rel="stylesheet" href="assets/css/styles.css?v=5">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -68,13 +68,13 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=3';
-    import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=2';
-    import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=3';
+    import { mountUI, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=5';
+    import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=5';
+    import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=5';
 
     let fbConfig;
     try {
-      const m = await import('./assets/js/firebase-config.js?v=2');
+      const m = await import('./assets/js/firebase-config.js?v=5');
       fbConfig = m.firebaseConfig;
     } catch {
       document.body.innerHTML = `<div style="text-align:center;padding:4rem;">⚠️ Firebase config नहीं मिला।</div>`;

@@ -1,6 +1,6 @@
 // ui.js — shared header, footer, toast, helpers
-import { VILLAGES } from '../../data/villages.js?v=2';
-import { initAnalytics } from './analytics.js?v=2';
+import { VILLAGES } from '../../data/villages.js?v=5';
+import { initAnalytics } from './analytics.js?v=5';
 
 // ── Header HTML ───────────────────────────────────────────
 function getHeaderHTML(activePage = '') {
@@ -144,15 +144,30 @@ export function showEmpty(containerId, message = 'अभी कोई लिस�
 // ── Lazy image loader ─────────────────────────────────────
 export function lazyLoad() {
   const imgs = document.querySelectorAll('img[data-src]');
+  if (!imgs.length) return;
+
+  const loadImage = img => {
+    img.decoding = 'async';
+    img.src = img.dataset.src;
+    img.removeAttribute('data-src');
+  };
+
+  if (!('IntersectionObserver' in window)) {
+    imgs.forEach(loadImage);
+    return;
+  }
+
+  let remaining = imgs.length;
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
-        e.target.src = e.target.dataset.src;
-        e.target.removeAttribute('data-src');
+        loadImage(e.target);
         io.unobserve(e.target);
+        remaining--;
       }
     });
-  });
+    if (remaining === 0) io.disconnect();
+  }, { rootMargin: '160px 0px' });
   imgs.forEach(img => io.observe(img));
 }
 
