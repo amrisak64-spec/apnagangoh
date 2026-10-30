@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=6">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -43,28 +43,16 @@
       <svg class="shark shark-two" viewBox="0 0 112 44"><path d="M108 21C92 20 86 14 77 13L69 1 63 14C47 13 31 18 20 24L2 12 8 27 2 42 21 31C39 38 55 37 70 32L78 43 84 29C93 27 101 24 108 21Z"/><circle cx="96" cy="20" r="1.3"/></svg>
     </div>
     <div class="container">
-
-      <!-- Brand badge -->
-      <div class="hero-brand">
-        <div class="hero-brand-icon">🏘️</div>
-        <div class="hero-brand-text">गंगोह<span>.in</span></div>
-      </div>
-
-      <h1>गंगोह का <span class="hero-highlight">अपना</span> <span id="hero-typewriter"></span></h1>
-      <p>प्रॉपर्टी खरीदें, बेचें या किराये पर लें — सीधे मालिक से, बिना दलाल</p>
-
-      <!-- Trust pills -->
-      <div class="hero-trust">
-        <span class="hero-trust-pill">✅ 100% Free Listing</span>
-        <span class="hero-trust-pill">📍 Gangoh Local</span>
-        <span class="hero-trust-pill">🤝 Direct Owner</span>
-      </div>
+      <h1>गंगोह का <span class="hero-highlight">अपना</span></h1>
+      <p>सीधे मालिक से प्रॉपर्टी खरीदें, बेचें या किराये पर लें</p>
 
       <!-- Search bar -->
       <div class="hero-search">
         <input type="text" id="hero-search-input" placeholder="गाँव, location या प्रॉपर्टी खोजें…" autocomplete="off">
         <button id="hero-search-btn">खोजें</button>
       </div>
+
+      <p class="hero-proof">100% Free Listing <span>•</span> Direct Owner <span>•</span> No Broker</p>
 
       <!-- Quick links -->
       <div class="hero-quick-links">
@@ -97,94 +85,65 @@
     </div>
   </section>
 
-  <!-- Category tiles -->
-  <section class="section" style="padding-bottom:0;">
+  <!-- Major locations -->
+  <section class="home-locations" aria-labelledby="home-locations-title">
     <div class="container">
-      <h2 class="section-title">श्रेणियाँ</h2>
-      <div class="category-tiles">
-
-        <a href="browse.html?type=plot" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/plot.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">प्लॉट</span>
-        </a>
-
-        <a href="browse.html?type=house" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/house.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">मकान / फ्लैट</span>
-        </a>
-
-        <a href="browse.html?type=shop" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/shop.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">दुकान / ऑफिस</span>
-        </a>
-
-        <a href="browse.html?type=agri" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/agri.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">खेती की ज़मीन</span>
-        </a>
-
-        <a href="browse.html?type=career" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/career.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">करियर & पढ़ाई</span>
-        </a>
-
-        <a href="jobs.html" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/jobs.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">नौकरी</span>
-        </a>
-
-        <a href="directory.html" class="category-tile">
-          <span class="tile-icon tile-icon-img"><img src="assets/images/categories/directory.webp" alt="" width="72" height="72" loading="lazy"></span>
-          <span class="tile-label">बिज़नेस डायरेक्टरी</span>
-        </a>
-
-        <a href="requirement.html" class="category-tile">
-          <span class="tile-icon" style="background:#FFF7ED;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
-              <rect x="9" y="3" width="6" height="4" rx="1"/>
-              <line x1="9" y1="12" x2="15" y2="12"/>
-              <line x1="9" y1="16" x2="13" y2="16"/>
-              <path d="M15 16l1 1 2-2"/>
-            </svg>
-          </span>
-          <span class="tile-label">ज़रूरत है (माँग)</span>
-        </a>
-
-        <a href="post.html" class="category-tile" style="background:linear-gradient(135deg,#5B35D5,#7C3AED);color:white;">
-          <span class="tile-icon" style="background:rgba(255,255,255,0.2);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="9"/>
-              <line x1="12" y1="8" x2="12" y2="16"/>
-              <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-          </span>
-          <span class="tile-label" style="color:white;">लिस्ट करें</span>
-        </a>
-
-      </div>
+      <h2 id="home-locations-title">लोकेशन के अनुसार खोजें</h2>
+      <div id="location-chips" class="home-location-chips" aria-label="लोकप्रिय लोकेशन"></div>
     </div>
   </section>
 
-  <!-- Trust bar -->
-  <section style="padding:1.25rem 0;background:white;margin-top:2rem;border-top:1.5px solid #F0EDE8;border-bottom:1.5px solid #F0EDE8;">
+  <div id="homepage-listings-loading" class="home-loading" role="status">
+    <span class="spinner" aria-hidden="true"></span><span>नई listings लोड हो रही हैं…</span>
+  </div>
+
+  <!-- Featured listings: shown only when Firestore returns featured results. -->
+  <section id="featured-section" class="section home-listing-section" hidden>
     <div class="container">
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.6rem 1.5rem;text-align:center;">
-        <span style="font-size:0.88rem;font-weight:700;color:#5B35D5;">🏘️ आपके area के लिए perfect</span>
-        <span style="color:#E2DDD8;">|</span>
-        <span style="font-size:0.88rem;font-weight:700;color:#138808;">📈 Business बढ़ाएँ</span>
-        <span style="color:#E2DDD8;">|</span>
-        <span style="font-size:0.88rem;font-weight:700;color:#B45309;">💼 HR & Office कम लागत में</span>
-        <span style="color:#E2DDD8;">|</span>
-        <span style="font-size:0.88rem;font-weight:700;color:#DC2626;">🤝 हर मौका, हर ज़रूरत</span>
+      <div class="home-section-heading">
+        <h2 class="section-title">⭐ Featured Listings</h2>
+        <a href="browse.html" class="btn btn-outline btn-sm">सभी देखें →</a>
       </div>
+      <div id="featured-container" class="home-listing-grid"></div>
     </div>
   </section>
 
-  <!-- Ad Slideshow -->
-  <section id="ad-section" style="padding:1.5rem 0;">
+  <!-- Each sale category excludes rentals so a listing never appears twice. -->
+  <section class="section home-listing-section" data-home-category="plot" hidden>
     <div class="container">
-      <h2 class="section-title" style="margin:0 0 1rem;">📢 प्रायोजित विज्ञापन</h2>
+      <div class="home-section-heading"><h2 class="section-title">🏞️ प्लॉट</h2><a href="browse.html?type=plot&amp;purpose=sale" class="btn btn-outline btn-sm">सभी देखें →</a></div>
+      <div id="listings-plot" class="home-listing-grid"></div>
+    </div>
+  </section>
+  <section class="section home-listing-section" data-home-category="house" hidden>
+    <div class="container">
+      <div class="home-section-heading"><h2 class="section-title">🏠 मकान / फ्लैट</h2><a href="browse.html?type=house&amp;purpose=sale" class="btn btn-outline btn-sm">सभी देखें →</a></div>
+      <div id="listings-house" class="home-listing-grid"></div>
+    </div>
+  </section>
+  <section class="section home-listing-section" data-home-category="shop" hidden>
+    <div class="container">
+      <div class="home-section-heading"><h2 class="section-title">🏪 दुकान / ऑफिस</h2><a href="browse.html?type=shop&amp;purpose=sale" class="btn btn-outline btn-sm">सभी देखें →</a></div>
+      <div id="listings-shop" class="home-listing-grid"></div>
+    </div>
+  </section>
+  <section class="section home-listing-section" data-home-category="agri" hidden>
+    <div class="container">
+      <div class="home-section-heading"><h2 class="section-title">🌾 खेती की ज़मीन</h2><a href="browse.html?type=agri&amp;purpose=sale" class="btn btn-outline btn-sm">सभी देखें →</a></div>
+      <div id="listings-agri" class="home-listing-grid"></div>
+    </div>
+  </section>
+  <section class="section home-listing-section" data-home-category="rent" hidden>
+    <div class="container">
+      <div class="home-section-heading"><h2 class="section-title">🔑 किराया</h2><a href="browse.html?purpose=rent" class="btn btn-outline btn-sm">सभी देखें →</a></div>
+      <div id="listings-rent" class="home-listing-grid"></div>
+    </div>
+  </section>
+
+  <!-- Sponsored ads -->
+  <section id="ad-section" class="section home-ad-section">
+    <div class="container">
+      <h2 class="section-title">📢 प्रायोजित विज्ञापन</h2>
       <div class="ad-slideshow-wrap" style="position:relative;border-radius:1rem;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.15);">
         <div id="ad-slideshow" style="display:flex;height:100%;transition:transform 0.6s ease;">
           <img src="assets/images/ads/website-banwaen.jpg" alt="वेबसाइट बनवाएं" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
@@ -192,42 +151,6 @@
           <img src="assets/images/ads/vidya-devi-medicare.jpg" alt="Vidya Devi Medicare Center & Dental Clinic" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:cover;flex-shrink:0;display:block;">
         </div>
         <div id="ad-dots" style="position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;gap:0.4rem;"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured listings -->
-  <section class="section">
-    <div class="container">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-        <h2 class="section-title" style="margin:0;">⭐ Featured Listings</h2>
-        <a href="browse.html" class="btn btn-outline btn-sm">सभी देखें →</a>
-      </div>
-      <div id="featured-container" style="min-height:320px;">
-        <div class="spinner"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Recent listings -->
-  <section class="section" style="padding-top:0;">
-    <div class="container">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-        <h2 class="section-title" style="margin:0;">🆕 नई Listings</h2>
-        <a href="browse.html" class="btn btn-outline btn-sm">सभी देखें →</a>
-      </div>
-      <div id="recent-container" style="min-height:320px;">
-        <div class="spinner"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Browse by area -->
-  <section class="section" style="background:white;padding:2rem 0;">
-    <div class="container">
-      <h2 class="section-title">🗺️ लोकैशन के अनुसार खोजें</h2>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:0.75rem;" id="area-grid">
-        <!-- populated by JS -->
       </div>
     </div>
   </section>
@@ -261,86 +184,38 @@
     </div>
   </section>
 
-  <!-- Local Blog / Updates -->
-  <section class="section" style="background:white;">
+  <!-- Three latest published blog posts from the static blog pages. -->
+  <section class="section home-blogs">
     <div class="container">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-        <h2 class="section-title" style="margin:0;">📰 गंगोह की खबरें & जानकारी</h2>
+      <div class="home-section-heading">
+        <h2 class="section-title">📰 गंगोह की खबरें & जानकारी</h2>
+        <a href="updates.html" class="btn btn-outline btn-sm">सभी खबरें →</a>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;">
-
-        <a href="blog/plot-kharidne-se-pehle.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#3B0F9E,#5B35D5,#7C3AED);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🏘️</div>
-            <div style="padding:1rem;">
-              <span style="background:#EDE9FE;color:#5B35D5;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">प्रॉपर्टी टिप्स</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में प्लॉट खरीदने से पहले ये 5 बातें जानें</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">रजिस्ट्री, नक्शा, और दाखिल-खारिज — इन तीन चीज़ों के बिना कोई ज़मीन न खरीदें।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 जून 2025</span>
-            </div>
-          </article>
+      <div class="home-blog-grid">
+        <a class="home-blog-card" href="blog/plot-kharidne-se-pehle.html">
+          <span class="home-blog-icon" aria-hidden="true">🏘️</span>
+          <div class="home-blog-copy">
+            <h3>गंगोह में प्लॉट खरीदने से पहले ये 5 बातें जानें</h3>
+            <p>रजिस्ट्री, नक्शा और दाखिल-खारिज — ज़मीन लेने से पहले ज़रूरी कागज़ जाँचें।</p>
+            <time datetime="2026-07">जुलाई 2026</time>
+          </div>
         </a>
-
-        <a href="blog/krishi-bhoomi-bhav.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#14532d,#138808,#1aaa0a);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🌾</div>
-            <div style="padding:1rem;">
-              <span style="background:#D1FAE5;color:#065F46;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">खेती की ज़मीन</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">नकुड़ व रामपुर मानिहारन में कृषि भूमि के बढ़ते भाव</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">इस साल गंगोह तहसील में खेत की ज़मीन की माँग तेज़ी से बढ़ी है — जानें क्यों।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 मई 2025</span>
-            </div>
-          </article>
+        <a class="home-blog-card" href="blog/krishi-bhoomi-bhav.html">
+          <span class="home-blog-icon" aria-hidden="true">🌾</span>
+          <div class="home-blog-copy">
+            <h3>गंगोह क्षेत्र में ज़मीन के भाव क्यों छू रहे हैं आसमान?</h3>
+            <p>गंगोह और आसपास खेती की ज़मीन की बढ़ती माँग और भावों पर एक नज़र।</p>
+            <time datetime="2026-06">जून 2026</time>
+          </div>
         </a>
-
-        <a href="blog/highway-property.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#1e3a8a,#1D4ED8,#3B82F6);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🛣️</div>
-            <div style="padding:1rem;">
-              <span style="background:#DBEAFE;color:#1E40AF;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">विकास</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह–सहारनपुर हाईवे — प्रॉपर्टी पर क्या असर?</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">नई सड़क से जुड़े इलाकों में ज़मीन के भाव और किराये में उछाल आने की उम्मीद।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 अप्रैल 2025</span>
-            </div>
-          </article>
+        <a class="home-blog-card" href="blog/gangoh-growth-corridor.html">
+          <span class="home-blog-icon" aria-hidden="true">🛣️</span>
+          <div class="home-blog-copy">
+            <h3>गंगोह किस दिशा में बढ़ रहा है?</h3>
+            <p>गंगोह के growth corridors, expressway और उभरते इलाक़ों का विश्लेषण।</p>
+            <time datetime="2025-06">जून 2025</time>
+          </div>
         </a>
-
-        <a href="blog/kiraye-ka-makan.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#78350f,#D97706,#F59E0B);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🔑</div>
-            <div style="padding:1rem;">
-              <span style="background:#FEF3C7;color:#92400E;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">किराया</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में किराये का मकान कैसे खोजें?</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">किराया दरें, सही इलाक़ा चुनने के टिप्स और agreement की पूरी जानकारी।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 मार्च 2025</span>
-            </div>
-          </article>
-        </a>
-
-        <a href="blog/dukan-office-jagah.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#7f1d1d,#DC2626,#EF4444);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">🏪</div>
-            <div style="padding:1rem;">
-              <span style="background:#FEE2E2;color:#991B1B;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">व्यापार</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह में दुकान के लिए सबसे अच्छी जगह कौन सी?</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">मैन बाज़ार, सर्राफा, सहारनपुर रोड — किसके लिए कौन सा इलाक़ा सही है।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 फ़रवरी 2025</span>
-            </div>
-          </article>
-        </a>
-
-        <a href="blog/gangoh-mein-naukri.html" style="text-decoration:none;color:inherit;">
-          <article style="background:#F9F7F4;border-radius:0.75rem;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);height:100%;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.07)';this.style.transform='none'">
-            <div style="background:linear-gradient(135deg,#1e1b4b,#5B35D5,#7C3AED);height:120px;display:flex;align-items:center;justify-content:center;font-size:3rem;">💼</div>
-            <div style="padding:1rem;">
-              <span style="background:#EDE9FE;color:#5B35D5;font-size:0.72rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:1rem;">नौकरी</span>
-              <h3 style="font-size:0.95rem;margin:0.5rem 0 0.35rem;font-weight:700;">गंगोह और आस-पास नौकरी के मौक़े</h3>
-              <p style="font-size:0.83rem;color:#6B6B6B;margin:0 0 0.6rem;line-height:1.6;">शिक्षा, स्वास्थ्य, व्यापार — किस क्षेत्र में मिल सकती है नौकरी और कैसे खोजें।</p>
-              <span style="font-size:0.78rem;color:#666;">📅 जनवरी 2025</span>
-            </div>
-          </article>
-        </a>
-
       </div>
     </div>
   </section>
@@ -350,7 +225,7 @@
     <div class="container">
       <h2 style="font-size:1.6rem;margin-bottom:0.5rem;">अपनी प्रॉपर्टी अभी लिस्ट करें</h2>
       <p style="opacity:0.9;margin-bottom:1.5rem;">मुफ़्त में — गंगोह और आस-पास हज़ारों buyers तक पहुँचें।</p>
-      <a href="post.html" class="btn" style="background:white;color:#1D4ED8;font-size:1.05rem;">🏠 अभी लिस्ट करें</a>
+      <a href="post.html" class="btn" style="background:white;color:#5B35D5;font-size:1.05rem;">🏠 अभी लिस्ट करें</a>
     </div>
   </section>
 
@@ -397,11 +272,11 @@
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, showEmpty, formatPrice, toast } from './assets/js/ui.js?v=5';
+    import { mountUI, updateNavUser, listingCardHTML, lazyLoad, toast } from './assets/js/ui.js?v=5';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=5';
     import { initListings, fetchFeatured, fetchListings } from './assets/js/listings.js?v=5';
     import { initFeedback, createFeedback } from './assets/js/feedback.js?v=5';
-    import { ALL_LOCATIONS, VILLAGES, TOWN } from './data/villages.js?v=5';
+    import { ALL_LOCATIONS } from './data/villages.js?v=5';
 
     let fbConfig;
     try {
@@ -410,104 +285,73 @@
     } catch { /* config missing */ }
 
     mountUI('index.html');
+    renderLocationChips();
 
     if (!fbConfig) {
-      document.getElementById('featured-container').innerHTML =
-        `<div class="empty-state"><p>⚠️ Firebase config नहीं मिला।</p></div>`;
-      document.getElementById('recent-container').innerHTML = '';
-      renderAreaGrid();
+      document.getElementById('homepage-listings-loading').textContent = 'Listings अभी लोड नहीं हो सकीं।';
     } else {
-    if (!firebase.apps.length) firebase.initializeApp(fbConfig);
-    const auth = firebase.auth();
-    const db   = firebase.firestore();
-    initAuth(auth, db);
-    initListings(db, null, null);
-    initFeedback(db);
-    onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
+      if (!firebase.apps.length) firebase.initializeApp(fbConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+      initAuth(auth, db);
+      initListings(db, null, null);
+      initFeedback(db);
+      onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
 
-    // Trust counter
-    try {
-      const snap = await db.collection('listings').where('status','==','live').get();
-      document.getElementById('trust-listings').textContent = snap.size || '0';
-    } catch {}
-
-    // Featured
-    try {
-      const featured = await fetchFeatured(6);
-      const fc = document.getElementById('featured-container');
-      if (!featured.length) {
-        fc.innerHTML = `<div class="empty-state"><span class="empty-icon">🏘️</span><p>अभी कोई Featured listing नहीं — <a href="browse.html">सभी देखें</a></p></div>`;
-      } else {
-        fc.innerHTML = `<div class="listings-grid">${featured.map(listingCardHTML).join('')}</div>`;
-        lazyLoad();
-      }
-    } catch (err) {
-      document.getElementById('featured-container').innerHTML =
-        `<div class="empty-state"><p>${err.message}</p></div>`;
-    }
-
-    // Recent
-    try {
-      const recent = await fetchListings({ limit: 8 });
-      const rc = document.getElementById('recent-container');
-      if (!recent.length) {
-        rc.innerHTML = `<div class="empty-state"><span class="empty-icon">🏘️</span><p>अभी कोई listing नहीं — <a href="post.html">पहले आप डालिए!</a></p></div>`;
-      } else {
-        rc.innerHTML = `<div class="listings-grid">${recent.map(listingCardHTML).join('')}</div>`;
-        lazyLoad();
-      }
-    } catch (err) {
-      document.getElementById('recent-container').innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
-    }
-
-    renderAreaGrid();
-
-    function renderAreaGrid() {
-      const grid = document.getElementById('area-grid');
-      const areas = [
-        { label: 'गंगोह नगर',              href: 'browse.html?area=town',               icon: '🏙️' },
-        { label: 'रामपुर मानिहारन',         href: 'browse.html?village=rampurmaniharan', icon: '🏡' },
-        { label: 'नकुड़',                   href: 'browse.html?village=nakud',            icon: '🌳' },
-        { label: 'अंबेहटा',                href: 'browse.html?village=ambehata',         icon: '🏘️' },
-        { label: 'नानौता',                 href: 'browse.html?village=nanota',            icon: '🌾' },
-        { label: 'लखनौती',                href: 'browse.html?village=lakhnoti',           icon: '🏠' },
-        { label: 'सहारनपुर',               href: 'browse.html?village=saharanpur',        icon: '🌆' },
-        { label: 'गंगोह मैन रोड',          href: 'browse.html?area=town',                icon: '🛤️' },
-        { label: 'सर्राफा बाजार',           href: 'browse.html?area=town',                icon: '🏪' },
-        { label: 'गंगोह, नानौता रोड',      href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, जंधहेड़ा रोड',    href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, लखनौती रोड',     href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, गुरछप्पर रोड',   href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, सहारनपुर रोड',   href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, बाइ-पास रोड',    href: 'browse.html?area=town',                icon: '🔄' },
-        { label: 'गंगोह, रामबाग रोड',     href: 'browse.html?area=town',                icon: '🌸' },
-        { label: 'गंगोह, सलारपुर रोड',    href: 'browse.html?area=town',                icon: '🛣️' },
-        { label: 'गंगोह, तीतरों रोड',      href: 'browse.html?area=town',                icon: '🐦' },
+      const categories = [
+        { key: 'plot', query: { type: 'plot', purpose: 'sale' } },
+        { key: 'house', query: { type: 'house', purpose: 'sale' } },
+        { key: 'shop', query: { type: 'shop', purpose: 'sale' } },
+        { key: 'agri', query: { type: 'agri', purpose: 'sale' } },
+        { key: 'rent', query: { purpose: 'rent' } },
       ];
-      const cards = areas.map(a =>
-        `<a href="${a.href}" style="background:white;border:1.5px solid #E2E8F0;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:#1A1A1A;display:block;transition:box-shadow 0.2s;">
-          <div style="font-size:1.6rem;margin-bottom:0.35rem;">${a.icon}</div>
-          <div style="font-weight:600;font-size:0.94rem;line-height:1.3;">${a.label}</div>
-        </a>`
-      ).join('');
-      grid.innerHTML = cards +
-        `<a href="browse.html" style="background:#1D4ED8;border-radius:0.6rem;padding:0.75rem;text-align:center;text-decoration:none;color:white;display:block;">
-          <div style="font-size:1.4rem;margin-bottom:0.3rem;">🔍</div>
-          <div style="font-weight:600;font-size:0.85rem;">सभी इलाके</div>
-        </a>`;
+
+      const listingRequests = [
+        fetchFeatured(6).then(featured => {
+          if (!featured.length) return;
+          document.getElementById('featured-container').innerHTML = featured.map(listingCardHTML).join('');
+          document.getElementById('featured-section').hidden = false;
+        }).catch(err => console.error('Featured listings could not load:', err)),
+        ...categories.map(async category => {
+          try {
+            const listings = await fetchListings({ ...category.query, limit: 4 });
+            if (!listings.length) return;
+            document.getElementById(`listings-${category.key}`).innerHTML = listings.map(listingCardHTML).join('');
+            document.querySelector(`[data-home-category="${category.key}"]`).hidden = false;
+          } catch (err) {
+            console.error(`${category.key} listings could not load:`, err);
+          }
+        }),
+      ];
+
+      await Promise.all(listingRequests);
+      lazyLoad();
+      document.getElementById('homepage-listings-loading').hidden = true;
+    }
+
+    function renderLocationChips() {
+      const chipRoot = document.getElementById('location-chips');
+      const popularValues = ['gangoh', 'ambehata', 'nanauta', 'titro', 'jandheda', 'lakhnoti'];
+      const locations = popularValues
+        .map(value => ALL_LOCATIONS.find(location => location.value === value))
+        .filter(Boolean);
+
+      chipRoot.innerHTML = locations.map(location => {
+        const filter = location.isTown
+          ? 'area=town'
+          : `village=${encodeURIComponent(location.value)}`;
+        return `<a class="home-location-chip" href="browse.html?${filter}">${location.label}</a>`;
+      }).join('');
     }
 
     // Hero search
     document.getElementById('hero-search-btn').addEventListener('click', () => {
       const q = document.getElementById('hero-search-input').value.trim();
-      if (q) window.location.href = `browse.html?q=${encodeURIComponent(q)}`;
-      else   window.location.href = 'browse.html';
+      window.location.href = q ? `browse.html?q=${encodeURIComponent(q)}` : 'browse.html';
     });
-    document.getElementById('hero-search-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') document.getElementById('hero-search-btn').click();
+    document.getElementById('hero-search-input').addEventListener('keydown', event => {
+      if (event.key === 'Enter') document.getElementById('hero-search-btn').click();
     });
-
-    } // end else (fbConfig exists)
 
     // ── Ad Slideshow ───────────────────────────────────────
     (function(){
@@ -569,28 +413,6 @@
       });
     })();
 
-    // ── Typewriter effect ─────────────────────────────────
-    (function(){
-      const el = document.getElementById('hero-typewriter');
-      if (!el) return;
-      const words = ['Online नेटवर्क', 'Digital बाज़ार', 'Property Hub', 'भरोसेमंद Platform'];
-      let ti = 0, ci = 0, deleting = false;
-      const TYPE_SPEED = 80, DELETE_SPEED = 40, PAUSE = 2000;
-      function tick() {
-        const full = words[ti];
-        if (!deleting) {
-          ci++;
-          el.textContent = full.slice(0, ci);
-          if (ci === full.length) { deleting = true; setTimeout(tick, PAUSE); return; }
-        } else {
-          ci--;
-          el.textContent = full.slice(0, ci);
-          if (ci === 0) { deleting = false; ti = (ti + 1) % words.length; }
-        }
-        setTimeout(tick, deleting ? DELETE_SPEED : TYPE_SPEED);
-      }
-      tick();
-    })();
   </script>
 </body>
 </html>
