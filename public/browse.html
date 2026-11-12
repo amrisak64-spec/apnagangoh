@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>प्रॉपर्टी देखें — गंगोह | गंगोह.in</title>
   <meta name="description" content="गंगोह और आस-पास के गाँवों में प्लॉट, मकान, दुकान और खेती की ज़मीन — बिक्री और किराये पर। Saharanpur, UP।">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -99,10 +101,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js?v=5';
+    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js?v=7';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=5';
-    import { initListings, fetchListings } from './assets/js/listings.js?v=5';
+    import { initListings, fetchListings } from './assets/js/listings.js?v=12';
     import { VILLAGES } from './data/villages.js?v=5';
+    import { CATEGORIES, BROWSE_CATEGORY_IDS } from './assets/js/categories.js?v=2';
 
     let fbConfig;
     try {
@@ -122,6 +125,15 @@
     onAuthReady((user, role) => updateNavUser(user, role === 'admin'));
 
     // Populate village dropdown
+    const categoryFilter = document.getElementById('filter-type');
+    BROWSE_CATEGORY_IDS.forEach(id => {
+      const category = CATEGORIES[id];
+      const value = category.vehicleType ? `vehicle-${category.vehicleType}` : category.type;
+      if (!Array.from(categoryFilter.options).some(option => option.value === value)) {
+        const icon = id === 'car' ? '🚗 ' : id === 'bike' ? '🏍️ ' : '';
+        categoryFilter.add(new Option(`${icon}${category.label}`, value));
+      }
+    });
     const villageFilter = document.getElementById('filter-village');
     VILLAGES.forEach(v => {
       const opt = document.createElement('option');
@@ -137,8 +149,20 @@
 
     // Read URL params
     const params = new URLSearchParams(location.search);
-    if (params.get('type'))    document.getElementById('filter-type').value    = params.get('type');
+    if (params.get('type')) {
+      const requestedType = params.get('type');
+      const vehicleCategory = CATEGORIES[requestedType];
+      const queryVehicleType = params.get('vehicleType');
+      document.getElementById('filter-type').value = vehicleCategory?.vehicleType
+        ? `vehicle-${vehicleCategory.vehicleType}`
+        : requestedType === 'vehicle' && queryVehicleType
+          ? `vehicle-${queryVehicleType}`
+          : requestedType;
+    } else if (params.get('vehicleType')) {
+      document.getElementById('filter-type').value = `vehicle-${params.get('vehicleType')}`;
+    }
     if (params.get('purpose')) document.getElementById('filter-purpose').value = params.get('purpose');
+    if (params.get('priceMax')) document.getElementById('filter-price').value = params.get('priceMax');
     if (params.get('village')) {
       document.getElementById('filter-area').value = 'village';
       document.getElementById('village-filter-wrap').style.display = 'block';
@@ -151,12 +175,16 @@
     let currentFilters = {};
 
     function getFilters() {
-      const type         = document.getElementById('filter-type').value;
+      const selectedType = document.getElementById('filter-type').value;
+      const type         = selectedType.startsWith('vehicle-') ? 'vehicle' : selectedType;
+      const pickedVehicle = selectedType.startsWith('vehicle-') ? selectedType.slice('vehicle-'.length) : '';
+      const vehicleType  = pickedVehicle || '';
+      const vehicleTypes = pickedVehicle ? (CATEGORIES[pickedVehicle].vehicleTypes || [CATEGORIES[pickedVehicle].vehicleType]) : [];
       const purpose      = document.getElementById('filter-purpose').value;
       const townOrVillage= document.getElementById('filter-area').value;
       const village      = document.getElementById('filter-village').value;
       const priceMax     = document.getElementById('filter-price').value;
-      return { type, purpose, townOrVillage, village: townOrVillage === 'village' ? village : undefined, priceMax };
+      return { type, vehicleType, vehicleTypes, purpose, townOrVillage, village: townOrVillage === 'village' ? village : undefined, priceMax };
     }
 
     async function loadListings(append = false) {
@@ -211,13 +239,14 @@
       const bar = document.getElementById('active-filters');
       bar.innerHTML = '';
       const labels = {
-        type:         { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'कृषि भूमि' },
+        type:         { plot:CATEGORIES.plot.label, house:CATEGORIES.house.label, shop:CATEGORIES.shop.label, agri:CATEGORIES.agri.label, vehicle:'गाड़ी', 'vehicle-car': CATEGORIES.car.label, 'vehicle-bike': CATEGORIES.bike.label, career:CATEGORIES.career.label },
+        vehicleType:  { car:CATEGORIES.car.label, bike:CATEGORIES.bike.label },
         purpose:      { sale:'बिक्री', rent:'किराया' },
         townOrVillage:{ town:'गंगोह शहर', village:'गाँव' },
         priceMax:     { '500000':'≤₹5L', '1000000':'≤₹10L', '2500000':'≤₹25L', '5000000':'≤₹50L', '10000000':'≤₹1Cr' },
       };
       Object.entries(currentFilters).forEach(([k, v]) => {
-        if (!v) return;
+        if (!v || k === 'vehicleTypes') return;
         const lbl = (labels[k] && labels[k][v]) || v;
         bar.insertAdjacentHTML('beforeend',
           `<span class="pill" style="background:#FEF3C7;color:#92400E;">${lbl}</span>`);
