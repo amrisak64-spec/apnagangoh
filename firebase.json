@@ -1,10 +1,22 @@
 {
   "hosting": {
+    "site": "apnagangoh-web",
     "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "redirects": [
+      { "source": "/plot-kharidne-se-pehle", "destination": "/blog/plot-kharidne-se-pehle", "type": 301 },
+      { "source": "/kiraye-ka-makan", "destination": "/blog/kiraye-ka-makan", "type": 301 },
+      { "source": "/krishi-bhoomi-bhav", "destination": "/blog/krishi-bhoomi-bhav", "type": 301 },
+      { "source": "/dukan-office-jagah", "destination": "/blog/dukan-office-jagah", "type": 301 },
+      { "source": "/highway-property", "destination": "/blog/highway-property", "type": 301 },
+      { "source": "/gangoh-growth-corridor", "destination": "/blog/gangoh-growth-corridor", "type": 301 },
+      { "source": "/gangoh-mein-naukri", "destination": "/blog/gangoh-mein-naukri", "type": 301 }
     ],
     "headers": [
       {
