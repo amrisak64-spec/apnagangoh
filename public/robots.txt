@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
-Disallow: /gng-admin-panel.html
-Disallow: /my-listings.html
+Disallow: /gng-admin-panel
+Disallow: /my-listings
+Disallow: /edit-listing
+Disallow: /login
+Disallow: /dealer
 
 Sitemap: https://gangoh.in/sitemap.xml
