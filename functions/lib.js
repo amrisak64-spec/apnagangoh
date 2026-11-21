@@ -66,7 +66,10 @@ const placeKey = l => {
 };
 const locationEn = l => {
   const place = placeEn(placeKey(l));
-  return !place || place.toLowerCase() === 'gangoh' ? 'Gangoh' : `${place}, Gangoh`;
+  const road = titleCase(latinWords(l.locality)).trim();
+  const parts = [road, place].filter((p, i, all) => p && all.findIndex(q => q.toLowerCase() === p.toLowerCase()) === i);
+  if (!parts.length || parts[parts.length - 1].toLowerCase() !== 'gangoh') parts.push('Gangoh');
+  return parts.join(', ');
 };
 function priceEn(n, purpose, type) {
   const p = Number(n);
@@ -94,12 +97,12 @@ function describeListing(l) {
     const hi = l.title || `${isCar ? 'कार' : 'बाइक'} बिक्री के लिए`;
     const slug = buildSlug([name, kind, 'for sale']);
     const facts = [
-      ['Year', l.year], ['Brand', l.brand], ['Model', l.model], ['Fuel', l.fuelType ? titleCase(l.fuelType) : ''],
-      ['Kilometres driven', hasKm(l) ? `${Number(l.kmDriven).toLocaleString('en-IN')} km` : ''],
-      ['Owner', l.ownerNumber], ['Transmission', l.transmission ? titleCase(l.transmission) : ''],
-      ['Price', price],
+      ['वर्ष / Year', l.year], ['ब्रांड / Brand', l.brand], ['मॉडल / Model', l.model], ['ईंधन / Fuel', l.fuelType ? titleCase(l.fuelType) : ''],
+      ['चली दूरी / Kilometres driven', hasKm(l) ? `${Number(l.kmDriven).toLocaleString('en-IN')} km` : ''],
+      ['मालिक / Owner', l.ownerNumber], ['गियर / Transmission', l.transmission ? titleCase(l.transmission) : ''],
+      ['कीमत / Price', price],
     ].filter(([, v]) => v);
-    return { section: 'vehicles', en, hi, slug, price, facts, kind, name };
+    return { section: 'vehicles', en, hi, slug, price, facts, kind, name, place: 'Gangoh', priceNum: Number(l.price) || 0 };
   }
   const t = PROPERTY_TYPES[l.type] || { en: 'Property', slug: 'property', hi: 'प्रॉपर्टी' };
   const sale = l.purpose !== 'rent';
@@ -110,12 +113,15 @@ function describeListing(l) {
   const en = `${size ? size + ' ' : ''}${t.en} for ${sale ? 'Sale' : 'Rent'}, ${loc}${price ? ` – ${price}` : ''}`;
   const hi = l.title || `${t.hi} ${sale ? 'बिक्री' : 'किराये'} के लिए`;
   const slug = buildSlug([size, t.slug, 'for', sale ? 'sale' : 'rent', placeKey(l)]);
+  const place = [l.locality, l.landmark, placeKey(l) ? placeEn(placeKey(l)) : 'Gangoh'].filter(v => typeof v === 'string' && v.trim()).join(', ');
   const facts = [
-    ['Type', t.en], ['Purpose', sale ? 'For sale' : 'For rent'], ['Area', size], ['Location', loc], ['Price', price],
-    ['Road width', l.roadSizeFeet ? `${l.roadSizeFeet} ft` : ''], ['Rooms', l.rooms],
-    ['Rate', l.ratePerGaj ? `₹${Number(l.ratePerGaj).toLocaleString('en-IN')} per Gaj` : (l.ratePerBigha ? `₹${Number(l.ratePerBigha).toLocaleString('en-IN')} per Bigha` : '')],
+    ['प्रकार / Type', `${t.hi} / ${t.en}`], ['उद्देश्य / Purpose', sale ? 'बिक्री / For sale' : 'किराया / For rent'],
+    ['क्षेत्रफल / Area', size ? `${size}${unit !== (l.areaUnit || '') && l.areaUnit ? ` (${l.areaUnit})` : ''}` : ''],
+    ['लोकेशन / Location', place], ['कीमत / Price', price],
+    ['सड़क चौड़ाई / Road width', l.roadSizeFeet ? `${l.roadSizeFeet} ft` : ''], ['कमरे / Rooms', l.rooms],
+    ['रेट / Rate', l.ratePerGaj ? `₹${Number(l.ratePerGaj).toLocaleString('en-IN')} per Gaj` : (l.ratePerBigha ? `₹${Number(l.ratePerBigha).toLocaleString('en-IN')} per Bigha` : '')],
   ].filter(([, v]) => v);
-  return { section: 'property', en, hi, slug, price, facts, kind: t.en, name: en };
+  return { section: 'property', en, hi, slug, price, facts, kind: t.en, name: en, place, priceNum: Number(l.price) || 0 };
 }
 
 function listingJsonLd(l, d, url) {
@@ -137,10 +143,13 @@ function listingJsonLd(l, d, url) {
     };
   }
   return {
-    '@context': 'https://schema.org', '@type': 'RealEstateListing', name: d.en, description: desc, url,
-    ...(iso(l.createdAt) ? { datePosted: iso(l.createdAt) } : {}),
-    ...(photos.length ? { image: photos } : {}), ...(offer ? { offers: offer } : {}), address,
-    contentLocation: { '@type': 'Place', name: locationEn(l), address },
+    '@context': 'https://schema.org', '@type': 'Product', name: d.en, description: desc, url,
+    category: `Real Estate > ${d.kind}`,
+    ...(photos.length ? { image: photos } : {}),
+    brand: { '@type': 'Brand', name: 'Gangoh.in' },
+    ...(offer ? { offers: { ...offer, itemCondition: 'https://schema.org/UsedCondition', areaServed: { '@type': 'Place', name: locationEn(l), address } } } : {}),
+    ...(iso(l.createdAt) ? { releaseDate: iso(l.createdAt) } : {}),
+    ...(l.areaSize ? { additionalProperty: [{ '@type': 'PropertyValue', name: 'Area', value: `${l.areaSize} ${UNIT_EN[l.areaUnit] || l.areaUnit || ''}`.trim() }] } : {}),
   };
 }
 
@@ -202,17 +211,34 @@ function headTags({ title, desc, url, ld, type = 'website', image = LOGO, robots
 const factsTable = facts => facts.length ? `<table class="ssr-facts" style="border-collapse:collapse;margin:1rem 0;">${facts.map(([k, v]) =>
   `<tr><th style="text-align:left;padding:0.35rem 1rem 0.35rem 0;color:#555;font-weight:600;">${esc(k)}</th><td style="padding:0.35rem 0;">${esc(v)}</td></tr>`).join('')}</table>` : '';
 
-function listingSsrBlock(l, d) {
-  const photos = (Array.isArray(l.photos) ? l.photos : []).filter(u => typeof u === 'string' && u.trim()).slice(0, 3);
+const waNumber = v => { const n = String(v || '').replace(/\D/g, ''); if (/^[6-9]\d{9}$/.test(n)) return `91${n}`; return /^91[6-9]\d{9}$/.test(n) ? n : ''; };
+const BTN = 'display:inline-block;padding:0.7rem 1.1rem;border-radius:0.6rem;font-weight:700;text-decoration:none;margin:0.25rem 0.4rem 0.25rem 0;';
+
+// Complete server-rendered body of a listing page (used both inside the interactive template and standalone).
+function listingSsrBlock(l, d, url = SITE + '/', id = '') {
+  const photos = (Array.isArray(l.photos) ? l.photos : []).filter(u => typeof u === 'string' && u.trim()).slice(0, 8);
   const more = d.section === 'vehicles'
-    ? ['/vehicles', 'More cars & bikes in Gangoh | और कार और बाइक'] : ['/browse', 'More property in Gangoh | और प्रॉपर्टी देखें'];
-  return `<article class="ssr-listing">
-    <h1>${esc(d.en)}</h1>
-    <p lang="hi" style="font-weight:600;">${esc(d.hi)}</p>
-    ${photos.map(p => `<img src="${esc(p)}" alt="${esc(d.en)}" style="max-width:100%;height:auto;border-radius:0.5rem;margin:0.5rem 0;" loading="lazy">`).join('')}
+    ? ['/vehicles', 'और कार और बाइक देखें | More cars & bikes in Gangoh'] : ['/browse', 'और प्रॉपर्टी देखें | More property in Gangoh'];
+  const owner = waNumber(l.contactWhatsApp || l.phone);
+  const ownerMsg = `नमस्ते, मैंने गंगोह.in पर "${d.hi}" देखा। मुझे इसके बारे में जानकारी चाहिए।
+${url}`;
+  const shareMsg = `${d.hi}${d.price ? ` — ${d.price}` : ''}
+गंगोह.in पर देखें: ${url}`;
+  return `<article class="ssr-listing" style="max-width:760px;margin:0 auto;">
+    <p><a href="/">← होम | Gangoh.in</a> · <a href="${more[0]}">${more[1]}</a></p>
+    <h1>${esc(d.hi)}</h1>
+    <p style="color:#555;margin:0.2rem 0;">${esc(d.en)}</p>
+    ${d.price ? `<p style="font-size:1.6rem;font-weight:900;color:#5B35D5;margin:0.6rem 0;">${esc(d.price)}</p>` : ''}
+    ${photos.length ? `<div class="ssr-gallery" style="display:grid;gap:0.5rem;">${photos.map((p, i) =>
+      `<img src="${esc(p)}" alt="${esc(`${d.en} – फोटो ${i + 1}`)}" style="width:100%;height:auto;border-radius:0.6rem;" ${i === 0 ? '' : 'loading="lazy"'}>`).join('')}</div>` : ''}
+    <h2 style="font-size:1.15rem;margin-top:1.2rem;">विवरण / Details</h2>
     ${factsTable(d.facts)}
-    ${l.description ? `<p>${esc(clip(l.description, 1200))}</p>` : ''}
-    <p><a href="${more[0]}">${more[1]}</a></p>
+    ${l.description ? `<h2 style="font-size:1.15rem;">जानकारी / Description</h2><p style="white-space:pre-line;">${esc(clip(l.description, 1500))}</p>` : ''}
+    <p style="margin-top:1.2rem;">
+      ${owner ? `<a href="https://wa.me/${owner}?text=${encodeURIComponent(ownerMsg)}" rel="nofollow noopener" target="_blank" style="${BTN}background:#128C45;color:#fff;">WhatsApp पर मालिक से बात करें</a>` : ''}
+      <a href="https://wa.me/?text=${encodeURIComponent(shareMsg)}" rel="nofollow noopener" target="_blank" style="${BTN}border:2px solid #128C45;color:#0b6b33;">WhatsApp पर शेयर करें</a>
+    </p>
+    <p><a href="/post" style="${BTN}background:#5B35D5;color:#fff;">+ अपनी प्रॉपर्टी या गाड़ी मुफ़्त लिस्ट करें</a> <a href="/" style="${BTN}border:2px solid #5B35D5;color:#5B35D5;">🏠 होम पर जाएँ</a></p>
   </article>`;
 }
 
@@ -276,8 +302,85 @@ function goneBody(kind) {
   </div>`;
 }
 
+// ── Home page (server-rendered shelves) ──────────────────────
+const priceHi = n => {
+  const p = Number(n);
+  if (!Number.isFinite(p) || p <= 0) return '—';
+  if (p >= 10000000) return `₹${(p / 10000000).toFixed(2)} करोड़`;
+  if (p >= 100000) return `₹${(p / 100000).toFixed(2)} लाख`;
+  if (p >= 1000) return `₹${(p / 1000).toFixed(1)}K`;
+  return `₹${p.toLocaleString('hi-IN')}`;
+};
+const FUEL_HI = { petrol: 'पेट्रोल', diesel: 'डीज़ल', cng: 'CNG', electric: 'इलेक्ट्रिक' };
+const CARD_ICON = { plot: 'plot.webp', house: 'house.webp', shop: 'shop.webp', agri: 'agri.webp', vehicle: 'vehicle.svg' };
+function homeHeadline(l) {
+  const n = l.areaSize;
+  const map = {
+    plot: n ? `${n} ${l.areaUnit || 'गज'} का प्लॉट` : 'प्लॉट',
+    house: n ? `${n} ${l.areaUnit || 'गज'} का मकान` : 'मकान',
+    shop: n ? `${n} ${l.areaUnit || 'गज़'} की दुकान` : 'दुकान',
+    agri: n ? `${n} ${l.areaUnit || 'बीघा'} खेती की ज़मीन` : 'खेती की ज़मीन',
+  };
+  return map[l.type] || l.title || 'लिस्टिंग';
+}
+// Same markup/classes as the client card (ui.js) so styles match and a real <a href="/property/…"> exists for crawlers.
+function homeCardHtml(id, l) {
+  const d = describeListing(l);
+  const href = `/${d.section}/${d.slug}-${id}`;
+  const veh = d.section === 'vehicles';
+  const photo = (Array.isArray(l.photos) ? l.photos : []).find(u => typeof u === 'string' && u.trim());
+  const title = veh ? d.name : homeHeadline(l);
+  const img = photo
+    ? `<img class="card-img" src="${esc(photo)}" alt="${esc(d.en)}" loading="lazy" decoding="async">`
+    : `<div class="card-img-placeholder"><img class="category-icon" src="/assets/images/categories/${CARD_ICON[veh ? 'vehicle' : l.type] || 'house.webp'}" alt=""></div>`;
+  const rent = l.purpose === 'rent' && !veh;
+  const tag = veh ? (l.listerType === 'dealer' ? 'डीलर' : 'मालिक') : (rent ? 'किराया' : 'बिक्री');
+  const flags = (l.isFeatured ? '<span class="hv-flag">⭐ Featured</span>' : '') + (l.isVerified ? '<span class="hv-flag hv-flag-ok">✓ Verified</span>' : '');
+  const meta = veh
+    ? [l.fuelType && (FUEL_HI[l.fuelType] || l.fuelType), hasKm(l) && `${Number(l.kmDriven).toLocaleString('en-IN')} किमी`].filter(Boolean).map(esc).join(' <span class="hv-sep">|</span> ')
+    : `📍 ${esc([l.village && l.village !== 'town' && l.village !== 'village' ? placeEn(l.village) : 'गंगोह', l.locality].filter(Boolean).join(' · '))}`;
+  const phone = String(l.phone || l.contactWhatsApp || '').replace(/\D/g, '');
+  const call = phone ? `<a class="hv-btn hv-btn-call" href="tel:${esc(phone.length === 10 ? '+91' + phone : phone)}">📞 कॉल करें</a>` : '';
+  return `<article class="home-vehicle-card${veh ? '' : ' prop-card'}">
+  <a class="hv-link" href="${esc(href)}" aria-label="${esc(title)} देखें">
+    <div class="hv-photo">${img}<span class="hv-tag${rent ? ' hv-tag-rent' : ''}">${tag}</span>${flags}</div>
+    <div class="hv-body">
+      <h3 class="home-vehicle-title">${esc(title)}</h3>
+      <p class="home-vehicle-specs${veh ? '' : ' hv-loc'}">${meta}</p>
+      <div class="hv-price-row"><span class="home-vehicle-price">${esc(priceHi(l.price))}${rent ? '<small class="hv-per">/माह</small>' : ''}</span></div>
+    </div>
+  </a>
+  <div class="hv-actions">${call}<a class="hv-btn hv-btn-main" href="${esc(href)}">विवरण देखें</a></div>
+</article>`;
+}
+
+// rows: [{ id, data }] newest first. Fills the homepage shelves and un-hides the sections that have cards.
+function buildHome(html, rows) {
+  const ok = rows.filter(r => r.data && r.data.type !== 'career' && r.data.purpose !== 'career');
+  const pick = (test, n) => ok.filter(r => test(r.data)).slice(0, n);
+  const shelves = {
+    plot: pick(l => l.type === 'plot' && l.purpose === 'sale', 4),
+    house: pick(l => l.type === 'house' && l.purpose === 'sale', 4),
+    shop: pick(l => l.type === 'shop' && l.purpose === 'sale', 4),
+    agri: pick(l => l.type === 'agri' && l.purpose === 'sale', 4),
+    rent: pick(l => l.purpose === 'rent' && !isVehicle(l), 4),
+    vehicle: pick(isVehicle, 3),
+  };
+  const featured = pick(l => l.isFeatured && !isVehicle(l), 6);
+  const fill = (out, containerId, list) => !list.length ? out : out.replace(
+    new RegExp(`(<div id="${containerId}"[^>]*>)</div>`), (m, open) => `${open}${list.map(r => homeCardHtml(r.id, r.data)).join('')}</div>`);
+  let out = html;
+  for (const [key, list] of Object.entries(shelves)) {
+    if (!list.length) continue;
+    out = fill(out, `listings-${key}`, list).replace(`data-home-category="${key}" hidden`, `data-home-category="${key}"`);
+  }
+  if (featured.length) out = fill(out, 'featured-container', featured).replace('aria-labelledby="featured-title" hidden>', 'aria-labelledby="featured-title">');
+  // The client script still toggles this element, so keep it in the DOM but hide it from the first paint.
+  return out.replace('<div id="homepage-listings-loading" class="home-loading" role="status">', '<div id="homepage-listings-loading" class="home-loading" role="status" hidden>');
+}
+
 // ── Page <title>/<meta description> text ─────────────────────
-const listingMeta = d => ({ title: `${d.en} | ${d.hi}`, desc: clip(`${d.en}. View photos, price and contact details on Gangoh.in. | ${d.hi}`, 200) });
+const listingMeta = d => ({ title: `${d.en} | Gangoh.in`, desc: clip(`${d.en}. ${d.hi}। फोटो, कीमत और WhatsApp नंबर Gangoh.in पर।`, 157) });
 // Skip the Hindi half when it only repeats the English title (e.g. a job posted as "Hindi Teacher").
 const bilingual = d => d.hi && !d.en.toLowerCase().includes(String(d.hi).toLowerCase()) ? `${d.en} | ${d.hi}` : d.en;
 const jobMeta = d => ({ title: bilingual(d), desc: clip(`${d.en}. Apply on Gangoh.in. | गंगोह में नौकरी – ${d.hi}`, 200) });
@@ -303,7 +406,7 @@ function sitemapXml(extra) {
 
 module.exports = {
   SITE, esc, slugify, idFromSlug, titleCase, isVehicle, iso,
-  describeListing, listingJsonLd, listingMeta, listingSsrBlock,
+  describeListing, listingJsonLd, listingMeta, listingSsrBlock, buildHome, homeCardHtml,
   describeJob, jobJsonLd, jobMeta, jobBody, describeBusiness, businessJsonLd, businessMeta, businessBody,
   headTags, standalonePage, goneBody, sitemapXml,
 };

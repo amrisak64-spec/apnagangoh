@@ -5,5 +5,6 @@ Disallow: /my-listings
 Disallow: /edit-listing
 Disallow: /login
 Disallow: /dealer
+Disallow: /assets/templates/
 
 Sitemap: https://gangoh.in/sitemap.xml

@@ -1,4 +1,5 @@
 // ui.js — shared header, footer, toast, helpers
+import { listingPath } from './slug.js?v=1';
 import { VILLAGES } from '../../data/villages.js?v=5';
 import { initAnalytics } from './analytics.js?v=5';
 
@@ -215,10 +216,10 @@ export function listingCardHTML(listing) {
   const priceLabel = isCareer
     ? (fee ? `<span class="home-vehicle-price hv-price-career">${escapeHtml(fee)}</span>` : '<span class="hv-nego">फ़ीस जानें</span>')
     : `<span class="home-vehicle-price">${formatPrice(price)}${purpose === 'rent' ? '<small class="hv-per">/माह</small>' : ''}</span>`;
+  const path = listingPath(listing);
   const shareText = encodeURIComponent(`${headline} — ${formatPrice(price)}
 📍 ${locationStr}
-गंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
-  const lid = encodeURIComponent(String(id ?? ''));
+गंगोह.in पर देखें: https://gangoh.in${path}`);
   const phone = String(listing.phone || listing.contactWhatsApp || '').replace(/\D/g, '');
   const phoneForCall = phone.length === 10 ? `+91${phone}` : phone;
   const tag = isCareer ? '🎓 करियर' : purpose === 'sale' ? 'बिक्री' : 'किराया';
@@ -228,7 +229,7 @@ export function listingCardHTML(listing) {
   const subtitle = title && title !== headline ? `<p class="hv-subtitle">${escapeHtml(title)}</p>` : '';
 
   return `<article class="home-vehicle-card prop-card">
-  <a class="hv-link" href="listing.html?id=${lid}" aria-label="${escapeHtml(headline)} देखें">
+  <a class="hv-link" href="${path}" aria-label="${escapeHtml(headline)} देखें">
     <div class="hv-photo">${img}<span class="hv-tag ${purpose === 'rent' && !isCareer ? 'hv-tag-rent' : ''}">${tag}</span>${flags}</div>
     <div class="hv-body">
       <h3 class="home-vehicle-title">${escapeHtml(headline)}</h3>
@@ -239,7 +240,7 @@ export function listingCardHTML(listing) {
   </a>
   <div class="hv-actions">
     ${phoneForCall ? `<a class="hv-btn hv-btn-call" href="tel:${escapeHtml(phoneForCall)}">📞 कॉल करें</a>` : ''}
-    <a class="hv-btn hv-btn-main" href="listing.html?id=${lid}">विवरण देखें</a>
+    <a class="hv-btn hv-btn-main" href="${path}">विवरण देखें</a>
     <a class="hv-btn hv-btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">${WA_ICON}</a>
   </div>
 </article>`;
@@ -272,8 +273,8 @@ export function homepageVehicleCardHTML(listing) {
     ? '<img class="card-img" data-src="' + esc(listing.photos[0]) + '" src="" alt="' + esc(title) + '" loading="lazy">'
     : '<div class="card-img-placeholder">' + categoryIconHTML('vehicle') + '</div>';
   const seller = listing.listerType === 'dealer' ? 'डीलर' : 'मालिक';
-  const id = encodeURIComponent(String(listing.id ?? ''));
-  const detailUrl = 'https://gangoh.in/listing.html?id=' + id;
+  const path = listingPath(listing);
+  const detailUrl = 'https://gangoh.in' + path;
   const shareText = encodeURIComponent(title + ' — ' + price + '\nगंगोह.in पर देखें: ' + detailUrl);
   const phone = String(listing.phone || listing.contactWhatsApp || '').replace(/\D/g, '');
   const phoneForCall = phone.length === 10 ? '+91' + phone : phone;
@@ -285,7 +286,7 @@ export function homepageVehicleCardHTML(listing) {
 
   // CarWale-style vertical card: big photo, title, "km | fuel | place", price row, Call + details buttons.
   return '<article class="home-vehicle-card">' +
-    '<a class="hv-link" href="listing.html?id=' + id + '" aria-label="' + esc(title) + ' देखें">' +
+    '<a class="hv-link" href="' + path + '" aria-label="' + esc(title) + ' देखें">' +
       '<div class="hv-photo">' + photo + '<span class="hv-tag">' + esc(seller) + '</span>' + flags + '</div>' +
       '<div class="hv-body">' +
         '<h3 class="home-vehicle-title">' + esc(title) + '</h3>' +
@@ -296,7 +297,7 @@ export function homepageVehicleCardHTML(listing) {
     '</a>' +
     '<div class="hv-actions">' +
       (phoneForCall ? '<a class="hv-btn hv-btn-call" href="tel:' + esc(phoneForCall) + '">📞 कॉल करें</a>' : '') +
-      '<a class="hv-btn hv-btn-main" href="listing.html?id=' + id + '">विवरण देखें</a>' +
+      '<a class="hv-btn hv-btn-main" href="' + path + '">विवरण देखें</a>' +
       '<a class="hv-btn hv-btn-wa" href="https://wa.me/?text=' + shareText + '" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">' + WA_ICON + '</a>' +
     '</div>' +
   '</article>';

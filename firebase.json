@@ -19,6 +19,8 @@
       { "source": "/gangoh-mein-naukri", "destination": "/blog/gangoh-mein-naukri", "type": 301 }
     ],
     "rewrites": [
+      { "source": "/", "function": { "functionId": "pages", "region": "asia-south1" } },
+      { "source": "/index.html", "function": { "functionId": "pages", "region": "asia-south1" } },
       { "source": "/sitemap.xml", "function": { "functionId": "pages", "region": "asia-south1" } },
       { "source": "/property/**", "function": { "functionId": "pages", "region": "asia-south1" } },
       { "source": "/vehicles/**", "function": { "functionId": "pages", "region": "asia-south1" } },
@@ -35,11 +37,11 @@
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
       },
       {
-        "source": "**/*.html",
+        "source": "/assets/templates/**",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
       },
       {
-        "source": "/",
+        "source": "**/*.html",
         "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
       },
       {
