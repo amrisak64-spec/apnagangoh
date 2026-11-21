@@ -212,43 +212,40 @@ export function listingCardHTML(listing) {
   const headline = headlineMap[type] || title;
 
   const locationStr = [village || 'गंगोह', locality].filter(Boolean).join(' · ');
-  const verifiedChip = isVerified
-    ? `<span style="background:#F0FDF4;color:#15803D;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">✓ Verified</span>`
-    : `<span style="background:#F9F7F4;color:#666;padding:0.15rem 0.5rem;border-radius:1rem;font-size:0.72rem;font-weight:600;">📞 Direct</span>`;
   const priceLabel = isCareer
-    ? (fee ? `<span style="font-size:0.9rem;font-weight:700;color:#CA8A04;">${escapeHtml(fee)}</span>` : `<span style="font-size:0.88rem;color:#888;">फ़ीस जानें</span>`)
-    : purpose === 'rent' ? `${formatPrice(price)}<span style="font-size:0.75rem;font-weight:600;color:#888;">/माह</span>` : formatPrice(price);
-  const shareText = encodeURIComponent(`${headline} — ${formatPrice(price)}\n📍 ${locationStr}\nगंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
+    ? (fee ? `<span class="home-vehicle-price hv-price-career">${escapeHtml(fee)}</span>` : '<span class="hv-nego">फ़ीस जानें</span>')
+    : `<span class="home-vehicle-price">${formatPrice(price)}${purpose === 'rent' ? '<small class="hv-per">/माह</small>' : ''}</span>`;
+  const shareText = encodeURIComponent(`${headline} — ${formatPrice(price)}
+📍 ${locationStr}
+गंगोह.in पर देखें: https://gangoh.in/listing.html?id=${id}`);
+  const lid = encodeURIComponent(String(id ?? ''));
+  const phone = String(listing.phone || listing.contactWhatsApp || '').replace(/\D/g, '');
+  const phoneForCall = phone.length === 10 ? `+91${phone}` : phone;
+  const tag = isCareer ? '🎓 करियर' : purpose === 'sale' ? 'बिक्री' : 'किराया';
+  const flags = (isFeatured ? '<span class="hv-flag">⭐ Featured</span>' : '') +
+    (isVerified ? '<span class="hv-flag hv-flag-ok">✓ Verified</span>' : '') +
+    availabilityBadge.replace('class="badge listing-sold-badge"', 'class="hv-flag hv-flag-sold"');
+  const subtitle = title && title !== headline ? `<p class="hv-subtitle">${escapeHtml(title)}</p>` : '';
 
-  return `
-<div class="listing-card" style="display:flex;flex-direction:column;">
-  <a href="listing.html?id=${encodeURIComponent(String(id ?? ''))}" style="text-decoration:none;color:inherit;flex:1;">
-    ${img}
-    <div class="card-body" style="padding:1rem;">
-      <!-- Badges -->
-      <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.45rem;">
-        ${purposeBadge}${availabilityBadge}${featuredBadge}${verifiedChip}
-      </div>
-      <!-- Smart headline in red -->
-      <div style="font-size:1.05rem;font-weight:900;color:#DC2626;line-height:1.25;margin-bottom:0.2rem;">${escapeHtml(headline)}</div>
-      <!-- User title as subtitle -->
-      <div style="font-size:0.8rem;color:#555;line-height:1.3;margin-bottom:0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(title)}</div>
-      <!-- Location -->
-      <div style="font-size:1rem;font-weight:600;color:#16A34A;margin-bottom:0.45rem;display:flex;align-items:center;gap:0.25rem;"><svg width="15" height="18" viewBox="0 0 52 63" xmlns="http://www.w3.org/2000/svg"><ellipse cx="26" cy="57" rx="16" ry="6" fill="#4CAF50" opacity="0.7"/><ellipse cx="26" cy="57" rx="8" ry="3" fill="#2E7D32" opacity="0.5"/><path d="M26 2C15.5 2 7 10.5 7 21c0 14 19 38 19 38S45 35 45 21C45 10.5 36.5 2 26 2z" fill="#E53935"/><path d="M26 2C26 2 45 10.5 45 21c0 14-19 38-19 38V2z" fill="#B71C1C"/><circle cx="26" cy="21" r="9" fill="white"/></svg> ${escapeHtml(locationStr)}</div>
-      <!-- Price -->
-      <div style="font-size:1.15rem;font-weight:900;color:#5B35D5;">${priceLabel}</div>
+  return `<article class="home-vehicle-card prop-card">
+  <a class="hv-link" href="listing.html?id=${lid}" aria-label="${escapeHtml(headline)} देखें">
+    <div class="hv-photo">${img}<span class="hv-tag ${purpose === 'rent' && !isCareer ? 'hv-tag-rent' : ''}">${tag}</span>${flags}</div>
+    <div class="hv-body">
+      <h3 class="home-vehicle-title">${escapeHtml(headline)}</h3>
+      ${subtitle}
+      <p class="home-vehicle-specs hv-loc">📍 ${escapeHtml(locationStr)}</p>
+      <div class="hv-price-row">${priceLabel}</div>
     </div>
   </a>
-  <div style="padding:0.5rem 0.8rem 0.7rem;border-top:1px solid #F0EDE8;">
-    <a href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener"
-       onclick="event.stopPropagation()"
-       style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:#15803D;font-weight:600;text-decoration:none;">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-      WhatsApp पर Share करें
-    </a>
+  <div class="hv-actions">
+    ${phoneForCall ? `<a class="hv-btn hv-btn-call" href="tel:${escapeHtml(phoneForCall)}">📞 कॉल करें</a>` : ''}
+    <a class="hv-btn hv-btn-main" href="listing.html?id=${lid}">विवरण देखें</a>
+    <a class="hv-btn hv-btn-wa" href="https://wa.me/?text=${shareText}" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">${WA_ICON}</a>
   </div>
-</div>`;
+</article>`;
 }
+
+const WA_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
 
 // Vehicle listings (vehicles.html, browse, etc.) share the CarWale-style card used on the homepage.
 function vehicleCardHTML(listing) {
@@ -285,7 +282,6 @@ export function homepageVehicleCardHTML(listing) {
   const flags = (listing.purpose === 'rent' ? '<span class="hv-flag">किराया</span>' : '') +
     ((listing.isVerified || listing.verified) ? '<span class="hv-flag hv-flag-ok">✓ Verified</span>' : '') +
     listingAvailabilityBadge(listing).replace('class="badge listing-sold-badge"', 'class="hv-flag hv-flag-sold"');
-  const waIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
 
   // CarWale-style vertical card: big photo, title, "km | fuel | place", price row, Call + details buttons.
   return '<article class="home-vehicle-card">' +
@@ -301,7 +297,7 @@ export function homepageVehicleCardHTML(listing) {
     '<div class="hv-actions">' +
       (phoneForCall ? '<a class="hv-btn hv-btn-call" href="tel:' + esc(phoneForCall) + '">📞 कॉल करें</a>' : '') +
       '<a class="hv-btn hv-btn-main" href="listing.html?id=' + id + '">विवरण देखें</a>' +
-      '<a class="hv-btn hv-btn-wa" href="https://wa.me/?text=' + shareText + '" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">' + waIcon + '</a>' +
+      '<a class="hv-btn hv-btn-wa" href="https://wa.me/?text=' + shareText + '" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">' + WA_ICON + '</a>' +
     '</div>' +
   '</article>';
 }
