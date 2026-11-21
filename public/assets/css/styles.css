@@ -1070,6 +1070,33 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   box-shadow: 0 4px 14px rgba(0,0,0,.18);
 }
 .hero-ribbon span { padding: 0 0.2rem; }
+/* Hero offer line: chips pop in one by one, then "बिना एजेंट के" keeps a gentle shine + pulse. */
+.hero-offer { display: flex; flex-wrap: wrap; justify-content: center; gap: .4rem .45rem; max-width: 640px; margin: .6rem auto 0; }
+.hero-offer-chip {
+  padding: .28rem .8rem; border-radius: 999px; color: #fff; font-size: clamp(.82rem, 1.2vw, .98rem); font-weight: 800; line-height: 1.3;
+  background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.38); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  text-shadow: 0 1px 3px rgba(0,0,0,.45); opacity: 0;
+  animation: heroChipIn .55s cubic-bezier(.2,.9,.3,1.3) forwards; animation-delay: calc(.35s + var(--i) * .13s);
+}
+.hero-offer-key {
+  position: relative; overflow: hidden; color: #2a1500; text-shadow: none; border-color: #ffd34d;
+  background: linear-gradient(135deg, #ffd34d, #ffb300);
+  animation: heroChipIn .55s cubic-bezier(.2,.9,.3,1.3) forwards, heroKeyPulse 2.4s ease-in-out 1.8s infinite;
+  animation-delay: calc(.35s + var(--i) * .13s), 1.8s;
+}
+.hero-offer-key::after {
+  content: ""; position: absolute; inset: 0 auto 0 -60%; width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.75), transparent);
+  transform: skewX(-20deg); animation: heroKeyShine 3s ease-in-out 2s infinite;
+}
+@keyframes heroChipIn { from { opacity: 0; transform: translateY(12px) scale(.85); } to { opacity: 1; transform: none; } }
+@keyframes heroKeyPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,211,77,.55); } 50% { box-shadow: 0 0 0 9px rgba(255,211,77,0); } }
+@keyframes heroKeyShine { 0% { left: -60%; } 55%, 100% { left: 130%; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-offer-chip { opacity: 1; animation: none; }
+  .hero-offer-key::after { display: none; }
+}
+@media (max-width: 640px) { .hero-offer { gap: .3rem .35rem; } .hero-offer-chip { padding: .22rem .6rem; font-size: .78rem; } }
 .hero-search-tools { width: min(760px, 100%); min-width: 0; display: grid; justify-items: center; gap: 0.7rem; }
 .hero .hero-search { width: 100%; min-width: 0; margin: 0; box-shadow: 0 6px 22px rgba(0,0,0,.3); animation: none; }
 .hero .hero-search input { min-width: 0; min-height: 58px; font-size: 1rem; }
