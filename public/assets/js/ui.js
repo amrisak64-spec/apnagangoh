@@ -177,13 +177,15 @@ function escapeHtml(value) {
 }
 
 // Category artwork shown in place of a photo when a post has none.
-const CATEGORY_ICONS = { plot: 'plot', house: 'house', shop: 'shop', agri: 'agri', career: 'career' };
+const CATEGORY_ICONS = { plot: 'plot', house: 'house', shop: 'shop', agri: 'agri', career: 'career', vehicle: 'vehicle' };
 export function categoryIconHTML(type, cls = '') {
   const name = CATEGORY_ICONS[type] || 'house';
-  return `<img class="category-icon ${cls}" src="/assets/images/categories/${name}.webp" alt="" loading="lazy">`;
+  const extension = type === 'vehicle' ? 'svg' : 'webp';
+  return `<img class="category-icon ${cls}" src="/assets/images/categories/${name}.${extension}" alt="" loading="lazy">`;
 }
 
 export function listingCardHTML(listing) {
+  if (listing.type === 'vehicle' || listing.category === 'vehicle') return vehicleCardHTML(listing);
   const { id, title, price, type, purpose, village, locality, photos, isVerified, isFeatured, areaSize, areaUnit, guidanceFor, domain, mode, fee } = listing;
   const isCareer = type === 'career';
   const img = photos && photos.length
@@ -194,6 +196,7 @@ export function listingCardHTML(listing) {
     : purpose === 'sale'
       ? `<span class="badge badge-sale">बिक्री</span>`
       : `<span class="badge badge-rent">किराया</span>`;
+  const availabilityBadge = listingAvailabilityBadge(listing);
   const featuredBadge = isFeatured ? `<span class="badge badge-featured">⭐</span>` : '';
 
   const GUIDANCE_LABELS = { '10th': '10वीं के बाद', '12th': '12वीं के बाद', graduation: 'Graduation के बाद', competitive: 'Competitive Exams', skill: 'Skill Development' };
@@ -224,7 +227,7 @@ export function listingCardHTML(listing) {
     <div class="card-body" style="padding:1rem;">
       <!-- Badges -->
       <div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-bottom:0.45rem;">
-        ${purposeBadge}${featuredBadge}${verifiedChip}
+        ${purposeBadge}${availabilityBadge}${featuredBadge}${verifiedChip}
       </div>
       <!-- Smart headline in red -->
       <div style="font-size:1.05rem;font-weight:900;color:#DC2626;line-height:1.25;margin-bottom:0.2rem;">${escapeHtml(headline)}</div>
@@ -245,4 +248,66 @@ export function listingCardHTML(listing) {
     </a>
   </div>
 </div>`;
+}
+
+// Vehicle listings (vehicles.html, browse, etc.) share the CarWale-style card used on the homepage.
+function vehicleCardHTML(listing) {
+  return homepageVehicleCardHTML(listing);
+}
+
+// CarWale-style vehicle card, used on the homepage shelf and every vehicle listing grid.
+export function homepageVehicleCardHTML(listing) {
+  const esc = escapeHtml;
+  const year = Number.isInteger(listing.year) ? String(listing.year) : '';
+  const brandModel = [listing.brand, listing.model].filter(value => typeof value === 'string' && value.trim()).join(' ');
+  const title = [year, brandModel].filter(Boolean).join(' ') || listing.title || 'कार और बाइक';
+  const amount = Number(listing.price);
+  const price = Number.isFinite(amount) && amount > 0
+    ? (amount < 100000 ? '₹' + amount.toLocaleString('en-IN') : '₹' + (amount / 100000).toFixed(2) + ' लाख')
+    : 'कीमत पूछें';
+  const fuelLabels = { petrol: 'पेट्रोल', diesel: 'डीज़ल', cng: 'CNG', electric: 'इलेक्ट्रिक' };
+  const specs = [
+    listing.fuelType && (fuelLabels[listing.fuelType] || listing.fuelType),
+    listing.kmDriven !== null && listing.kmDriven !== undefined && listing.kmDriven !== '' && Number.isFinite(Number(listing.kmDriven))
+      ? Number(listing.kmDriven).toLocaleString('en-IN') + ' किमी' : '',
+  ].filter(Boolean).map(esc).join(' • ');
+  const photo = listing.photos?.[0]
+    ? '<img class="card-img" data-src="' + esc(listing.photos[0]) + '" src="" alt="' + esc(title) + '" loading="lazy">'
+    : '<div class="card-img-placeholder">' + categoryIconHTML('vehicle') + '</div>';
+  const seller = listing.listerType === 'dealer' ? 'डीलर' : 'मालिक';
+  const id = encodeURIComponent(String(listing.id ?? ''));
+  const detailUrl = 'https://gangoh.in/listing.html?id=' + id;
+  const shareText = encodeURIComponent(title + ' — ' + price + '\nगंगोह.in पर देखें: ' + detailUrl);
+  const phone = String(listing.phone || listing.contactWhatsApp || '').replace(/\D/g, '');
+  const phoneForCall = phone.length === 10 ? '+91' + phone : phone;
+  const location = [listing.locality, listing.village].filter(value => typeof value === 'string' && value.trim()).join(', ');
+  const metaLine = [specs, location ? esc(location) : ''].filter(Boolean).join(' <span class="hv-sep">|</span> ');
+  const flags = (listing.purpose === 'rent' ? '<span class="hv-flag">किराया</span>' : '') +
+    ((listing.isVerified || listing.verified) ? '<span class="hv-flag hv-flag-ok">✓ Verified</span>' : '') +
+    listingAvailabilityBadge(listing).replace('class="badge listing-sold-badge"', 'class="hv-flag hv-flag-sold"');
+  const waIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
+
+  // CarWale-style vertical card: big photo, title, "km | fuel | place", price row, Call + details buttons.
+  return '<article class="home-vehicle-card">' +
+    '<a class="hv-link" href="listing.html?id=' + id + '" aria-label="' + esc(title) + ' देखें">' +
+      '<div class="hv-photo">' + photo + '<span class="hv-tag">' + esc(seller) + '</span>' + flags + '</div>' +
+      '<div class="hv-body">' +
+        '<h3 class="home-vehicle-title">' + esc(title) + '</h3>' +
+        (metaLine ? '<p class="home-vehicle-specs">' + metaLine + '</p>' : '') +
+        '<div class="hv-price-row"><span class="home-vehicle-price">' + esc(price) + '</span>' +
+          (listing.negotiable ? '<span class="hv-nego">मोलभाव संभव</span>' : '') + '</div>' +
+      '</div>' +
+    '</a>' +
+    '<div class="hv-actions">' +
+      (phoneForCall ? '<a class="hv-btn hv-btn-call" href="tel:' + esc(phoneForCall) + '">📞 कॉल करें</a>' : '') +
+      '<a class="hv-btn hv-btn-main" href="listing.html?id=' + id + '">विवरण देखें</a>' +
+      '<a class="hv-btn hv-btn-wa" href="https://wa.me/?text=' + shareText + '" target="_blank" rel="noopener" aria-label="WhatsApp पर Share करें" title="WhatsApp पर Share करें">' + waIcon + '</a>' +
+    '</div>' +
+  '</article>';
+}
+function listingAvailabilityBadge(listing) {
+  const availability = listing?.availability || (listing?.status === 'sold' ? 'sold' : listing?.status === 'rented' ? 'rented' : 'active');
+  if (availability === 'sold') return '<span class="badge listing-sold-badge">बिक चुका / Sold</span>';
+  if (availability === 'rented') return '<span class="badge listing-sold-badge">किराये पर दिया / Rented</span>';
+  return '';
 }

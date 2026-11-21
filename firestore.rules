@@ -27,6 +27,36 @@ service cloud.firestore {
              || (data[field] is string && data[field].size() <= maxLength);
     }
 
+    // Vehicle-specific fields share the listings collection and the common listing envelope.
+    function validVehicleFields(data) {
+      return data.keys().hasAll([
+               'category', 'vehicleType', 'brand', 'model', 'year', 'fuelType', 'kmDriven',
+               'listerType', 'phone', 'ownerNumber'
+             ])
+             && data.category == 'vehicle'
+             && data.vehicleType in ['car', 'bike', 'scooty']
+             && data.brand is string && data.brand.size() > 0 && data.brand.size() <= 80
+             && data.model is string && data.model.size() > 0 && data.model.size() <= 80
+             && data.year is int && data.year >= 1990 && data.year <= request.time.year()
+             && (data.vehicleType == 'car' ? data.fuelType in ['petrol', 'diesel', 'cng', 'electric'] : data.fuelType in ['petrol', 'electric'])
+             && data.kmDriven is int && data.kmDriven >= 0 && data.kmDriven <= 10000000
+             && data.listerType in ['owner', 'dealer']
+             && data.ownerNumber in ['1st', '2nd', '3rd+']
+             && validPhone(data.phone) && data.phone == data.contactWhatsApp
+             && (!('verified' in data) || (data.verified is bool && data.verified == false))
+             && (!('insuranceValid' in data) || data.insuranceValid is bool)
+             && validOptionalText(data, 'registrationState', 80)
+             && validOptionalText(data, 'registrationLast4', 4)
+             && (!('registrationLast4' in data) || data.registrationLast4 == '' || data.registrationLast4.matches('^[0-9]{4}$'))
+             && validOptionalText(data, 'insuranceValidTill', 20)
+             && validOptionalText(data, 'transmission', 20)
+             && (!('transmission' in data) || data.transmission == '' || data.transmission in ['manual', 'automatic'])
+             && validOptionalText(data, 'bikeType', 20)
+             && (!('bikeType' in data) || data.bikeType == '' || data.bikeType in ['bike', 'scooty'])
+             && validOptionalAmount(data, 'cc')
+             && (!('negotiable' in data) || data.negotiable is bool);
+    }
+
     function validListingFields(data) {
       return data.keys().hasAll([
                'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
@@ -37,23 +67,25 @@ service cloud.firestore {
                'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
                'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
                'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+               'category', 'vehicleType', 'brand', 'model', 'year', 'fuelType', 'kmDriven', 'ownerNumber',
+               'registrationState', 'registrationLast4', 'insuranceValid', 'insuranceValidTill', 'transmission', 'cc', 'bikeType', 'negotiable', 'listerType', 'phone', 'verified', 'availability',
                'ownerId', 'status', 'isVerified', 'isFeatured', 'createdAt', 'updatedAt'
              ])
-             && data.type in ['plot', 'house', 'shop', 'agri', 'career']
+             && data.type in ['plot', 'house', 'shop', 'agri', 'career', 'vehicle']
              && data.purpose is string
-             && (data.type == 'career' || data.purpose in ['sale', 'rent'])
+             && (data.type == 'career' || (data.type == 'vehicle' ? data.purpose == 'sale' : data.purpose in ['sale', 'rent']))
              && data.title is string && data.title.size() > 0 && data.title.size() <= 250
              && data.townOrVillage in ['town', 'village']
              && data.village is string && data.village.size() <= 100
              && data.locality is string && data.locality.size() <= 120
              && data.landmark is string && data.landmark.size() <= 120
              && data.price is number && data.price >= 0 && data.price <= 10000000000000
-             && (data.type == 'career' ? data.price == 0 : data.price >= 100)
+             && (data.type == 'career' ? data.price == 0 : data.type == 'vehicle' ? data.price > 0 : data.price >= 100)
              && (data.areaSize == null || (data.areaSize is number && data.areaSize > 0 && data.areaSize <= 10000000000))
              && data.areaUnit is string && data.areaUnit.size() <= 20
              && data.description is string && data.description.size() <= 1000
              && validPhone(data.contactWhatsApp)
-             && data.photos is list && data.photos.size() <= 5
+             && data.photos is list && (data.type == 'vehicle' ? (data.photos.size() >= 2 && data.photos.size() <= 6) : data.photos.size() <= 5)
              && validOptionalAmount(data, 'ratePerGaj')
              && validOptionalAmount(data, 'ratePerBigha')
              && validOptionalAmount(data, 'roadSizeFeet')
@@ -66,9 +98,11 @@ service cloud.firestore {
              && validOptionalText(data, 'duration', 100)
              && validOptionalText(data, 'timing', 100)
              && validOptionalText(data, 'mentorQualification', 150)
+             && (!('availability' in data) || data.availability in ['active', 'sold', 'rented'])
              && (data.type != 'career' || (data.guidanceFor in ['10th', '12th', 'graduation', 'competitive', 'skill']
                  && data.domain is string && data.domain.size() > 0 && data.domain.size() <= 100
-                 && data.mode in ['offline', 'online', 'both']));
+                 && data.mode in ['offline', 'online', 'both']))
+             && (data.type != 'vehicle' || validVehicleFields(data));
     }
 
     function validBudget(value) {
@@ -108,18 +142,18 @@ service cloud.firestore {
 
     // ── listings ──────────────────────────────────────────────────
     match /listings/{listingId} {
-      // Public can read live listings; owner can read their own; admin can read all
-      allow read: if resource.data.status == 'live'
-                  || isOwner(resource.data.ownerId)
-                  || isAdmin();
+      // Listing documents are public; owner controls still protect changes and deletion.
+      allow read: if true;
 
-      // Authenticated user can create with status 'live' (no admin review)
+      // Signed-in users create listings live, including cars and bikes.
       allow create: if request.auth != null
                    && request.resource.data.keys().hasOnly([
                      'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
                      'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
                      'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
                      'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+                     'category', 'vehicleType', 'brand', 'model', 'year', 'fuelType', 'kmDriven', 'ownerNumber',
+                     'registrationState', 'registrationLast4', 'insuranceValid', 'insuranceValidTill', 'transmission', 'cc', 'bikeType', 'negotiable', 'listerType', 'phone', 'verified', 'availability',
                      'ownerId', 'status', 'isVerified', 'isFeatured', 'createdAt', 'updatedAt'
                    ])
                    && request.resource.data.ownerId == request.auth.uid
@@ -130,9 +164,25 @@ service cloud.firestore {
                    && request.resource.data.updatedAt == request.time
                    && validListingFields(request.resource.data);
 
-      // Admin can update anything. Owners submit edits through listingEdits so
-      // the currently published version remains unchanged until admin approval.
-      allow update: if isAdmin();
+      // Admin can moderate any listing. Owners can change only their own content fields;
+      // ownership, moderation flags, status, and original creation time stay protected.
+      allow update: if isAdmin()
+                    || (isOwner(resource.data.ownerId)
+                        && request.resource.data.ownerId == resource.data.ownerId
+                        && request.resource.data.status == resource.data.status
+                        && request.resource.data.isVerified == resource.data.isVerified
+                        && request.resource.data.isFeatured == resource.data.isFeatured
+                        && request.resource.data.createdAt == resource.data.createdAt
+                        && request.resource.data.updatedAt == request.time
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                          'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
+                          'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
+                          'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
+                          'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+                          'category', 'vehicleType', 'brand', 'model', 'year', 'fuelType', 'kmDriven', 'ownerNumber',
+                          'registrationState', 'registrationLast4', 'insuranceValid', 'insuranceValidTill', 'transmission', 'cc', 'bikeType', 'negotiable', 'listerType', 'phone', 'verified', 'availability', 'updatedAt'
+                        ])
+                        && validListingFields(request.resource.data));
 
       // Owner can delete their own; admin can delete any
       allow delete: if isOwner(resource.data.ownerId) || isAdmin();
@@ -154,7 +204,9 @@ service cloud.firestore {
                          'type', 'purpose', 'title', 'townOrVillage', 'village', 'locality', 'landmark',
                          'price', 'areaSize', 'areaUnit', 'description', 'contactWhatsApp', 'photos',
                          'ratePerGaj', 'ratePerBigha', 'roadSizeFeet', 'storey', 'rooms', 'securityDeposit',
-                         'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification'
+                         'pagdi', 'guidanceFor', 'domain', 'mode', 'fee', 'duration', 'timing', 'mentorQualification',
+                         'category', 'vehicleType', 'brand', 'model', 'year', 'fuelType', 'kmDriven', 'ownerNumber',
+                         'registrationState', 'registrationLast4', 'insuranceValid', 'insuranceValidTill', 'transmission', 'cc', 'bikeType', 'negotiable', 'listerType', 'phone', 'verified', 'availability'
                        ])
                     && validListingFields(request.resource.data.changes)
                     && get(/databases/$(database)/documents/listings/$(request.resource.data.listingId)).data.ownerId == request.auth.uid

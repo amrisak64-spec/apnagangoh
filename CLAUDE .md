@@ -25,7 +25,7 @@ Three launch categories only:
 
 - Frontend: **Vanilla HTML + CSS + JavaScript**. Tailwind CSS via CDN is allowed for speed; no build step.
 - DB/Auth/Storage: **Firebase** (Firestore, Phone Auth, Storage). Use Firebase JS SDK v10+ (modular).
-- Hosting: **Netlify**. No build command. Publish directory: `public/`.
+- Hosting: **Firebase Hosting**. Static files are served from `public/`.
 - Payments: **Razorpay** (Phase 3 only — do not wire up at first).
 
 ## Folder structure
@@ -68,7 +68,6 @@ Three launch categories only:
 Note: the moderation panel is `gng-admin-panel.html` (not `admin.html` as in earlier drafts of this spec) — its logic lives inline in the page rather than in a separate module.
 ├── firestore.rules
 ├── storage.rules
-├── netlify.toml
 ├── .gitignore                   # standard ignores; Firebase web config is intentionally committed
 └── CLAUDE.md
 ```
@@ -159,8 +158,7 @@ In-app chat · ratings/reviews · user-to-user payments/escrow · maps integrati
 
 ## Deployment
 
-- Netlify: no build command, publish `public/`.
-- Netlify serves the static HTML pages directly; do not add a catch-all rewrite to `index.html`.
-- Use Firebase CLI only to deploy Firestore rules/indexes and Storage rules; `firebase.json` intentionally has no Hosting target.
+- Firebase Hosting serves the static HTML pages directly from `public/`.
+- Use Firebase CLI to deploy Hosting, Firestore rules/indexes, and Storage rules.
 - Firebase web config is public client configuration; secure data with Firestore and Storage rules.
 - Region: Firestore `asia-south1` (Mumbai).

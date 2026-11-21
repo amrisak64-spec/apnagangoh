@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="page-title">लिस्टिंग — गंगोह.in</title>
   <meta name="description" id="page-desc" content="गंगोह प्रॉपर्टी लिस्टिंग — गंगोह.in">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -27,9 +29,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice, waURL, categoryIconHTML } from './assets/js/ui.js?v=5';
-    import { initListings, fetchListing } from './assets/js/listings.js?v=5';
+    import { mountUI, toast, formatPrice, waURL, categoryIconHTML } from './assets/js/ui.js?v=7';
+    import { initListings, fetchListing, deleteListing } from './assets/js/listings.js?v=8';
     import { initReports, createReport } from './assets/js/reports.js?v=5';
     import { ALL_LOCATIONS } from './data/villages.js?v=5';
 
@@ -45,38 +48,55 @@
 
     if (!firebase.apps.length) firebase.initializeApp(fbConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
+    const storage = firebase.storage();
+    let viewerUid = null;
     mountUI();
-    initListings(db, null, null);
+    initListings(db, storage, auth);
     initReports(db);
 
-    const id = new URLSearchParams(location.search).get('id');
+    // Clean SEO URLs (/property/<slug>-<id>, /vehicles/<slug>-<id>) are served by the `pages` Cloud Function,
+    // which already put the bilingual title, description and structured data in the HTML (data-ssr="1").
+    const SSR = document.documentElement.dataset.ssr === '1';
+    const pathMatch = location.pathname.match(/^\/(?:property|vehicles)\/.*-([A-Za-z0-9]{20})\/?$/);
+    const id = new URLSearchParams(location.search).get('id') || (pathMatch ? pathMatch[1] : null);
     const main = document.getElementById('main-content');
 
     if (!id) {
       main.innerHTML = `<div class="empty-state"><span class="empty-icon">❓</span><p>लिस्टिंग नहीं मिली।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
     } else {
-      loadListing(id);
+      auth.onAuthStateChanged(user => {
+        viewerUid = user?.uid || null;
+        loadListing(id);
+      });
     }
 
     async function loadListing(listingId) {
       try {
         const listing = await fetchListing(listingId);
-        if (!listing || listing.status !== 'live') {
+        if (!listing || (!['live', 'sold', 'rented'].includes(listing.status) && listing.ownerId !== viewerUid)) {
           main.innerHTML = `<div class="empty-state"><span class="empty-icon">🚫</span><p>यह listing उपलब्ध नहीं है।</p><a href="browse.html" class="btn btn-primary" style="margin-top:1rem;">Browse करें</a></div>`;
           return;
         }
         renderListing(listing);
+        if (new URLSearchParams(location.search).get('updated') === '1') toast('आपकी listing अपडेट हो गई।', 'success');
       } catch (err) {
         main.innerHTML = `<div class="empty-state"><p>Error: ${err.message}</p></div>`;
       }
     }
 
     function renderListing(l) {
-      document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | गंगोह.in`;
-      document.getElementById('page-desc').content = `${l.title} — ${l.purpose === 'sale' ? 'बिक्री' : 'किराये'} पर। कीमत: ${formatPrice(l.price)}। ${l.village || 'गंगोह'}, Gangoh।`;
+      if (l.type === 'vehicle' || l.category === 'vehicle') {
+        renderVehicleListing(l);
+        injectJsonLd(l);
+        return;
+      }
+      if (!SSR) document.getElementById('page-title').textContent = `${l.title} — ${l.village || 'गंगोह'} | गंगोह.in`;
+      if (!SSR) document.getElementById('page-desc').content = `${l.title} — ${l.purpose === 'sale' ? 'बिक्री' : 'किराये'} पर। कीमत: ${formatPrice(l.price)}। ${l.village || 'गंगोह'}, Gangoh।`;
 
       const typeLabel    = { plot:'प्लॉट', house:'मकान', shop:'दुकान', agri:'खेती की ज़मीन' }[l.type] || l.type;
       const purposeLabel = l.purpose === 'sale' ? 'बिक्री' : 'किराया';
+      const availabilityBadge = listingAvailabilityBadge(l);
 
       // Smart headline: "200 गज का प्लॉट", "6 बीघा खेती की ज़मीन" etc.
       const headlineMap = {
@@ -136,6 +156,7 @@
       <!-- Badges -->
       <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.75rem;">
         <span class="badge ${l.purpose==='sale'?'badge-sale':'badge-rent'}">${purposeLabel}</span>
+        ${availabilityBadge}
         ${l.isVerified ? `<span class="badge badge-verified">✓ Verified</span>` : ''}
         ${l.isFeatured ? `<span class="badge badge-featured">⭐ Featured</span>` : ''}
       </div>
@@ -219,6 +240,7 @@
       <div style="margin-top:0.75rem;">
         <button id="report-btn" style="background:none;border:none;padding:0;font-size:0.8rem;color:#DC2626;cursor:pointer;font-family:inherit;text-decoration:underline;">🚩 फर्ज़ी लिस्टिंग रिपोर्ट करें</button>
       </div>
+      ${ownerActionsHTML(l)}
     </div>
   </div>
 </div>`;
@@ -268,10 +290,115 @@
 
       // Structured data
       injectJsonLd(l);
+      bindOwnerActions(l);
+    }
+
+    // Change 2: vehicle detail omits insurance; legacy scooter records display as bikes.
+    // Vehicle detail uses the existing listing route while providing vehicle specs and a mobile contact bar.
+    function renderVehicleListing(l) {
+      const year = Number.isInteger(l.year) ? String(l.year) : '';
+      const brand = typeof l.brand === 'string' ? l.brand.trim() : '';
+      const model = typeof l.model === 'string' ? l.model.trim() : '';
+      const title = [year, brand, model].filter(Boolean).join(' ') || l.title || 'कार और बाइक बिक्री के लिए';
+      const kind = l.vehicleType === 'car' ? 'कार' : 'बाइक';
+      const englishKind = l.vehicleType === 'car' ? 'Car' : 'Bike';
+      const phone = String(l.phone || l.contactWhatsApp || '').replace(/\D/g, '');
+      const phoneDigits = phone.length === 10 ? `91${phone}` : phone;
+      const phoneForCall = phone.length === 10 ? `+91${phone}` : phone;
+      const price = Number(l.price);
+      const priceLabel = Number.isFinite(price) && price > 0
+        ? (price >= 100000 ? `₹${(price / 100000).toFixed(2)} लाख` : `₹${price.toLocaleString('en-IN')}`)
+        : 'कीमत पूछें';
+      const fuelLabel = { petrol: 'पेट्रोल', diesel: 'डीज़ल', cng: 'CNG', electric: 'इलेक्ट्रिक' }[l.fuelType] || l.fuelType;
+      const ownerLabel = { '1st': 'पहला मालिक', '2nd': 'दूसरा मालिक', '3rd+': 'तीसरा या अधिक मालिक' }[l.ownerNumber] || l.ownerNumber;
+      const sellerLabel = l.listerType === 'dealer' ? 'डीलर' : l.listerType === 'owner' ? 'मालिक' : '';
+      const hasKm = l.kmDriven !== null && l.kmDriven !== undefined && l.kmDriven !== '' && Number.isFinite(Number(l.kmDriven));
+      const rows = [
+        ['गाड़ी', kind], ['ब्रांड', brand], ['मॉडल', model], ['मॉडल वर्ष', year],
+        ['ईंधन', fuelLabel], [hasKm ? 'चली दूरी' : '', hasKm ? `${Number(l.kmDriven).toLocaleString('en-IN')} किमी` : ''],
+        ['मालिक', ownerLabel], ['रजिस्ट्रेशन', l.registrationState],
+        ['विक्रेता', sellerLabel],
+        ['ट्रांसमिशन', l.transmission === 'automatic' ? 'Automatic' : l.transmission === 'manual' ? 'Manual' : ''],
+        ['रजिस्ट्रेशन के आख़िरी 4 अंक', l.registrationLast4],
+        ['इंजन क्षमता', l.cc ? `${Number(l.cc).toLocaleString('en-IN')} CC` : ''],
+        ['मोलभाव', l.negotiable ? 'हाँ' : (typeof l.negotiable === 'boolean' ? 'नहीं' : '')],
+      ].filter(([label, value]) => label && value !== undefined && value !== null && value !== '');
+      const photos = Array.isArray(l.photos) ? l.photos.filter(url => typeof url === 'string' && url.trim()) : [];
+      const gallery = photos.length
+        ? `<div class="vehicle-detail-gallery" aria-label="गाड़ी की तस्वीरें">${photos.map((photo, index) => `<img src="${escapeHtml(photo)}" alt="${escapeHtml(title)} — तस्वीर ${index + 1}" loading="lazy">`).join('')}</div>`
+        : '<div class="vehicle-detail-placeholder">📷 फोटो जल्द उपलब्ध</div>';
+      const waMessage = `नमस्ते, मुझे ${title} के बारे में जानकारी चाहिए। यह गाड़ी मुझे गंगोह.in पर मिली: ${location.href}`;
+      const waHref = phoneDigits ? waURL(phoneDigits, waMessage) : '';
+      const badges = [
+        `<span class="badge ${l.purpose === 'rent' ? 'badge-rent' : 'badge-sale'}">${l.purpose === 'rent' ? 'किराया' : 'बिक्री'}</span>`,
+        `<span class="badge vehicle-seller-badge">${escapeHtml(sellerLabel || kind)}</span>`,
+        l.listerType === 'owner' || !l.listerType ? '<span class="badge vehicle-direct-badge">📞 Direct</span>' : '',
+        listingAvailabilityBadge(l),
+        (l.isVerified || l.verified) ? '<span class="badge vehicle-verified-badge">✓ Verified</span>' : '',
+        l.negotiable ? '<span class="badge vehicle-negotiable-badge">मोलभाव संभव</span>' : '',
+      ].filter(Boolean).join('');
+      const locationText = [l.locality, l.village].filter(value => typeof value === 'string' && value.trim()).join(' · ');
+
+      if (!SSR) document.getElementById('page-title').textContent = `${title} — Used ${englishKind} for sale in Gangoh | कार और बाइक बिक्री के लिए — Gangoh.in`;
+      if (!SSR) document.getElementById('page-desc').content = `${title} (${kind}) गंगोह में बिक्री के लिए। ${fuelLabel ? `${fuelLabel}, ` : ''}${hasKm ? `${Number(l.kmDriven).toLocaleString('en-IN')} किमी चली, ` : ''}${priceLabel}। गाड़ी देखने से पहले जाँच ज़रूर करें।`;
+
+      main.innerHTML = `
+        <p style="margin-bottom:1rem;"><a href="vehicles.html" style="color:#888;font-size:.9rem;">← कार और बाइक की सभी लिस्टिंग</a></p>
+        <div class="detail-grid vehicle-detail-grid">
+          <div>
+            <section class="vehicle-detail-summary" style="background:white;border-radius:.8rem;padding:1rem 1.2rem;margin-bottom:1rem;box-shadow:var(--shadow-card);">
+              <div class="vehicle-card-badges">${badges}</div>
+              <h1 style="font-size:clamp(1.5rem,5vw,2.2rem);margin:.5rem 0;color:var(--color-text);overflow-wrap:anywhere;">${escapeHtml(title)}</h1>
+              ${locationText ? `<p style="margin:0;color:var(--color-muted);">📍 ${escapeHtml(locationText)}</p>` : ''}
+              <p style="margin:.65rem 0 0;color:var(--color-saffron);font-size:1.8rem;font-weight:900;">${escapeHtml(priceLabel)}</p>
+            </section>
+            ${gallery}
+            <h2 style="margin:1.2rem 0 .5rem;font-size:1.2rem;">गाड़ी की पूरी जानकारी</h2>
+            <table class="vehicle-spec-table"><tbody>${rows.map(([label, value]) => `<tr><th scope="row">${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`).join('')}</tbody></table>
+            ${l.description ? `<section style="background:white;border-radius:.8rem;padding:1rem 1.2rem;margin-top:1rem;box-shadow:var(--shadow-card);"><h2 style="font-size:1.1rem;">विवरण</h2><p style="white-space:pre-wrap;overflow-wrap:anywhere;color:var(--color-muted);">${formatDescription(l.description)}</p></section>` : ''}
+            <p class="vehicle-detail-safety">खरीदने से पहले RC और गाड़ी की जाँच ज़रूर करें।</p>
+          </div>
+          <aside class="detail-info-card"><h2 style="font-size:1.1rem;">विक्रेता से संपर्क करें</h2><p style="color:var(--color-saffron);font-size:1.3rem;font-weight:900;">${escapeHtml(priceLabel)}</p>
+            ${phoneForCall ? `<a class="vehicle-card-call vehicle-detail-action" href="tel:${escapeHtml(phoneForCall)}">📞 कॉल करें</a>` : ''}
+            ${waHref ? `<a class="vehicle-card-whatsapp vehicle-detail-action" href="${escapeHtml(waHref)}" target="_blank" rel="noopener">WhatsApp पर संदेश भेजें</a>` : '<p style="color:var(--color-muted);">संपर्क नंबर उपलब्ध नहीं</p>'}
+            ${sellerLabel ? `<p style="margin-top:1rem;color:var(--color-muted);">विक्रेता: ${escapeHtml(sellerLabel)}</p>` : ''}
+            ${ownerActionsHTML(l)}
+          </aside>
+        </div>
+        ${phoneForCall ? `<nav class="vehicle-mobile-contact" aria-label="विक्रेता से संपर्क"><a href="tel:${escapeHtml(phoneForCall)}">📞 कॉल करें</a>${waHref ? `<a href="${escapeHtml(waHref)}" target="_blank" rel="noopener">WhatsApp</a>` : ''}</nav>` : ''}`;
+      bindOwnerActions(l);
     }
 
     function escapeHtml(value) {
       return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function listingAvailabilityBadge(listing) {
+      const value = listing.availability || (listing.status === 'sold' ? 'sold' : listing.status === 'rented' ? 'rented' : 'active');
+      if (value === 'sold') return '<span class="badge listing-sold-badge">बिक चुका / Sold</span>';
+      if (value === 'rented') return '<span class="badge listing-sold-badge">किराये पर दिया / Rented</span>';
+      return '';
+    }
+
+    function ownerActionsHTML(listing) {
+      if (!viewerUid || listing.ownerId !== viewerUid) return '';
+      return `<div class="owner-listing-actions"><a class="btn btn-outline btn-sm" href="edit-listing.html?id=${encodeURIComponent(listing.id)}">✏️ Edit Listing</a><button class="btn btn-danger btn-sm" type="button" id="owner-delete-listing">🗑️ Delete Listing</button></div>`;
+    }
+
+    function bindOwnerActions(listing) {
+      document.getElementById('owner-delete-listing')?.addEventListener('click', async event => {
+        if (!confirm('इस listing और इसकी फ़ोटो को हमेशा के लिए हटाना चाहते हैं?')) return;
+        const button = event.currentTarget;
+        button.disabled = true;
+        try {
+          await deleteListing(listing.id);
+          toast('Listing delete हो गई।', 'success');
+          location.href = 'my-listings.html';
+        } catch (error) {
+          button.disabled = false;
+          toast(error.message || 'Listing हटाई नहीं जा सकी।', 'error');
+        }
+      });
     }
 
     // Descriptions accept a small Markdown subset. Escape first so raw HTML is never trusted.
@@ -284,8 +411,26 @@
 
     // ── RealEstateListing structured data ─────────────────────
     function injectJsonLd(l) {
+      if (SSR) return;
       document.querySelectorAll('script[data-listing-ld]').forEach(el => el.remove());
-      const ld = {
+      const isVehicle = l.type === 'vehicle' || l.category === 'vehicle';
+      const vehicleTitle = [Number.isInteger(l.year) ? l.year : '', l.brand, l.model].filter(value => value !== null && value !== undefined && String(value).trim()).join(' ') || l.title;
+      const ld = isVehicle ? {
+        '@context': 'https://schema.org/',
+        '@type': ['Product', 'Vehicle'],
+        name: vehicleTitle,
+        description: l.description || vehicleTitle,
+        url: location.href,
+        ...(l.photos && l.photos.length ? { image: l.photos } : {}),
+        ...(l.brand ? { brand: { '@type': 'Brand', name: l.brand } } : {}),
+        ...(l.model ? { model: l.model } : {}),
+        ...(Number.isInteger(l.year) ? { vehicleModelDate: String(l.year) } : {}),
+        ...(l.vehicleType ? { vehicleConfiguration: l.vehicleType === 'car' ? 'Car' : 'Motorcycle' } : {}),
+        ...(Number.isFinite(Number(l.kmDriven)) && l.kmDriven != null ? { mileageFromOdometer: { '@type': 'QuantitativeValue', value: Number(l.kmDriven), unitCode: 'KMT' } } : {}),
+        ...(l.fuelType ? { fuelType: l.fuelType } : {}),
+        itemCondition: 'https://schema.org/UsedCondition',
+        offers: { '@type': 'Offer', price: Number(l.price) || undefined, priceCurrency: 'INR', availability: 'https://schema.org/InStock' },
+      } : {
         '@context': 'https://schema.org/',
         '@type': 'RealEstateListing',
         name: l.title,

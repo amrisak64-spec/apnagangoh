@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>लिस्टिंग Edit करें — गंगोह.in</title>
+  <meta name="description" content="अपनी गंगोह.in लिस्टिंग की जानकारी और फ़ोटो बदलें।">
+  <meta name="robots" content="noindex, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header id="site-header"></header>
+  <main class="container edit-listing-page">
+    <a class="edit-back-link" href="my-listings.html">← मेरी Listings पर वापस</a>
+    <section class="edit-listing-card">
+      <h1>✏️ Listing Edit करें</h1>
+      <p class="edit-listing-intro">अपनी जानकारी बदलें और Save करें।</p>
+      <p id="edit-error" class="form-error" role="alert" hidden></p>
+      <form id="edit-listing-form" hidden>
+        <div class="edit-form-grid">
+          <label class="edit-wide">शीर्षक *<input class="form-control" id="edit-title" maxlength="250" required></label>
+          <label>कीमत (₹) *<input class="form-control" id="edit-price" type="number" min="0" step="1" inputmode="numeric" required></label>
+          <label>संपर्क नंबर *<input class="form-control" id="edit-phone" type="tel" inputmode="numeric" maxlength="10" required></label>
+          <label>साइज़<input class="form-control" id="edit-size" type="number" min="0" step="any"></label>
+          <label>रेट / इकाई (₹)<input class="form-control" id="edit-rate" type="number" min="0" step="any"></label>
+          <label>इकाई<input class="form-control" id="edit-area-unit" maxlength="20"></label>
+          <label>शहर / गाँव<select class="form-control" id="edit-village"></select></label>
+          <label>क्षेत्र का प्रकार<select class="form-control" id="edit-town-or-village"><option value="town">शहर</option><option value="village">गाँव</option></select></label>
+          <label>मोहल्ला / लोकेशन<input class="form-control" id="edit-locality" maxlength="120"></label>
+          <label>लैंडमार्क<input class="form-control" id="edit-landmark" maxlength="120"></label>
+          <label class="edit-wide">विवरण<textarea class="form-control" id="edit-description" rows="4" maxlength="1000"></textarea></label>
+        </div>
+
+        <section id="edit-vehicle-fields" class="edit-vehicle-fields" hidden>
+          <h2>वाहन की जानकारी</h2>
+          <div class="edit-form-grid">
+            <label>प्रकार<select class="form-control" id="edit-vehicle-type"><option value="car">कार</option><option value="bike">बाइक</option><option value="scooty">स्कूटी</option></select></label>
+            <label>ब्रांड<input class="form-control" id="edit-brand" maxlength="80"></label>
+            <label>मॉडल<input class="form-control" id="edit-model" maxlength="80"></label>
+            <label>निर्माण वर्ष<input class="form-control" id="edit-year" type="number" min="1990" step="1"></label>
+            <label>चली दूरी (किमी)<input class="form-control" id="edit-km" type="number" min="0" step="1"></label>
+            <label>ईंधन<select class="form-control" id="edit-fuel"><option value="">चुनें</option><option value="petrol">पेट्रोल</option><option value="diesel">डीज़ल</option><option value="cng">CNG</option><option value="electric">इलेक्ट्रिक</option></select></label>
+            <label>मालिक<select class="form-control" id="edit-owner-number"><option value="">चुनें</option><option value="1st">1st</option><option value="2nd">2nd</option><option value="3rd+">3rd+</option></select></label>
+            <label>विक्रेता<select class="form-control" id="edit-lister"><option value="owner">मालिक</option><option value="dealer">डीलर</option></select></label>
+            <label>इंश्योरेंस वैध कब तक<input class="form-control" id="edit-insurance-till" type="date"></label>
+            <label class="edit-car-only">ट्रांसमिशन<select class="form-control" id="edit-transmission"><option value="">चुनें</option><option value="manual">Manual</option><option value="automatic">Automatic</option></select></label>
+            <label class="edit-car-only">रजिस्ट्रेशन के आख़िरी 4 अंक<input class="form-control" id="edit-registration-last4" inputmode="numeric" maxlength="4"></label>
+            <label class="edit-bike-only">CC<input class="form-control" id="edit-cc" type="number" min="1" max="3000"></label>
+            <label class="edit-wide"><input id="edit-negotiable" type="checkbox"> मोलभाव संभव</label>
+          </div>
+        </section>
+
+        <section class="edit-photos-section">
+          <h2>फ़ोटो <small id="edit-photo-count"></small></h2>
+          <div id="edit-photo-list" class="edit-photo-list"></div>
+          <label class="btn btn-outline edit-add-photos">＋ फ़ोटो जोड़ें
+            <input id="edit-photo-input" type="file" accept="image/*" multiple hidden>
+          </label>
+          <p class="form-hint">नई फ़ोटो अपलोड से पहले 1200px तक छोटी और JPEG में compress होंगी।</p>
+          <p id="edit-upload-status" class="form-hint" aria-live="polite"></p>
+        </section>
+
+        <label class="edit-availability">लिस्टिंग की स्थिति
+          <select class="form-control" id="edit-availability"><option value="active">Active / उपलब्ध</option><option value="sold">बिक चुका / Sold</option><option value="rented">किराये पर दिया / Rented</option></select>
+        </label>
+        <div class="edit-form-actions"><button class="btn btn-primary" id="edit-save" type="submit">बदलाव Save करें</button><a href="my-listings.html" class="btn btn-outline">रद्द करें</a></div>
+      </form>
+    </section>
+  </main>
+  <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+  <script defer src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script type="module">
+    import { mountUI, toast } from './assets/js/ui.js?v=7';
+    import { initAuth, requireAuth } from './assets/js/auth.js?v=5';
+    import { initListings, fetchListing, updateOwnedListing } from './assets/js/listings.js?v=9';
+    import { compressImages } from './assets/js/image-compress.js?v=8';
+    import { VILLAGES, TOWN } from './data/villages.js?v=5';
+
+    const fb = await import('./assets/js/firebase-config.js?v=5');
+    if (!firebase.apps.length) firebase.initializeApp(fb.firebaseConfig);
+    const auth = firebase.auth(), db = firebase.firestore(), storage = firebase.storage();
+    mountUI('my-listings.html'); initAuth(auth, db); initListings(db, storage, auth);
+    const { user } = await requireAuth('login.html');
+    const id = new URLSearchParams(location.search).get('id');
+    const form = document.getElementById('edit-listing-form');
+    const errorBox = document.getElementById('edit-error');
+    const photoInput = document.getElementById('edit-photo-input');
+    const photoList = document.getElementById('edit-photo-list');
+    const fileList = [];
+    let listing = null, existingPhotos = [];
+    const $ = id => document.getElementById(id);
+    const locationSelect = $('edit-village');
+    [TOWN, { value: 'saharanpur', label: 'सहारनपुर' }, { value: 'karnal', label: 'करनाल' }, { value: 'rampur-maniharan', label: 'रामपुर-मानिहारन' }, { value: 'ambehta', label: 'अंबेहटा' }, { value: 'nanauta', label: 'नानौता' }, ...VILLAGES].forEach(location => {
+      if (!Array.from(locationSelect.options).some(option => option.value === location.value)) locationSelect.add(new Option(location.label, location.value));
+    });
+
+    if (!id) {
+      showError('लिस्टिंग का लिंक सही नहीं है।');
+    } else {
+      try {
+        listing = await fetchListing(id);
+        if (!listing || listing.ownerId !== user.uid) throw new Error('यह listing आपके खाते की नहीं है।');
+        fillForm(listing);
+        form.hidden = false;
+      } catch (error) { showError(error.message || 'लिस्टिंग नहीं खुल सकी।'); }
+    }
+
+    function fillForm(l) {
+      existingPhotos = Array.isArray(l.photos) ? [...l.photos] : [];
+      if (l.village && !Array.from(locationSelect.options).some(option => option.value === l.village)) locationSelect.add(new Option(l.village, l.village));
+      const values = {
+        'edit-title': l.title, 'edit-price': l.price, 'edit-phone': l.contactWhatsApp || l.phone,
+        'edit-size': l.areaSize, 'edit-rate': l.type === 'agri' ? l.ratePerBigha : l.ratePerGaj,
+        'edit-area-unit': l.areaUnit, 'edit-village': l.village, 'edit-locality': l.locality,
+        'edit-landmark': l.landmark, 'edit-description': l.description, 'edit-town-or-village': l.townOrVillage,
+        'edit-vehicle-type': l.vehicleType, 'edit-brand': l.brand, 'edit-model': l.model,
+        'edit-year': l.year, 'edit-km': l.kmDriven, 'edit-fuel': l.fuelType,
+        'edit-owner-number': l.ownerNumber, 'edit-lister': l.listerType || 'owner',
+        'edit-insurance-till': l.insuranceValidTill, 'edit-transmission': l.transmission,
+        'edit-registration-last4': l.registrationLast4, 'edit-cc': l.cc,
+        'edit-availability': l.availability || 'active',
+      };
+      Object.entries(values).forEach(([key, value]) => { if (value !== undefined && value !== null) $(key).value = value; });
+      $('edit-negotiable').checked = Boolean(l.negotiable);
+      $('edit-vehicle-fields').hidden = l.type !== 'vehicle';
+      $('edit-rate').closest('label').hidden = !['plot', 'agri'].includes(l.type);
+      $('edit-size').closest('label').hidden = !['plot', 'agri', 'house', 'shop'].includes(l.type);
+      $('edit-availability').querySelector('[value="rented"]').hidden = l.purpose !== 'rent';
+      syncVehicleFields(); renderPhotos();
+      if (l.type === 'plot') {
+        ['edit-size', 'edit-rate'].forEach(id => $(id).addEventListener('input', () => {
+          const size = Number($('edit-size').value), rate = Number($('edit-rate').value);
+          if (size > 0 && rate > 0) $('edit-price').value = Math.round(size * rate);
+        }));
+      }
+    }
+
+    $('edit-vehicle-type').addEventListener('change', syncVehicleFields);
+    function syncVehicleFields() {
+      const kind = $('edit-vehicle-type').value;
+      document.querySelectorAll('.edit-car-only').forEach(node => { node.hidden = kind !== 'car'; });
+      document.querySelectorAll('.edit-bike-only').forEach(node => { node.hidden = kind === 'car'; });
+      $('edit-fuel').querySelector('[value="diesel"]').hidden = kind !== 'car';
+      $('edit-fuel').querySelector('[value="cng"]').hidden = kind !== 'car';
+    }
+
+    photoInput.addEventListener('change', async () => {
+      const max = listing.type === 'vehicle' ? 6 : 5;
+      const remaining = max - existingPhotos.length - fileList.length;
+      if (remaining <= 0) { toast(`अधिकतम ${max} फ़ोटो रखें।`, 'error'); photoInput.value = ''; return; }
+      const chosen = Array.from(photoInput.files || []).filter(file => file.type.startsWith('image/')).slice(0, remaining);
+      try {
+        const images = await compressImages(chosen, { maxWidthOrHeight: 1200, initialQuality: 0.7, fileType: 'image/jpeg' });
+        fileList.push(...images.map(image => ({ file: image.compressed, preview: image.previewUrl })));
+        renderPhotos();
+      } catch { toast('फ़ोटो compress नहीं हो सकीं।', 'error'); }
+      photoInput.value = '';
+    });
+
+    function renderPhotos() {
+      photoList.replaceChildren();
+      const all = [...existingPhotos.map(url => ({ url, existing: true })), ...fileList.map(file => ({ url: file.preview, existing: false }))];
+      $('edit-photo-count').textContent = `${all.length}/${listing.type === 'vehicle' ? 6 : 5}`;
+      all.forEach((photo, index) => {
+        const tile = document.createElement('div'); tile.className = 'edit-photo-tile';
+        const img = document.createElement('img'); img.alt = index === 0 ? 'मुख्य फ़ोटो' : `फ़ोटो ${index + 1}`;
+        img.src = photo.url; tile.appendChild(img);
+        if (index === 0) { const cover = document.createElement('span'); cover.className = 'vehicle-cover-badge'; cover.textContent = 'मुख्य फ़ोटो'; tile.appendChild(cover); }
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'edit-photo-remove'; remove.setAttribute('aria-label', 'फ़ोटो हटाएँ'); remove.textContent = '×';
+        remove.addEventListener('click', () => { if (photo.existing) existingPhotos.splice(index, 1); else fileList.splice(index - existingPhotos.length, 1); renderPhotos(); });
+        tile.appendChild(remove); photoList.appendChild(tile);
+      });
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      errorBox.hidden = true;
+      const phone = $('edit-phone').value.replace(/\D/g, '');
+      const price = Number($('edit-price').value);
+      const year = Number($('edit-year').value);
+      const vehicle = listing.type === 'vehicle';
+      if (!/^[6-9]\d{9}$/.test(phone)) return showError('संपर्क नंबर 10 अंकों का सही होना चाहिए.', 'edit-phone');
+      if (listing.type !== 'career' && (!Number.isFinite(price) || price <= 0)) return showError('कीमत ₹ में शून्य से अधिक दर्ज करें।', 'edit-price');
+      if (!$('edit-title').value.trim()) return showError('शीर्षक दर्ज करें।', 'edit-title');
+      if (vehicle) {
+        const now = new Date().getFullYear();
+        if (!$('edit-brand').value.trim() || !$('edit-model').value.trim()) return showError('ब्रांड और मॉडल दर्ज करें।', 'edit-brand');
+        if (!Number.isInteger(year) || year < 1990 || year > now) return showError(`वर्ष 1990 से ${now} के बीच दर्ज करें।`, 'edit-year');
+        if (!Number.isFinite(Number($('edit-km').value)) || Number($('edit-km').value) < 0) return showError('चली दूरी सही दर्ज करें।', 'edit-km');
+        const fuels = $('edit-vehicle-type').value === 'car' ? ['petrol', 'diesel', 'cng', 'electric'] : ['petrol', 'electric'];
+        if (!fuels.includes($('edit-fuel').value)) return showError('ईंधन चुनें।', 'edit-fuel');
+        if (!['1st','2nd','3rd+'].includes($('edit-owner-number').value)) return showError('मालिक का क्रम चुनें।', 'edit-owner-number');
+        if ($('edit-registration-last4').value && !/^\d{4}$/.test($('edit-registration-last4').value)) return showError('रजिस्ट्रेशन के आख़िरी 4 अंक ही लिखें।', 'edit-registration-last4');
+      }
+      const save = $('edit-save'); save.disabled = true;
+      const progress = $('edit-upload-status');
+      const changes = {
+        title: $('edit-title').value.trim(), description: $('edit-description').value.trim(),
+        price, areaSize: $('edit-size').value ? Number($('edit-size').value) : null,
+        areaUnit: $('edit-area-unit').value.trim(), village: $('edit-village').value.trim(),
+        townOrVillage: $('edit-town-or-village').value,
+        locality: $('edit-locality').value.trim(), landmark: $('edit-landmark').value.trim(),
+        contactWhatsApp: phone,
+        availability: $('edit-availability').value,
+      };
+      if (listing.type === 'plot') changes.ratePerGaj = $('edit-rate').value ? Number($('edit-rate').value) : null;
+      if (listing.type === 'agri') changes.ratePerBigha = $('edit-rate').value ? Number($('edit-rate').value) : null;
+      if (vehicle) Object.assign(changes, {
+        category: 'vehicle', vehicleType: $('edit-vehicle-type').value,
+        brand: $('edit-brand').value.trim(), model: $('edit-model').value.trim(), year,
+        kmDriven: Number($('edit-km').value), fuelType: $('edit-fuel').value,
+        ownerNumber: $('edit-owner-number').value, listerType: $('edit-lister').value,
+        insuranceValidTill: $('edit-insurance-till').value,
+        transmission: $('edit-transmission').value, registrationLast4: $('edit-registration-last4').value.trim(),
+        bikeType: $('edit-vehicle-type').value === 'car' ? '' : $('edit-vehicle-type').value,
+        cc: $('edit-cc').value ? Number($('edit-cc').value) : null,
+        negotiable: $('edit-negotiable').checked, phone,
+      });
+      try {
+        await updateOwnedListing(id, changes, fileList.map(file => file.file), existingPhotos, percent => { progress.textContent = `फ़ोटो अपलोड हो रही हैं… ${percent}%`; });
+        fileList.forEach(file => URL.revokeObjectURL(file.preview));
+        location.href = `listing.html?id=${encodeURIComponent(id)}&updated=1`;
+      } catch (error) {
+        showError(error.message || 'बदलाव Save नहीं हो सके।'); save.disabled = false;
+      }
+    });
+
+    function showError(message, targetId) {
+      errorBox.textContent = message; errorBox.hidden = false;
+      if (targetId) { $(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); $(targetId)?.focus({ preventScroll: true }); }
+    }
+  </script>
+</body>
+</html>

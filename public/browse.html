@@ -3,8 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>प्रॉपर्टी देखें — गंगोह | गंगोह.in</title>
-  <meta name="description" content="गंगोह और आस-पास के गाँवों में प्लॉट, मकान, दुकान और खेती की ज़मीन — बिक्री और किराये पर। Saharanpur, UP।">
+  <title>Property for Sale &amp; Rent in Gangoh – Plots, Houses, Shops | प्रॉपर्टी देखें</title>
+  <meta name="description" content="Browse plots, houses, shops and farmland for sale and rent in Gangoh and nearby villages. | गंगोह में प्लॉट, मकान, दुकान और खेती की ज़मीन।">
+  <link rel="canonical" href="https://gangoh.in/browse">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gangoh.in">
+  <meta property="og:locale" content="hi_IN">
+  <meta property="og:title" content="Property for Sale &amp; Rent in Gangoh – Plots, Houses, Shops | प्रॉपर्टी देखें">
+  <meta property="og:description" content="Browse plots, houses, shops and farmland for sale and rent in Gangoh and nearby villages. | गंगोह में प्लॉट, मकान, दुकान और खेती की ज़मीन।">
+  <meta property="og:url" content="https://gangoh.in/browse">
+  <meta property="og:image" content="https://gangoh.in/assets/images/logo.png">
+  <meta name="twitter:card" content="summary">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -21,7 +30,7 @@
 
   <div class="page-header">
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
-      <h1>🏘️ प्रॉपर्टी देखें</h1>
+      <div><h1>🏘️ प्रॉपर्टी देखें</h1><p class="en-sub" style="color:#666;margin:0.15rem 0 0;font-size:0.95rem;font-weight:500;">Property for sale and rent in Gangoh, Saharanpur</p></div>
       <a href="post.html" class="btn btn-primary btn-sm">+ लिस्ट करें</a>
     </div>
   </div>
@@ -101,7 +110,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script type="module">
-    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js?v=7';
+    import { mountUI, updateNavUser, toast, listingCardHTML, lazyLoad, showEmpty, formatPrice } from './assets/js/ui.js?v=9';
     import { initAuth, onAuthReady } from './assets/js/auth.js?v=5';
     import { initListings, fetchListings } from './assets/js/listings.js?v=12';
     import { VILLAGES } from './data/villages.js?v=5';

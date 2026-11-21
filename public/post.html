@@ -3,12 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>लिस्ट करें — गंगोह.in</title>
-  <meta name="description" content="गंगोह और आस-पास अपनी प्रॉपर्टी, नौकरी, करियर गाइडेंस — मुफ़्त में लिस्ट करें।">
+  <title>Post Free Ad in Gangoh – Sell Property, Vehicle, Jobs | फ्री विज्ञापन डालें</title>
+  <meta name="description" content="Post a free ad in Gangoh – sell or rent property, vehicles, list jobs or your business. | गंगोह में मुफ़्त विज्ञापन डालें।">
+  <link rel="canonical" href="https://gangoh.in/post">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gangoh.in">
+  <meta property="og:locale" content="hi_IN">
+  <meta property="og:title" content="Post Free Ad in Gangoh – Sell Property, Vehicle, Jobs | फ्री विज्ञापन डालें">
+  <meta property="og:description" content="Post a free ad in Gangoh – sell or rent property, vehicles, list jobs or your business. | गंगोह में मुफ़्त विज्ञापन डालें।">
+  <meta property="og:url" content="https://gangoh.in/post">
+  <meta property="og:image" content="https://gangoh.in/assets/images/logo.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
 
-  <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
   <style>
     .field-section { display: none; }
     .field-section.active { display: block; }
@@ -39,7 +50,8 @@
     }
     .type-btn:hover { border-color: #5B35D5; }
     .type-btn.selected { border-color: #5B35D5; background: #EDE9FE; }
-    .type-btn .t-icon { font-size: 1.8rem; display: block; margin-bottom: 0.3rem; }
+    .type-btn .t-icon { display: block; margin: 0 auto 0.3rem; width: 64px; height: 64px; }
+    .type-btn .t-icon img { display: block; max-width: 100%; max-height: 100%; height: auto; object-fit: contain; }
     .type-btn .t-label { font-size: 0.82rem; font-weight: 700; color: #1A1A1A; }
     .purpose-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
     .purpose-tab {
@@ -71,38 +83,23 @@
   <div class="page-header">
     <div class="container">
       <h1>लिस्ट करें</h1>
+      <p class="en-sub" style="color:#666;margin:0.15rem 0 0;font-size:0.95rem;font-weight:500;">Post a free ad in Gangoh – property, vehicles, jobs</p>
       <p style="color:#888;margin:0;font-size:0.9rem;">मुफ़्त में — तुरंत live होगी।</p>
     </div>
   </div>
 
   <main class="container section">
     <div style="max-width:680px;margin:0 auto;">
+      <div id="login-gate" hidden style="text-align:center;padding:2rem 1rem;border:1.5px solid #E2E8F0;border-radius:0.75rem;margin-bottom:1.5rem;">
+        <h2 style="margin:0 0 0.5rem;">Login to post your free ad | मुफ़्त विज्ञापन डालने के लिए Login करें</h2>
+        <p style="color:#555;margin:0 0 1rem;">Sell or rent property, vehicles, list jobs or your business in Gangoh. Login with Google or mobile OTP.<br>Google या Mobile OTP से Login करके अपनी लिस्टिंग डालें।</p>
+        <a id="login-gate-btn" class="btn btn-primary" href="login.html">Login | लॉगिन</a>
+      </div>
       <form id="post-form" novalidate>
 
         <!-- STEP 1: Type -->
         <div class="section-divider">Step 1 — प्रकार चुनें</div>
-        <div class="type-selector">
-          <button type="button" class="type-btn" data-type="plot">
-            <span class="t-icon">🏞️</span>
-            <span class="t-label">प्लॉट</span>
-          </button>
-          <button type="button" class="type-btn" data-type="house">
-            <span class="t-icon">🏠</span>
-            <span class="t-label">मकान / फ्लैट</span>
-          </button>
-          <button type="button" class="type-btn" data-type="shop">
-            <span class="t-icon">🏪</span>
-            <span class="t-label">दुकान / ऑफिस</span>
-          </button>
-          <button type="button" class="type-btn" data-type="agri">
-            <span class="t-icon">🌾</span>
-            <span class="t-label">खेती की ज़मीन</span>
-          </button>
-          <button type="button" class="type-btn" data-type="career">
-            <span class="t-icon">🎓</span>
-            <span class="t-label">करियर & पढ़ाई</span>
-          </button>
-        </div>
+        <div class="type-selector" id="listing-category-options" aria-label="लिस्टिंग की श्रेणी"></div>
         <input type="hidden" id="f-type">
 
         <!-- STEP 2: Purpose (hidden for career) -->
@@ -119,7 +116,8 @@
         <div id="dynamic-fields" style="display:none;">
 
           <!-- STEP 3: Location -->
-          <div class="section-divider">Step 3 — लोकैशन</div>
+          <div class="section-divider" id="common-location-heading">Step 3 — लोकैशन</div>
+          <div id="common-location-fields">
           <div class="two-col">
             <div class="form-group">
               <label id="f-city-label">शहर / गाँव *</label>
@@ -163,6 +161,7 @@
               <input type="text" class="form-control" id="f-landmark" maxlength="100" placeholder="जैसे: स्कूल के पास, मंदिर के पास, अस्पताल के पास">
             </div>
           </div>
+          </div><!-- /common-location-fields; vehicle listings use the Gangoh default -->
 
           <!-- ═══════ PLOT fields ═══════ -->
           <div class="field-section" id="fields-plot">
@@ -401,9 +400,32 @@
             </div>
           </div>
 
+          <!-- Change 1 and 2: the shared config offers only car/bike; insurance, CC and bike subtype are omitted. -->
+          <div class="field-section vehicle-flow" id="fields-vehicle">
+            <div class="vehicle-details-grid vehicle-primary-fields">
+              <label>वाहन का प्रकार *<select class="form-control" id="vehicle-type" required><option value="">प्रकार चुनें</option></select><span class="vehicle-field-error" id="vehicle-type-error"></span></label>
+              <label>ब्रांड *<select class="form-control" id="vehicle-brand" required disabled><option value="">पहले प्रकार चुनें</option></select><input class="form-control vehicle-other-brand" id="vehicle-brand-other" maxlength="80" placeholder="ब्रांड का नाम लिखें" hidden><span class="vehicle-field-error" id="vehicle-brand-error"></span></label>
+              <label>निर्माण वर्ष *<select class="form-control" id="vehicle-year" required><option value="">वर्ष चुनें</option></select><span class="vehicle-field-error" id="vehicle-year-error"></span></label>
+              <label>ईंधन *<select class="form-control" id="vehicle-fuel" required disabled><option value="">पहले प्रकार चुनें</option></select><span class="vehicle-field-error" id="vehicle-fuel-error"></span></label>
+              <label>चली दूरी (किमी) *<input class="form-control" id="vehicle-km" type="number" min="0" max="10000000" step="1" inputmode="numeric" placeholder="जैसे 42000" required><span class="vehicle-field-error" id="vehicle-km-error"></span></label>
+              <label>मालिक *<select class="form-control" id="vehicle-owner-number" required><option value="">मालिक चुनें</option><option value="1st">1st मालिक</option><option value="2nd">2nd मालिक</option><option value="3rd+">3rd+ मालिक</option></select><span class="vehicle-field-error" id="vehicle-owner-error"></span></label>
+              <label class="vehicle-car-only">ट्रांसमिशन<select class="form-control" id="vehicle-transmission"><option value="">चुनें</option><option value="manual">Manual</option><option value="automatic">Automatic</option></select></label>
+              <label class="vehicle-car-only">रजिस्ट्रेशन नंबर के आख़िरी 4 अंक<input class="form-control" id="vehicle-registration-last4" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="वैकल्पिक"></label>
+            </div>
+            <section class="vehicle-photo-field"><h3>वाहन की फोटो * <small>कम से कम 2, अधिकतम 6</small></h3><div id="vehicle-photos-slot"></div><span class="vehicle-field-error" id="vehicle-photo-error"></span></section>
+            <h3 class="vehicle-extras-title">बाकी जानकारी</h3>
+            <div class="vehicle-details-grid vehicle-extra-fields">
+              <label>मॉडल का नाम *<input class="form-control" id="vehicle-model" maxlength="80" placeholder="जैसे Swift VXI" required><span class="vehicle-field-error" id="vehicle-model-error"></span></label>
+              <label>कीमत (₹) *<input class="form-control" id="vehicle-price" type="number" min="1" step="1" inputmode="numeric" placeholder="जैसे 425000" required><small class="form-hint" id="vehicle-price-preview" aria-live="polite"></small><span class="vehicle-field-error" id="vehicle-price-error"></span></label>
+              <div id="vehicle-contact-slot"></div>
+              <label>विक्रेता<select class="form-control" id="vehicle-lister"><option value="owner" selected>मालिक</option><option value="dealer">डीलर</option></select></label>
+              <label class="vehicle-negotiable-field"><input id="vehicle-negotiable" type="checkbox"> मोलभाव संभव</label>
+            </div>
+          </div>
+
           <!-- ═══════ DESCRIPTION ═══════ -->
           <div class="section-divider" id="step-title-label">Step 5 — विवरण</div>
-          <div class="form-group">
+          <div class="form-group" id="common-description-section">
             <label>विवरण</label>
             <textarea class="form-control" id="f-description" rows="4" maxlength="1000"
               placeholder="अतिरिक्त जानकारी — पानी, बिजली, सड़क, आस-पास की सुविधाएँ..."></textarea>
@@ -411,37 +433,40 @@
           </div>
 
           <!-- ═══════ PHOTOS ═══════ -->
-          <div class="section-divider">Step 6 — फ़ोटो</div>
-          <div class="form-group">
+          <div class="section-divider" id="common-photo-heading">Step 6 — फ़ोटो</div>
+          <div class="form-group" id="common-photo-section">
             <div class="upload-area" id="upload-area" role="button" tabindex="0">
               <span class="upload-icon">📷</span>
-              <p style="margin:0;font-weight:600;">फ़ोटो जोड़ने के लिए tap करें</p>
-              <p class="form-hint" style="margin:0.25rem 0 0;">JPG/PNG • अपने आप compress होगी • अधिकतम 5 फ़ोटो</p>
+              <p id="upload-prompt" style="margin:0;font-weight:600;">फ़ोटो जोड़ने के लिए tap करें</p>
+              <p class="form-hint" id="photo-limit-hint" style="margin:0.25rem 0 0;">JPG/PNG • अपने आप compress होगी • अधिकतम 5 फ़ोटो</p>
             </div>
             <input type="file" id="photo-input" accept="image/*" multiple style="display:none;">
+            <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none;">
+            <button type="button" class="btn btn-outline vehicle-camera-button" id="camera-button" hidden>📷 कैमरे से फ़ोटो लें</button>
             <div class="img-preview-grid" id="img-previews"></div>
             <p id="photo-status" style="font-size:0.82rem;color:#888;margin-top:0.4rem;"></p>
           </div>
 
           <!-- ═══════ CONTACT ═══════ -->
-          <div class="section-divider">Step 7 — संपर्क</div>
-          <div class="form-group">
-            <label>WhatsApp नंबर *</label>
+          <div class="section-divider" id="common-contact-heading">Step 7 — संपर्क</div>
+          <div class="form-group" id="common-contact-section">
+            <label id="contact-phone-label">WhatsApp नंबर *</label>
             <div class="phone-input-wrap">
               <div class="country-code">🇮🇳 +91</div>
               <input type="tel" class="form-control" id="f-whatsapp" maxlength="10"
                 placeholder="10 अंकों का नंबर" inputmode="numeric" required>
             </div>
+            <span class="vehicle-field-error" id="vehicle-phone-error"></span>
             <p class="form-hint">खरीदार / किरायेदार सीधे यहाँ संपर्क करेंगे।</p>
           </div>
 
           <p id="form-error" class="form-error" style="display:none;"></p>
 
           <button type="submit" class="btn btn-primary btn-full" id="submit-btn" style="font-size:1.1rem;padding:1rem;">
-            📤 लिस्टिंग Submit करें
+            📤 लिस्टिंग जमा करें
           </button>
-          <p style="text-align:center;color:#888;font-size:0.85rem;margin-top:0.75rem;">
-            Submit करने पर listing तुरंत live हो जाएगी!
+          <p id="submit-review-hint" style="text-align:center;color:#888;font-size:0.85rem;margin-top:0.75rem;">
+            जमा करने पर लिस्टिंग प्रकाशित हो जाएगी।
           </p>
 
         </div><!-- /dynamic-fields -->
@@ -450,10 +475,11 @@
       <!-- Success -->
       <div id="post-success" style="display:none;text-align:center;padding:2rem;">
         <div style="font-size:3.5rem;margin-bottom:1rem;">🎉</div>
-        <h2>लिस्टिंग Submit हो गई!</h2>
+        <h2>लिस्टिंग जमा हो गई!</h2>
         <p style="color:#666;">आपकी listing तुरंत live हो गई!</p>
         <div style="display:flex;gap:1rem;justify-content:center;margin-top:1.5rem;flex-wrap:wrap;">
           <a href="index.html" class="btn btn-outline">🏠 Home</a>
+          <a href="my-listings.html" class="btn btn-outline">मेरी लिस्टिंग देखें</a>
           <button class="btn btn-primary" id="post-another-btn">+ एक और लिस्ट करें</button>
         </div>
       </div>
@@ -468,10 +494,12 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=5';
-    import { initAuth, requireAuth } from './assets/js/auth.js?v=5';
-    import { initListings, createListing, fetchListing, updateOwnListing } from './assets/js/listings.js?v=5';
-    import { compressImages } from './assets/js/image-compress.js?v=5';
+    import { mountUI, toast, formatPrice } from './assets/js/ui.js?v=7';
+    import { initAuth, requireAuth, onAuthReady } from './assets/js/auth.js?v=5';
+    import { initListings, createListing, fetchListing, updateOwnListing } from './assets/js/listings.js?v=11';
+    import { compressImages } from './assets/js/image-compress.js?v=7';
+    import { VEHICLE_CONFIG, vehicleYears } from './assets/js/vehicle-config.js?v=3';
+    import { CATEGORIES, LISTING_CATEGORY_IDS } from './assets/js/categories.js?v=2';
     import { VILLAGES } from './data/villages.js?v=5';
 
     let fbConfig;
@@ -492,14 +520,35 @@
     initAuth(auth, db);
     initListings(db, storage, auth);
 
-    const { user } = await requireAuth('login.html');
+    // Signed-out visitors (and search crawlers) stay on this page and see a login prompt
+    // instead of being redirected to login.html, so /post keeps its own title in search.
+    const { user } = await new Promise(resolve => {
+      onAuthReady((u, role) => {
+        if (u) return resolve({ user: u, role });
+        document.getElementById('post-form').hidden = true;
+        const gate = document.getElementById('login-gate');
+        gate.hidden = false;
+        document.getElementById('login-gate-btn').href = `login.html?next=${encodeURIComponent(location.href)}`;
+      });
+    });
 
-    if (user.phoneNumber) {
-      document.getElementById('f-whatsapp').value = user.phoneNumber.replace('+91', '');
-    }
+    // Use an existing account phone when present; profile phone fields take priority over auth phone.
+    const phoneInput = document.getElementById('f-whatsapp');
+    const phoneDigits = value => String(value || '').replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
+    phoneInput.value = phoneDigits(user.phoneNumber);
+    try {
+      const profile = (await db.collection('users').doc(user.uid).get()).data() || {};
+      const profilePhone = phoneDigits(profile.phone || profile.phoneNumber || profile.contactWhatsApp || profile.mobile);
+      if (/^[6-9]\d{9}$/.test(profilePhone)) phoneInput.value = profilePhone;
+    } catch (err) { console.info('Profile phone is unavailable; using the account phone if set.'); }
 
     // ── Edit mode ──────────────────────────────────────────
     const editId = new URLSearchParams(window.location.search).get('edit');
+    // Old ?edit= links now open the direct edit page, which applies changes immediately.
+    if (editId) {
+      window.location.replace(`edit-listing.html?id=${encodeURIComponent(editId)}`);
+      await new Promise(() => {});
+    }
     let existingPhotos = [];
     let editingListing = null;
 
@@ -512,7 +561,151 @@
     });
 
     // ── Type selector ─────────────────────────────────────
-    let selectedType = '', selectedPurpose = '';
+    let selectedType = '', selectedPurpose = '', selectedVehicleKind = '';
+    const vehicleTypeSelect = document.getElementById('vehicle-type');
+    const vehicleBrandSelect = document.getElementById('vehicle-brand');
+    const vehicleFuelSelect = document.getElementById('vehicle-fuel');
+    const vehicleBrandInput = document.getElementById('vehicle-brand-other');
+    const vehicleYearSelect = document.getElementById('vehicle-year');
+    const sharedDescription = document.getElementById('common-description-section');
+    const sharedPhotos = document.getElementById('common-photo-section');
+    const sharedContact = document.getElementById('common-contact-section');
+    const sharedAnchors = [sharedPhotos, sharedContact].map(node => { const marker = document.createComment(`restore ${node.id}`); node.before(marker); return marker; });
+    const addOptions = (select, entries, firstLabel) => {
+      select.replaceChildren(new Option(firstLabel, ''));
+      entries.forEach(entry => select.add(new Option(entry.label ?? entry[1], entry.value ?? entry[0])));
+    };
+    addOptions(vehicleTypeSelect, VEHICLE_CONFIG.types, 'प्रकार चुनें');
+    vehicleYears().filter(year => year >= 1990).forEach(year => vehicleYearSelect.add(new Option(String(year), String(year))));
+
+    const categoryOptions = document.getElementById('listing-category-options');
+    categoryOptions.innerHTML = LISTING_CATEGORY_IDS.map(id => {
+      const category = CATEGORIES[id];
+      const icon = id === 'car' ? '🚗 ' : id === 'bike' ? '🏍️ ' : '';
+      return `<button type="button" class="type-btn" data-type="${category.type}" data-category-id="${category.id}"${category.vehicleType ? ` data-vehicle-kind="${category.vehicleType}"` : ''}><span class="t-icon"><img src="/assets/images/categories/${category.icon}" alt="" loading="lazy"></span><span class="t-label">${icon}${category.formLabel || category.label}</span></button>`;
+    }).join('');
+
+    function populateTypeFields(type, reset = true) {
+      // Change 1: rebuild brand and fuel choices from the shared config and clear dependent values on type changes.
+      const brandLabel = type ? 'ब्रांड चुनें' : 'पहले प्रकार चुनें';
+      vehicleBrandSelect.replaceChildren(new Option(brandLabel, ''));
+      vehicleBrandSelect.disabled = !type;
+      (VEHICLE_CONFIG.brands[type] || []).forEach(brand => vehicleBrandSelect.add(new Option(brand, brand === 'अन्य' ? '__other__' : brand)));
+      vehicleFuelSelect.replaceChildren(new Option(type ? 'ईंधन चुनें' : 'पहले प्रकार चुनें', ''));
+      vehicleFuelSelect.disabled = !type;
+      (VEHICLE_CONFIG.fuels[type] || []).forEach(([value, label]) => vehicleFuelSelect.add(new Option(label, value)));
+      document.querySelectorAll('.vehicle-car-only').forEach(node => { node.hidden = type !== 'car'; });
+      document.querySelectorAll('.vehicle-bike-only').forEach(node => { node.hidden = type === 'car' || !type; });
+      if (reset) {
+        vehicleBrandSelect.value = ''; vehicleFuelSelect.value = ''; vehicleBrandInput.value = '';
+        vehicleBrandInput.hidden = true; vehicleBrandInput.required = false;
+      }
+    }
+
+    function limitVehicleTypesForCategory() {
+      const allowed = selectedVehicleKind === 'car' ? ['car'] : selectedVehicleKind === 'bike' ? ['bike'] : ['car', 'bike'];
+      [...vehicleTypeSelect.options].forEach(option => { if (option.value) option.hidden = !allowed.includes(option.value); });
+      if (!allowed.includes(vehicleTypeSelect.value)) vehicleTypeSelect.value = selectedVehicleKind || '';
+    }
+
+    function moveVehicleControls(active) {
+      [[sharedPhotos, document.getElementById('vehicle-photos-slot'), sharedAnchors[0]], [sharedContact, document.getElementById('vehicle-contact-slot'), sharedAnchors[1]]]
+        .forEach(([node, slot, anchor]) => active ? slot.appendChild(node) : anchor.after(node));
+      sharedDescription.hidden = active;
+      document.getElementById('common-location-fields').hidden = active;
+      document.getElementById('common-location-heading').hidden = active;
+      document.getElementById('step-title-label').hidden = active;
+      document.getElementById('common-photo-heading').hidden = active;
+      document.getElementById('common-contact-heading').hidden = active;
+      document.getElementById('camera-button').hidden = !active;
+      document.getElementById('contact-phone-label').textContent = active ? 'फोन नंबर *' : 'WhatsApp नंबर *';
+      document.getElementById('photo-limit-hint').textContent = active
+        ? 'कम से कम 2 और अधिकतम 6 फ़ोटो • अपलोड से पहले फ़ोटो का आकार घटेगा'
+        : 'JPG/PNG • अपने आप compress होगी • अधिकतम 5 फ़ोटो';
+      document.getElementById('upload-prompt').textContent = active ? 'फ़ोटो चुनें या कैमरे से लें' : 'फ़ोटो जोड़ने के लिए tap करें';
+      const previewGrid = document.getElementById('img-previews');
+      previewGrid.querySelectorAll('.vehicle-cover-badge').forEach(badge => badge.remove());
+      if (active && previewGrid.firstElementChild) previewGrid.firstElementChild.insertAdjacentHTML('afterbegin', '<span class="vehicle-cover-badge">मुख्य फ़ोटो</span>');
+    }
+
+    vehicleTypeSelect.addEventListener('change', () => {
+      populateTypeFields(vehicleTypeSelect.value);
+      clearVehicleErrors();
+    });
+    vehicleBrandSelect.addEventListener('change', () => {
+      const isOther = vehicleBrandSelect.value === '__other__';
+      vehicleBrandInput.hidden = !isOther;
+      vehicleBrandInput.required = isOther;
+      if (!isOther) vehicleBrandInput.value = '';
+      clearVehicleErrors('brand');
+    });
+    [['vehicle-year','year'],['vehicle-fuel','fuel'],['vehicle-km','km'],['vehicle-owner-number','owner'],['vehicle-model','model'],['vehicle-price','price'],['f-whatsapp','phone']].forEach(([id,key]) => {
+      document.getElementById(id).addEventListener('input', () => clearVehicleErrors(key));
+      document.getElementById(id).addEventListener('change', () => clearVehicleErrors(key));
+    });
+    vehicleBrandInput.addEventListener('input', () => clearVehicleErrors('brand'));
+    document.getElementById('vehicle-price').addEventListener('input', event => {
+      const amount = Number(event.target.value);
+      document.getElementById('vehicle-price-preview').textContent = amount > 0 ? `कीमत: ${formatPrice(amount)}` : '';
+    });
+
+    function setVehicleError(field, message) {
+      const error = document.getElementById(`vehicle-${field}-error`);
+      if (error) error.textContent = message;
+      const controlId = { phone: 'f-whatsapp', photo: 'upload-area', brand: vehicleBrandSelect.value === '__other__' ? 'vehicle-brand-other' : 'vehicle-brand' }[field] || `vehicle-${field === 'owner' ? 'owner-number' : field}`;
+      const control = document.getElementById(controlId);
+      if (control) control.setAttribute('aria-invalid', String(Boolean(message)));
+    }
+    function clearVehicleErrors(field) {
+      const fields = field ? [field] : ['type','brand','year','fuel','km','owner','photo','model','price','phone'];
+      fields.forEach(name => setVehicleError(name, ''));
+    }
+    function validateVehicleFields(phone) {
+      clearVehicleErrors();
+      const type = vehicleTypeSelect.value;
+      const brand = vehicleBrandSelect.value === '__other__' ? vehicleBrandInput.value.trim() : vehicleBrandSelect.value;
+      const year = Number(vehicleYearSelect.value);
+      const km = Number(document.getElementById('vehicle-km').value);
+      const model = document.getElementById('vehicle-model').value.trim();
+      const price = Number(document.getElementById('vehicle-price').value);
+      const ownerNumber = document.getElementById('vehicle-owner-number').value;
+      const now = new Date().getFullYear();
+      if (!VEHICLE_CONFIG.types.some(item => item.value === type)) setVehicleError('type', 'वाहन का प्रकार चुनें।');
+      if (!brand || brand.length > 80) setVehicleError('brand', 'ब्रांड चुनें या नाम लिखें।');
+      if (!Number.isInteger(year) || year < 1990 || year > now) setVehicleError('year', `वर्ष 1990 से ${now} के बीच चुनें।`);
+      if (!VEHICLE_CONFIG.fuels[type]?.some(([value]) => value === vehicleFuelSelect.value)) setVehicleError('fuel', 'ईंधन चुनें।');
+      if (!Number.isInteger(km) || km < 0 || km > 10000000) setVehicleError('km', 'चली दूरी शून्य या उससे अधिक दर्ज करें।');
+      const photoCount = compressedFiles.length || (editId ? existingPhotos.length : 0);
+      if (photoCount < 2) setVehicleError('photo', 'कम से कम 2 फोटो ज़रूरी हैं।');
+      else if (photoCount > 6) setVehicleError('photo', 'अधिकतम 6 फोटो जोड़ें।');
+      if (!model || model.length > 80) setVehicleError('model', 'मॉडल का नाम दर्ज करें।');
+      if (!Number.isFinite(price) || price <= 0) setVehicleError('price', 'कीमत ₹ में शून्य से अधिक दर्ज करें।');
+      if (!['1st', '2nd', '3rd+'].includes(ownerNumber)) setVehicleError('owner', 'मालिक का क्रम चुनें।');
+      if (!/^[6-9][0-9]{9}$/.test(phone)) setVehicleError('phone', '10 अंकों का सही फोन नंबर दर्ज करें।');
+      const firstError = document.querySelector('#fields-vehicle .vehicle-field-error:not(:empty)');
+      if (firstError) {
+        const field = firstError.id.replace('vehicle-', '').replace('-error', '');
+        const target = document.getElementById(field === 'brand' ? (vehicleBrandSelect.value === '__other__' ? 'vehicle-brand-other' : 'vehicle-brand') : field === 'photo' ? 'upload-area' : field === 'phone' ? 'f-whatsapp' : field === 'owner' ? 'vehicle-owner-number' : `vehicle-${field}`);
+        target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        target?.focus?.({ preventScroll: true });
+        return null;
+      }
+      const registrationLast4 = document.getElementById('vehicle-registration-last4').value.trim();
+      if (type === 'car' && registrationLast4 && !/^\d{4}$/.test(registrationLast4)) {
+        document.getElementById('vehicle-registration-last4').setAttribute('aria-invalid', 'true');
+        document.getElementById('vehicle-registration-last4').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.getElementById('vehicle-registration-last4').focus({ preventScroll: true });
+        return null;
+      }
+      // Change 2: do not return or persist insurance data for new vehicle listings.
+      return {
+        type, brand, year, kmDriven: km, model, price, fuelType: vehicleFuelSelect.value,
+        ownerNumber,
+        transmission: type === 'car' ? document.getElementById('vehicle-transmission').value : '',
+        registrationLast4: type === 'car' ? registrationLast4 : '',
+        negotiable: document.getElementById('vehicle-negotiable').checked,
+      };
+    }
 
     const CITY_OPTIONS_DEFAULT = `
       <option value="">— चुनें —</option>
@@ -532,15 +725,28 @@
         document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedType = btn.dataset.type;
+        selectedVehicleKind = btn.dataset.vehicleKind || '';
         document.getElementById('f-type').value = selectedType;
 
         // Plot gets its own city list (no generic "गाँव" — plots aren't listed in villages)
         const isPlot = selectedType === 'plot';
+        const isVehicle = selectedType === 'vehicle';
+        if (isVehicle) {
+          limitVehicleTypesForCategory();
+          if (!editId && selectedVehicleKind) vehicleTypeSelect.value = selectedVehicleKind;
+          populateTypeFields(vehicleTypeSelect.value || selectedVehicleKind, false);
+          selectedPurpose = 'sale';
+          document.getElementById('f-purpose').value = 'sale';
+          document.querySelector('.purpose-tab[data-purpose="sale"]').classList.add('selected');
+          document.querySelector('.purpose-tab[data-purpose="rent"]').classList.remove('selected');
+        }
         document.getElementById('f-townOrVillage').innerHTML = isPlot ? CITY_OPTIONS_PLOT : CITY_OPTIONS_DEFAULT;
         document.getElementById('f-city-label').textContent = isPlot ? 'नगर *' : 'शहर / गाँव *';
         document.getElementById('village-group').style.display = 'none';
         document.getElementById('town-road-group').style.display = 'none';
 
+        moveVehicleControls(isVehicle);
+        document.getElementById('submit-review-hint').textContent = 'जमा करने पर लिस्टिंग प्रकाशित हो जाएगी।';
         updateDynamicFields();
       });
     });
@@ -554,6 +760,12 @@
         updateDynamicFields();
       });
     });
+
+    if (!editId) {
+      const requestedType = new URLSearchParams(location.search).get('type');
+      const category = CATEGORIES[requestedType] || (requestedType === 'vehicle' ? CATEGORIES.vehicle : null);
+      if (category) document.querySelector(`.type-btn[data-category-id="${CSS.escape(category.id)}"]`)?.click();
+    }
 
     const CAREER_DOMAINS = {
       '10th':        ['Science', 'Commerce', 'Arts', 'ITI', 'Polytechnic', 'Diploma'],
@@ -573,10 +785,12 @@
 
     function updateDynamicFields() {
       const isCareer = selectedType === 'career';
-      if (!selectedType || (!isCareer && !selectedPurpose)) return;
+      const isVehicle = selectedType === 'vehicle';
+      if (!selectedType || (!isCareer && !isVehicle && !selectedPurpose)) return;
+      moveVehicleControls(isVehicle);
 
       document.getElementById('dynamic-fields').style.display = 'block';
-      document.getElementById('purpose-section').style.display = isCareer ? 'none' : 'block';
+      document.getElementById('purpose-section').style.display = (isCareer || isVehicle) ? 'none' : 'block';
 
       // Hide all field sections
       document.querySelectorAll('.field-section').forEach(s => s.classList.remove('active'));
@@ -585,6 +799,13 @@
         document.getElementById('fields-career').classList.add('active');
         document.getElementById('step-title-label').textContent = 'Step 4 — विवरण';
         document.getElementById('f-purpose').value = 'career';
+        window.scrollTo({ top: document.getElementById('dynamic-fields').offsetTop - 80, behavior: 'smooth' });
+        return;
+      }
+
+      if (isVehicle) {
+        document.getElementById('fields-vehicle').classList.add('active');
+        document.getElementById('step-title-label').textContent = 'गाड़ी का विवरण';
         window.scrollTo({ top: document.getElementById('dynamic-fields').offsetTop - 80, behavior: 'smooth' });
         return;
       }
@@ -674,7 +895,7 @@
     const photoInput  = document.getElementById('photo-input');
     const previewGrid = document.getElementById('img-previews');
     const photoStatus = document.getElementById('photo-status');
-    const MAX_PHOTOS  = 5;
+    const MAX_PHOTOS  = () => selectedType === 'vehicle' ? 6 : 5;
 
     uploadArea.addEventListener('click', () => photoInput.click());
     uploadArea.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') photoInput.click(); });
@@ -685,32 +906,41 @@
       handleFiles(Array.from(e.dataTransfer.files));
     });
     photoInput.addEventListener('change', () => handleFiles(Array.from(photoInput.files)));
+    document.getElementById('camera-button').addEventListener('click', () => document.getElementById('camera-input').click());
+    document.getElementById('camera-input').addEventListener('change', event => handleFiles(Array.from(event.target.files)));
 
     async function handleFiles(files) {
       const imageFiles = files.filter(f => f.type.startsWith('image/'));
-      const remaining = MAX_PHOTOS - compressedFiles.length;
-      if (remaining <= 0) { toast(`अधिकतम ${MAX_PHOTOS} फ़ोटो।`, 'error'); return; }
+      const remaining = MAX_PHOTOS() - compressedFiles.length;
+      if (remaining <= 0) { toast(`अधिकतम ${MAX_PHOTOS()} फ़ोटो।`, 'error'); return; }
+      if (selectedType === 'vehicle' && imageFiles.length > remaining) toast('कार और बाइक की लिस्टिंग में अधिकतम 6 फ़ोटो जोड़ें।', 'error');
       const toProcess = imageFiles.slice(0, remaining);
-      photoStatus.textContent = 'Compressing...';
+      photoStatus.textContent = 'फ़ोटो तैयार हो रही हैं…';
       try {
-        const results = await compressImages(toProcess);
+        const compressionOptions = selectedType === 'vehicle' ? { maxWidthOrHeight: 1200, initialQuality: 0.75, fileType: 'image/jpeg' } : undefined;
+        const results = await compressImages(toProcess, compressionOptions);
         results.forEach(r => {
           compressedFiles.push(r.compressed);
           addPreview(r.previewUrl, compressedFiles.length - 1);
         });
-        photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS} फ़ोटो तैयार`;
-      } catch { toast('फ़ोटो process नहीं हो सकी।', 'error'); }
+        photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS()} फ़ोटो तैयार`;
+      } catch { toast('फ़ोटो तैयार नहीं हो सकी।', 'error'); }
       photoInput.value = '';
+      document.getElementById('camera-input').value = '';
+      if (selectedType === 'vehicle') document.getElementById('vehicle-photo-error').textContent = '';
     }
 
     function addPreview(url, idx) {
       const item = document.createElement('div');
       item.className = 'img-preview-item'; item.dataset.idx = idx;
-      item.innerHTML = `<img src="${url}" alt="preview"><button class="remove-img" aria-label="हटाएं">✕</button>`;
+      item.innerHTML = `${idx === 0 && selectedType === 'vehicle' ? '<span class="vehicle-cover-badge">मुख्य फ़ोटो</span>' : ''}<img src="${url}" alt="फ़ोटो का पूर्वावलोकन"><button class="remove-img" aria-label="फ़ोटो हटाएं">✕</button>`;
       item.querySelector('.remove-img').addEventListener('click', () => {
-        compressedFiles.splice(idx, 1); item.remove();
-        document.querySelectorAll('.img-preview-item').forEach((el,i) => el.dataset.idx = i);
-        photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS} फ़ोटो तैयार`;
+        compressedFiles.splice(Number(item.dataset.idx), 1); item.remove();
+        document.querySelectorAll('.img-preview-item').forEach((el,i) => {
+          el.dataset.idx = i; el.querySelector('.vehicle-cover-badge')?.remove();
+          if (i === 0 && selectedType === 'vehicle') el.insertAdjacentHTML('afterbegin', '<span class="vehicle-cover-badge">मुख्य फ़ोटो</span>');
+        });
+        photoStatus.textContent = `${compressedFiles.length}/${MAX_PHOTOS()} फ़ोटो तैयार`;
       });
       previewGrid.appendChild(item);
     }
@@ -730,6 +960,7 @@
         case 'house-rent':  return `${rooms}मकान किराये पर, ${loc}`.trim();
         case 'shop-sale':   return `दुकान / ऑफिस${areaSize ? ` (${areaSize} ${areaUnit})` : ''}, ${loc}`.trim();
         case 'shop-rent':   return `दुकान किराये पर, ${loc}`.trim();
+        case 'vehicle-sale': return `${extraFields.year} ${extraFields.brand} ${extraFields.model}`.trim();
         case 'career-career': {
           const g = CAREER_GUIDANCE_LABELS[extraFields.guidanceFor] || '';
           const d = extraFields.domain ? ` ${extraFields.domain}` : '';
@@ -749,8 +980,9 @@
 
       const type    = document.getElementById('f-type').value;
       const purpose = document.getElementById('f-purpose').value;
+      const isVehicle = type === 'vehicle';
       const cityField      = document.getElementById('f-townOrVillage');
-      const townOrVillage  = cityField.value;
+      const townOrVillage  = isVehicle ? 'town' : cityField.value;
       const selectedCity   = cityField.options[cityField.selectedIndex]?.dataset.city || '';
       const cityLabel      = cityField.options[cityField.selectedIndex]?.textContent || '';
       const village        = document.getElementById('f-village').value;
@@ -761,16 +993,35 @@
       const whatsapp       = document.getElementById('f-whatsapp').value.trim();
 
       const isCareer = type === 'career';
-      if (!type || (!isCareer && !purpose)) { showErr('प्रकार और उद्देश्य चुनें।'); return; }
-      if (!townOrVillage)    { showErr('शहर/गाँव चुनें।'); return; }
-      if (townOrVillage === 'village' && !village) { showErr('गाँव चुनें।'); return; }
-      if (!/^[6-9][0-9]{9}$/.test(whatsapp)) { showErr('सही WhatsApp नंबर दर्ज करें।'); return; }
+      if (!type || (!isCareer && !isVehicle && !purpose)) { showErr('प्रकार और उद्देश्य चुनें।'); return; }
+      if (!isVehicle && !townOrVillage)    { showErr('शहर/गाँव चुनें।'); return; }
+      if (!isVehicle && townOrVillage === 'village' && !village) { showErr('गाँव चुनें।'); return; }
+      let vehicleFields = null;
+      if (isVehicle) {
+        vehicleFields = validateVehicleFields(whatsapp);
+        if (!vehicleFields) return;
+      } else if (!/^[6-9][0-9]{9}$/.test(whatsapp)) { showErr('सही WhatsApp नंबर दर्ज करें।'); return; }
 
       // Collect type-specific fields
       let price = 0, areaSize = null, areaUnit = '', extraFields = {};
       const key = `${type}-${purpose}`;
 
-      if (isCareer) {
+      if (isVehicle) {
+        price = vehicleFields.price;
+        extraFields.category = 'vehicle';
+        extraFields.vehicleType = vehicleFields.type;
+        extraFields.brand = vehicleFields.brand;
+        extraFields.model = vehicleFields.model;
+        extraFields.year = vehicleFields.year;
+        extraFields.fuelType = vehicleFields.fuelType;
+        extraFields.kmDriven = vehicleFields.kmDriven;
+        extraFields.ownerNumber = vehicleFields.ownerNumber;
+        extraFields.transmission = vehicleFields.transmission;
+        extraFields.registrationLast4 = vehicleFields.registrationLast4;
+        extraFields.negotiable = vehicleFields.negotiable;
+        extraFields.listerType = document.getElementById('vehicle-lister').value;
+        extraFields.phone = whatsapp;
+      } else if (isCareer) {
         const guidanceFor = document.getElementById('career-guidance-for').value;
         const domain = document.getElementById('career-domain').value;
         if (!guidanceFor) { showErr('किसके बाद मार्गदर्शन — चुनें।'); return; }
@@ -819,11 +1070,11 @@
         extraFields.pagdi = Number(document.getElementById('shop-pagdi').value) || null;
       }
 
-      if (!isCareer && (!Number.isFinite(price) || price < 100 || price > 1e13)) { showErr('कीमत / किराया ₹100 से ₹10,000,000,000,000 के बीच दर्ज करें।'); return; }
+      if (!isCareer && (!Number.isFinite(price) || (isVehicle ? price <= 0 : price < 100) || price > 1e13)) { showErr(isVehicle ? 'गाड़ी की कीमत ₹ में शून्य से अधिक दर्ज करें।' : 'कीमत / किराया ₹100 से ₹10,000,000,000,000 के बीच दर्ज करें।'); return; }
 
       const submitBtn = document.getElementById('submit-btn');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Uploading... 0%';
+      submitBtn.textContent = isVehicle ? 'फ़ोटो अपलोड हो रही हैं… 0%' : 'फ़ोटो अपलोड हो रही हैं… 0%';
 
       try {
         const villageValue = townOrVillage === 'town' ? (selectedCity || 'gangoh') : village;
@@ -832,14 +1083,15 @@
         const formData = {
           type, purpose, title, townOrVillage,
           village: villageValue,
-          locality, landmark, price, areaSize, areaUnit,
-          description, contactWhatsApp: whatsapp,
+          locality: isVehicle ? '' : locality, landmark: isVehicle ? '' : landmark, price, areaSize, areaUnit,
+          description: isVehicle ? '' : description, contactWhatsApp: whatsapp,
           ...extraFields
         };
+        if (isVehicle) formData.purpose = 'sale';
 
         if (editId) {
           await updateOwnListing(editId, formData, compressedFiles, existingPhotos, pct => {
-            submitBtn.textContent = `Updating... ${pct}%`;
+            submitBtn.textContent = `फ़ोटो अपलोड हो रही हैं… ${pct}%`;
           });
           toast('अपडेट समीक्षा के लिए भेजा गया; पुरानी listing live रहेगी।', 'success');
           window.location.href = 'my-listings.html';
@@ -847,16 +1099,17 @@
         }
 
         await createListing(formData, compressedFiles, pct => {
-          submitBtn.textContent = `Uploading... ${pct}%`;
+          submitBtn.textContent = `फ़ोटो अपलोड हो रही हैं… ${pct}%`;
         });
 
         document.getElementById('post-form').style.display = 'none';
+        if (isVehicle) document.querySelector('#post-success p').textContent = 'आपकी कार या बाइक की लिस्टिंग प्रकाशित हो गई है।';
         document.getElementById('post-success').style.display = 'block';
-        toast('लिस्टिंग submit हो गई!', 'success');
+        toast('लिस्टिंग जमा हो गई!', 'success');
       } catch (err) {
-        showErr(`Error: ${err.message}`);
+        showErr(`लिस्टिंग जमा नहीं हो सकी: ${err.message}`);
         submitBtn.disabled = false;
-        submitBtn.textContent = editId ? '✏️ Update करें' : '📤 लिस्टिंग Submit करें';
+        submitBtn.textContent = editId ? '✏️ Update करें' : '📤 लिस्टिंग जमा करें';
       }
 
       function showErr(msg) {
@@ -955,6 +1208,18 @@
         document.getElementById('shop-rent-monthly').value = l.price || '';
         document.getElementById('shop-pagdi').value = l.pagdi || '';
         document.getElementById('shop-rent-preview').textContent = l.price ? formatPrice(l.price) : '';
+      } else if (l.type === 'vehicle') {
+        vehicleTypeSelect.value = l.vehicleType === 'car' ? 'car' : 'bike';
+        populateTypeFields(vehicleTypeSelect.value);
+        if ([...vehicleBrandSelect.options].some(option => option.value === l.brand)) vehicleBrandSelect.value = l.brand;
+        else { vehicleBrandSelect.value = '__other__'; vehicleBrandInput.hidden = false; vehicleBrandInput.required = true; vehicleBrandInput.value = l.brand || ''; }
+        document.getElementById('vehicle-model').value = l.model || '';
+        document.getElementById('vehicle-year').value = l.year || '';
+        document.getElementById('vehicle-price').value = l.price || '';
+        document.getElementById('vehicle-fuel').value = l.fuelType || '';
+        document.getElementById('vehicle-km').value = l.kmDriven ?? '';
+        document.getElementById('vehicle-lister').value = l.listerType || 'owner';
+        document.getElementById('vehicle-price-preview').textContent = l.price ? `कीमत: ${formatPrice(l.price)}` : '';
       }
 
       document.getElementById('f-description').value = l.description || '';

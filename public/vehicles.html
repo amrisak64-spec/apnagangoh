@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Used Cars &amp; Bikes for Sale in Gangoh | कार और बाइक बिक्री</title>
+  <meta name="description" content="Buy and sell used cars and bikes in Gangoh. Filter by brand, year, fuel and kilometres. | गंगोह में पुरानी कार और बाइक खरीदें-बेचें।">
+  <link rel="canonical" href="https://gangoh.in/vehicles">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Gangoh.in">
+  <meta property="og:locale" content="hi_IN">
+  <meta property="og:title" content="Used Cars &amp; Bikes for Sale in Gangoh | कार और बाइक बिक्री">
+  <meta property="og:description" content="Buy and sell used cars and bikes in Gangoh. Filter by brand, year, fuel and kilometres. | गंगोह में पुरानी कार और बाइक खरीदें-बेचें।">
+  <meta property="og:url" content="https://gangoh.in/vehicles">
+  <meta property="og:image" content="https://gangoh.in/assets/images/logo.png">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
+  <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <header id="site-header"></header>
+  <main class="container vehicle-page">
+    <div class="vehicle-page-heading">
+      <div><p class="vehicle-eyebrow">गंगोह और आसपास</p><h1>कार और बाइक बिक्री के लिए</h1><p class="en-sub" style="color:#666;margin:0.15rem 0 0;font-size:0.95rem;font-weight:500;">Used cars and bikes for sale in Gangoh</p><p>कार और बाइक की नई लिस्टिंग देखें।</p></div>
+      <a class="btn btn-primary" href="post.html?type=vehicle">+ कार और बाइक लिस्ट करें</a>
+    </div>
+
+    <nav class="vehicle-tabs" aria-label="गाड़ी का प्रकार">
+      <!-- Change 3: the public tabs and filter expose only all, car and bike. -->
+      <button type="button" class="vehicle-tab is-active" data-vehicle-tab="">सभी</button>
+      <button type="button" class="vehicle-tab" data-vehicle-tab="car">कार</button>
+      <button type="button" class="vehicle-tab" data-vehicle-tab="bike">बाइक</button>
+    </nav>
+
+    <section class="vehicle-filter-panel" aria-label="गाड़ी फ़िल्टर">
+      <div class="vehicle-filter-grid">
+        <label>वाहन का प्रकार<select class="form-control" id="v-type"><option value="">सभी</option><option value="car">कार</option><option value="bike">बाइक</option></select></label>
+        <label>ब्रांड<select class="form-control" id="v-brand" disabled><option value="">पहले वाहन का प्रकार चुनें</option></select></label>
+        <label>वर्ष से<select class="form-control" id="v-year-min"><option value="">सभी वर्ष</option></select></label>
+        <label>ईंधन<select class="form-control" id="v-fuel" disabled><option value="">सभी ईंधन</option></select></label>
+        <label>चली दूरी<select class="form-control" id="v-km-range"></select></label>
+        <label>अधिकतम कीमत<select class="form-control" id="v-price-max"></select></label>
+        <label>क्रम<select class="form-control" id="v-sort"><option value="newest">नया पहले</option><option value="priceAsc">कीमत कम से ज़्यादा</option><option value="priceDesc">कीमत ज़्यादा से कम</option></select></label>
+      </div>
+      <div class="vehicle-filter-actions"><button class="vehicle-clear-link" type="button" id="vehicle-clear">साफ़ करें</button></div>
+    </section>
+
+    <p class="vehicle-results-count" id="vehicle-results-count" aria-live="polite"></p>
+    <section id="vehicle-results" class="listings-grid vehicle-listings-grid" aria-live="polite"><div class="spinner"></div></section>
+    <div class="vehicle-more-wrap"><button class="btn btn-outline" id="vehicle-more" type="button" hidden>और दिखाएँ</button></div>
+    <p class="vehicle-safety-note">खरीदने से पहले RC, इंश्योरेंस और गाड़ी की जाँच ज़रूर करें।</p>
+  </main>
+  <footer id="site-footer"></footer>
+  <div id="toast-container"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { mountUI, updateNavUser, listingCardHTML, lazyLoad } from './assets/js/ui.js?v=9';
+    import { initAuth } from './assets/js/auth.js?v=6';
+    import { initListings, fetchVehiclePage } from './assets/js/listings.js?v=10';
+    import { VEHICLE_CONFIG, vehicleYears } from './assets/js/vehicle-config.js?v=3';
+
+    const configModule = await import('./assets/js/firebase-config.js?v=6');
+    if (!firebase.apps.length) firebase.initializeApp(configModule.firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    mountUI('vehicles.html');
+    initAuth(auth, db);
+    initListings(db, null, null);
+    auth.onAuthStateChanged(user => updateNavUser(user, false));
+
+    const PAGE_SIZE = 12;
+    const BATCH_SIZE = 36;
+    const results = document.getElementById('vehicle-results');
+    const moreButton = document.getElementById('vehicle-more');
+    const countLabel = document.getElementById('vehicle-results-count');
+    let cursor = null;
+    let exhausted = false;
+    let busy = false;
+    let reloadQueued = false;
+    let generation = 0;
+    let shown = 0;
+    let pendingMatches = [];
+    let selectedType = new URLSearchParams(location.search).get('vehicleType') || '';
+    if (!VEHICLE_CONFIG.types.some(item => item.value === selectedType)) selectedType = '';
+    const typeSelect = document.getElementById('v-type');
+    const brandSelect = document.getElementById('v-brand');
+    const fuelSelect = document.getElementById('v-fuel');
+
+    vehicleYears().forEach(year => document.getElementById('v-year-min').add(new Option(String(year), String(year))));
+    VEHICLE_CONFIG.kmRanges.forEach(option => document.getElementById('v-km-range').add(new Option(option.label, option.value)));
+    VEHICLE_CONFIG.priceRanges.forEach(option => document.getElementById('v-price-max').add(new Option(option.label, option.value)));
+
+    function syncTypeFacets(reset = true) {
+      const type = typeSelect.value;
+      brandSelect.replaceChildren(new Option(type ? 'सभी ब्रांड' : 'पहले वाहन का प्रकार चुनें', ''));
+      brandSelect.disabled = !type;
+      (VEHICLE_CONFIG.brands[type] || []).forEach(brand => brandSelect.add(new Option(brand, brand === 'अन्य' ? '__other__' : brand)));
+      fuelSelect.replaceChildren(new Option('सभी ईंधन', ''));
+      fuelSelect.disabled = !type;
+      (VEHICLE_CONFIG.fuels[type] || []).forEach(([value, label]) => fuelSelect.add(new Option(label, value)));
+      if (reset) { brandSelect.value = ''; fuelSelect.value = ''; }
+    }
+    typeSelect.value = selectedType;
+    syncTypeFacets();
+
+    function currentFilters() {
+      const kmValue = document.getElementById('v-km-range').value;
+      return {
+        type: selectedType,
+        brand: brandSelect.value,
+        yearMin: Number(document.getElementById('v-year-min').value) || null,
+        fuelType: fuelSelect.value,
+        kmRange: kmValue,
+        priceMax: Number(document.getElementById('v-price-max').value) || null,
+        sort: document.getElementById('v-sort').value,
+      };
+    }
+
+    function matches(item, filter) {
+      const price = Number(item.price);
+      const year = Number(item.year);
+      const km = Number(item.kmDriven);
+      const knownBrands = VEHICLE_CONFIG.brands[filter.type] || [];
+      const kmMatch = !filter.kmRange || (filter.kmRange === '100000+'
+        ? km >= 100000
+        : km <= Number(filter.kmRange));
+      return (!filter.type || item.vehicleType === filter.type)
+        && (!filter.priceMax || price <= filter.priceMax)
+        && (!filter.brand || (filter.brand === '__other__'
+          ? !knownBrands.filter(brand => brand !== 'अन्य').includes(item.brand)
+          : item.brand === filter.brand))
+        && (!filter.yearMin || year >= filter.yearMin)
+        && (!filter.fuelType || item.fuelType === filter.fuelType)
+        && kmMatch;
+    }
+
+    async function resetAndLoad() {
+      cursor = null; exhausted = false; shown = 0; pendingMatches = [];
+      results.innerHTML = '<div class="spinner"></div>';
+      countLabel.textContent = '';
+      generation++;
+      if (busy) { reloadQueued = true; return; }
+      await loadMore(true, generation);
+    }
+
+    async function loadMore(reset = false, requestGeneration = generation) {
+      if (busy || (exhausted && !reset)) return;
+      busy = true;
+      moreButton.disabled = true;
+      moreButton.textContent = 'लोड हो रहा है…';
+      if (!reset && shown) moreButton.hidden = false;
+      const filter = currentFilters();
+      const found = pendingMatches.splice(0, PAGE_SIZE);
+      try {
+        // Read bounded Firestore pages with a cursor; type, brand and fuel are server-side filters.
+        while (found.length < PAGE_SIZE && !exhausted) {
+          const page = await fetchVehiclePage({
+            vehicleType: filter.type,
+            brand: filter.brand === '__other__' ? '' : filter.brand,
+            fuelType: filter.fuelType,
+            sort: filter.sort,
+            limit: BATCH_SIZE,
+            after: cursor || undefined,
+          });
+          if (requestGeneration !== generation) return;
+          cursor = page.cursor;
+          exhausted = !page.hasMore;
+          pendingMatches.push(...page.items.filter(item => matches(item, filter)));
+          found.push(...pendingMatches.splice(0, PAGE_SIZE - found.length));
+          if (!page.items.length) exhausted = true;
+        }
+        if (requestGeneration !== generation) return;
+        if (reset) results.innerHTML = '';
+        if (found.length) {
+          results.insertAdjacentHTML('beforeend', found.map(listingCardHTML).join(''));
+          shown += found.length;
+          lazyLoad();
+          countLabel.textContent = `${shown} वाहन दिखाए गए`;
+        } else if (!shown) {
+          results.innerHTML = '<div class="vehicle-empty-state"><p>इस फ़िल्टर में कोई गाड़ी नहीं मिली।</p><a class="btn btn-primary" href="post.html?type=vehicle">+ कार और बाइक लिस्ट करें</a></div>';
+          countLabel.textContent = '';
+        }
+        moreButton.hidden = !shown || (exhausted && !pendingMatches.length);
+      } catch (error) {
+        if (requestGeneration === generation && reset) results.innerHTML = '<div class="empty-state"><p>कार और बाइक की लिस्टिंग अभी लोड नहीं हो सकीं। कृपया फिर कोशिश करें।</p></div>';
+        console.error('Vehicle results failed to load:', error);
+      } finally {
+        busy = false;
+        moreButton.disabled = false;
+        moreButton.textContent = 'और दिखाएँ';
+        if (reloadQueued) {
+          reloadQueued = false;
+          loadMore(true, generation);
+        }
+      }
+    }
+
+    function updateTabs() {
+      document.querySelectorAll('[data-vehicle-tab]').forEach(tab => {
+        const active = tab.dataset.vehicleTab === selectedType;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-pressed', String(active));
+      });
+    }
+    function setType(type) {
+      selectedType = type;
+      typeSelect.value = type;
+      syncTypeFacets(true);
+      updateTabs();
+      resetAndLoad();
+    }
+    document.querySelectorAll('[data-vehicle-tab]').forEach(tab => tab.addEventListener('click', () => {
+      setType(tab.dataset.vehicleTab);
+    }));
+    typeSelect.addEventListener('change', () => setType(typeSelect.value));
+    [brandSelect, document.getElementById('v-year-min'), fuelSelect, document.getElementById('v-km-range'), document.getElementById('v-price-max'), document.getElementById('v-sort')]
+      .forEach(control => control.addEventListener('change', resetAndLoad));
+    document.getElementById('vehicle-clear').addEventListener('click', () => {
+      ['v-year-min','v-km-range','v-price-max'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('v-sort').value = 'newest';
+      setType('');
+    });
+    moreButton.addEventListener('click', () => loadMore());
+    updateTabs();
+    resetAndLoad();
+  </script>
+</body>
+</html>

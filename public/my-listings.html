@@ -6,8 +6,10 @@
   <title>मेरी Listings — गंगोह.in</title>
   <meta name="description" content="गंगोह.in पर आपकी पोस्ट की गई सभी प्रॉपर्टी listings — एक जगह मैनेज करें।">
   <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=18">
 
   <link rel="icon" href="/assets/images/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/assets/images/favicon-32.png" sizes="32x32" type="image/png">
@@ -68,9 +70,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script type="module">
-    import { mountUI, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=5';
+    import { mountUI, toast, formatPrice, categoryIconHTML } from './assets/js/ui.js?v=7';
     import { initAuth, requireAuth, logout } from './assets/js/auth.js?v=5';
-    import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=5';
+    import { initListings, fetchUserListings, fetchUserListingEdits, deleteListing } from './assets/js/listings.js?v=9';
 
     let fbConfig;
     try {
@@ -149,28 +151,29 @@
       const statusColor = { pending:'#1D4ED8', live:'#138808', rejected:'#DC2626' }[l.status] || '#888';
       const statusLabel = { pending:'⏳ Review में', live:'✅ Live', rejected:'❌ Rejected' }[l.status] || l.status;
       const thumb = l.photos?.length
-        ? `<img src="${l.photos[0]}" style="width:110px;min-width:110px;height:90px;object-fit:cover;" loading="lazy">`
-        : `<div style="width:110px;min-width:110px;height:90px;background:#F3EEE8;display:flex;align-items:center;justify-content:center;">${categoryIconHTML(l.type).replace('<img ', '<img style="height:76px;width:auto;" ')}</div>`;
+        ? `<img src="${escapeHTML(l.photos[0])}" alt="लिस्टिंग की फ़ोटो" style="width:110px;max-width:100%;height:auto;aspect-ratio:11/9;object-fit:cover;flex:0 0 110px;" loading="lazy">`
+        : `<div style="width:110px;min-width:110px;height:90px;background:#F3EEE8;display:flex;align-items:center;justify-content:center;">${categoryIconHTML(l.type).replace('<img ', '<img style="max-width:100%;max-height:76px;width:auto;height:auto;" ')}</div>`;
       const date = l.createdAt?.toDate ? l.createdAt.toDate().toLocaleDateString('hi-IN') : '—';
-      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि भूमि'}[l.type] || '';
+      const typeLabel = {plot:'प्लॉट',house:'मकान',shop:'दुकान',agri:'कृषि भूमि',vehicle:l.vehicleType === 'car' ? 'कार' : 'बाइक / स्कूटी'}[l.type] || '';
+      const listingAvailability = l.availability === 'sold' ? '<span class="badge listing-sold-badge">बिक चुका / Sold</span>' : l.availability === 'rented' ? '<span class="badge listing-sold-badge">किराये पर दिया / Rented</span>' : '';
 
       div.innerHTML = `
         ${thumb}
         <div style="flex:1;padding:0.75rem;min-width:0;">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;">
             <div>
-              <span style="font-size:0.75rem;font-weight:700;color:${statusColor};background:${statusColor}18;padding:0.15rem 0.5rem;border-radius:1rem;">${statusLabel}</span>
+              <span style="font-size:0.75rem;font-weight:700;color:${statusColor};background:${statusColor}18;padding:0.15rem 0.5rem;border-radius:1rem;">${statusLabel}</span> ${listingAvailability}
             </div>
             <div style="font-size:0.75rem;color:#aaa;">${date}</div>
           </div>
-          <div style="font-weight:700;font-size:1rem;margin:0.35rem 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l.title || '—'}</div>
+          <div style="font-weight:700;font-size:1rem;margin:0.35rem 0 0.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(l.title || '—')}</div>
           <div style="font-size:0.85rem;color:#1D4ED8;font-weight:700;">${formatPrice(l.price)}</div>
-          <div style="font-size:0.8rem;color:#888;margin-top:0.15rem;">📍 ${l.village||'गंगोह'} · ${typeLabel} · ${l.purpose==='sale'?'बिक्री':'किराया'}</div>
+          <div style="font-size:0.8rem;color:#888;margin-top:0.15rem;">📍 ${escapeHTML(l.village||'गंगोह')} · ${escapeHTML(typeLabel)} · ${l.purpose==='sale'?'बिक्री':'किराया'}</div>
           ${pendingEditListingIds.has(l.id) ? `<div style="font-size:0.78rem;color:#1D4ED8;margin-top:0.25rem;">✏️ बदलाव समीक्षा में हैं; पुरानी listing अभी live है।</div>` : ''}
           ${l.status === 'rejected' ? `<div style="font-size:0.78rem;color:#DC2626;margin-top:0.25rem;">❗ Admin ने reject किया। नई listing डालें।</div>` : ''}
           <div style="display:flex;gap:0.4rem;margin-top:0.6rem;flex-wrap:wrap;">
-            ${l.status === 'live' ? `<a href="listing.html?id=${l.id}" class="btn btn-outline btn-sm" target="_blank">👁 देखें</a>` : ''}
-            <a href="post.html?edit=${l.id}" class="btn btn-outline btn-sm">✏️ Edit</a>
+            ${l.status === 'live' ? `<a href="listing.html?id=${encodeURIComponent(l.id)}" class="btn btn-outline btn-sm" target="_blank">👁 देखें</a>` : ''}
+            <a href="edit-listing.html?id=${encodeURIComponent(l.id)}" class="btn btn-outline btn-sm">✏️ Edit</a>
             <button class="btn btn-danger btn-sm" data-del="${l.id}">🗑️ Delete</button>
           </div>
         </div>`;
@@ -207,6 +210,10 @@
     });
 
     loadMyListings();
+
+    function escapeHTML(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
+    }
   </script>
 </body>
 </html>
