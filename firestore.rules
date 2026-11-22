@@ -142,8 +142,11 @@ service cloud.firestore {
 
     // ── listings ──────────────────────────────────────────────────
     match /listings/{listingId} {
-      // Listing documents are public; owner controls still protect changes and deletion.
-      allow read: if true;
+      // Public can read live listings; owner can read their own; admin can read all.
+      // (The SEO pages read through the Admin SDK, so they do not depend on this rule.)
+      allow read: if resource.data.status == 'live'
+                  || isOwner(resource.data.ownerId)
+                  || isAdmin();
 
       // Signed-in users create listings live, including cars and bikes.
       allow create: if request.auth != null
